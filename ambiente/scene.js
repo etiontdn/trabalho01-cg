@@ -70,15 +70,15 @@ export default function () {
 
         let area1Esquerda = new THREE.Mesh(area1EsquerdaGeo, area1Material);
         area1.add(area1Esquerda);
-        area1Esquerda.position.set(-45, altura, 0);
+        area1Esquerda.position.set(-45, 0, 0);
 
         let area1Centro = new THREE.Mesh(area1CentroGeo, area1Material);
         area1.add(area1Centro);
-        area1Centro.position.set(-25, altura, -10);
+        area1Centro.position.set(-25, 0, -10);
 
         let area1Direita = new THREE.Mesh(area1DireitaGeo, area1Material);
         area1.add(area1Direita);
-        area1Direita.position.set(20, altura, 0);
+        area1Direita.position.set(20, 0, 0);
 
         scene.add(area1);
 
@@ -93,15 +93,15 @@ export default function () {
 
         let area2Esquerda = new THREE.Mesh(area2EsquerdaGeo, area2Material);
         area2.add(area2Esquerda);
-        area2Esquerda.position.set(-20, altura, 0);
+        area2Esquerda.position.set(-20, 0, 0);
 
         let area2Centro = new THREE.Mesh(area2CentroGeo, area2Material);
         area2.add(area2Centro);
-        area2Centro.position.set(25, altura, -10);
+        area2Centro.position.set(25, 0, -10);
 
         let area2Direita = new THREE.Mesh(area2DireitaGeo, area2Material);
         area2.add(area2Direita);
-        area2Direita.position.set(45, altura, 0);
+        area2Direita.position.set(45, 0, 0);
 
         let area3Material = setDefaultMaterial("violet");
         let area3DireitaGeo = new THREE.BoxGeometry(30, altura, 100);
@@ -114,15 +114,15 @@ export default function () {
 
         let area3Esquerda = new THREE.Mesh(area3EsquerdaGeo, area3Material);
         area3.add(area3Esquerda);
-        area3Esquerda.position.set(-30, altura, 0);
+        area3Esquerda.position.set(-30, 0, 0);
 
         let area3Centro = new THREE.Mesh(area3CentroGeo, area3Material);
         area3.add(area3Centro);
-        area3Centro.position.set(5, altura, -10);
+        area3Centro.position.set(5, 0, -10);
 
         let area3Direita = new THREE.Mesh(area3DireitaGeo, area3Material);
         area3.add(area3Direita);
-        area3Direita.position.set(35, altura, 0);
+        area3Direita.position.set(35, 0, 0);
 
         let area4Material = setDefaultMaterial("green");
         let area4LateralGeo = new THREE.BoxGeometry(135, altura, 100);
@@ -134,26 +134,18 @@ export default function () {
 
         let area4Esquerda = new THREE.Mesh(area4LateralGeo, area4Material);
         area4.add(area4Esquerda);
-        area4Esquerda.position.set(-82.5, altura, 0);
+        area4Esquerda.position.set(-82.5, 0, 0);
 
         let area4Centro = new THREE.Mesh(area4CentroGeo, area4Material);
         area4.add(area4Centro);
-        area4Centro.position.set(0, altura, 10);
+        area4Centro.position.set(0, 0, 10);
 
         let area4Direita = new THREE.Mesh(area4LateralGeo, area4Material);
         area4.add(area4Direita);
-        area4Direita.position.set(82.5, altura, 0);
+        area4Direita.position.set(82.5, 0, 0);
     }
 
     criarAreas();
-
-    // create a cube
-    let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-    let cube = new THREE.Mesh(cubeGeometry, material);
-    // position the cube
-    cube.position.set(0.0, 2.0, 0.0);
-    // add the cube to the scene
-    scene.add(cube);
 
     return scene;
 }

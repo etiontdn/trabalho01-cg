@@ -1,13 +1,18 @@
-import * as THREE from "three";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import createScene from "./ambiente/scene.js";
-import { initRenderer, initCamera, onWindowResize } from "../libs/util/util.js";
+import { initRenderer, onWindowResize } from "../libs/util/util.js";
+import createCamera from "./camera.js";
+import createPersonagem from "./personagem.js";
 
-const renderer = initRenderer(); // Init a basic renderer
-const camera = initCamera(new THREE.Vector3(0, 500, 0)); // Init camera in this position
+const renderer = initRenderer();
+const camera = createCamera();
+
 const orbit = new OrbitControls(camera, renderer.domElement); // Enable mouse rotation, pan, zoom etc.
 
-// Listen window size changes
+const scene = createScene();
+const personagem = createPersonagem();
+scene.add(personagem);
+
 window.addEventListener(
     "resize",
     function () {
@@ -15,8 +20,6 @@ window.addEventListener(
     },
     false
 );
-
-const scene = createScene();
 
 render();
 function render() {
