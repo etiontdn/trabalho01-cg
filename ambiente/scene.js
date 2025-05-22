@@ -53,6 +53,24 @@ export default function () {
 
     criarParedes();
 
+    function criarEscada(posX, posY, posZ, cor){ //Receber total de degraus também?
+        let degrauMaterial = setDefaultMaterial(cor || "grey");
+        let degrauGeo = new THREE.BoxGeometry(30, 2, 2);
+        let degraus = 10; // Total de degraus
+
+        let escada = new THREE.Object3D();
+        escada.position.set(posX, posY, posZ);
+        
+        // Para escada 30x20x20
+        for (let i = 0; i < degraus; i++) {
+            let degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
+            degrau.position.set(0, (i * -2) + 8, (i * 2) - 9 );
+            escada.add(degrau);
+        }
+
+        return escada;
+    }
+
     function criarAreas() {
         const altura = 20;
         const pos1 = new THREE.Vector3(-150, altura / 2, -150);
@@ -80,6 +98,8 @@ export default function () {
         area1.add(area1Direita);
         area1Direita.position.set(20, 0, 0);
 
+        area1.add(criarEscada(-25, 1, 40, "teal"));
+
         scene.add(area1);
 
         let area2Material = setDefaultMaterial("salmon");
@@ -103,6 +123,8 @@ export default function () {
         area2.add(area2Direita);
         area2Direita.position.set(45, 0, 0);
 
+        area2.add(criarEscada(25, 1, 40, "salmon"));
+
         let area3Material = setDefaultMaterial("violet");
         let area3DireitaGeo = new THREE.BoxGeometry(30, altura, 100);
         let area3EsquerdaGeo = new THREE.BoxGeometry(40, altura, 100);
@@ -124,6 +146,8 @@ export default function () {
         area3.add(area3Direita);
         area3Direita.position.set(35, 0, 0);
 
+        area3.add(criarEscada(5, 1, 40, "violet"));
+
         let area4Material = setDefaultMaterial("green");
         let area4LateralGeo = new THREE.BoxGeometry(135, altura, 100);
         let area4CentroGeo = new THREE.BoxGeometry(30, altura, 80);
@@ -143,6 +167,10 @@ export default function () {
         let area4Direita = new THREE.Mesh(area4LateralGeo, area4Material);
         area4.add(area4Direita);
         area4Direita.position.set(82.5, 0, 0);
+
+        let area4Escada = criarEscada(0, 1, -40, "green");
+        area4Escada.rotation.y = Math.PI;
+        area4.add(area4Escada);
     }
 
     criarAreas();
