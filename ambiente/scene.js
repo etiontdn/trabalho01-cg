@@ -7,16 +7,14 @@ import {
 } from "../../libs/util/util.js";
 
 export default function () {
-    let scene, material; // Initial variables
-    scene = new THREE.Scene(); // Create main scene
-    const light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
+    let scene, material;
+    scene = new THREE.Scene();
+    const light = initDefaultBasicLight(scene);
 
-    material = setDefaultMaterial("red"); // create a basic material
-
+    material = setDefaultMaterial("red");
     let axesHelper = new THREE.AxesHelper(12);
     scene.add(axesHelper);
 
-    // create the ground plane
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane);
 

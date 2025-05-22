@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { initCamera } from "../libs/util/util.js";
 export default function () {
-    const camera = initCamera(new THREE.Vector3(0, 500, 0)); // Init camera in this position
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     return camera;
 }
