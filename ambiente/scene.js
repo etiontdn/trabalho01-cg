@@ -1,18 +1,15 @@
 import * as THREE from "three";
 import {
-    initRenderer,
     initDefaultBasicLight,
     setDefaultMaterial,
     createGroundPlaneXZ,
 } from "../../libs/util/util.js";
 
 export default function () {
-    let scene, material;
+    let scene;
     scene = new THREE.Scene();
     const light = initDefaultBasicLight(scene);
     scene.add(light);
-
-    material = setDefaultMaterial("red");
 
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane);
