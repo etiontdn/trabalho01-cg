@@ -1,0 +1,48 @@
+.crosshair {
+    --size: 64px;
+    --individual-size: calc(0.3125 * var(--size));
+    --stroke-width: calc(0.0625 * var(--size));
+    --center-translate: calc(var(--size) / 2 - var(--stroke-width) / 2);
+    --second-translate: calc(
+        (var(--size) / 2) + ((var(--size) / 2) - var(--individual-size))
+    );
+    position: absolute;
+    height: var(--size);
+    width: var(--size);
+    top: calc(50% - var(--size) / 2);
+    left: calc(50% - var(--size) / 2);
+}
+
+.crosshair-v {
+    position: absolute;
+    width: var(--stroke-width);
+    background-color: white;
+    height: var(--individual-size);
+    transform: translateX(var(--center-translate));
+}
+
+.crosshair-v-2 {
+    position: absolute;
+    width: var(--stroke-width);
+    background-color: white;
+    height: var(--individual-size);
+    transform: translateX(var(--center-translate))
+        translateY(var(--second-translate));
+}
+
+.crosshair-h {
+    position: absolute;
+    height: var(--stroke-width);
+    background-color: white;
+    width: var(--individual-size);
+    transform: translateY(var(--center-translate));
+}
+
+.crosshair-h-2 {
+    position: absolute;
+    height: var(--stroke-width);
+    background-color: white;
+    width: var(--individual-size);
+    transform: translateY(var(--center-translate))
+        translateX(var(--second-translate));
+}
