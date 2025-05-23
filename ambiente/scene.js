@@ -18,30 +18,30 @@ export default function () {
 
     function criarParedes() {
         let paredeMaterial = setDefaultMaterial("grey");
-        let paredeEsquerdaGeometry = new THREE.BoxGeometry(10, 500, 500);
+        let paredeEsquerdaGeometry = new THREE.BoxGeometry(10, 50, 500);
         let paredeEsquerda = new THREE.Mesh(
             paredeEsquerdaGeometry,
             paredeMaterial
         );
-        paredeEsquerda.position.set(-255, 240, 0);
+        paredeEsquerda.position.set(-255, 24, 0);
         scene.add(paredeEsquerda);
 
-        let paredeDireitaGeometry = new THREE.BoxGeometry(10, 500, 500);
+        let paredeDireitaGeometry = new THREE.BoxGeometry(10, 50, 500);
         let paredeDireita = new THREE.Mesh(
             paredeDireitaGeometry,
             paredeMaterial
         );
-        paredeDireita.position.set(255, 240, 0);
+        paredeDireita.position.set(255, 24, 0);
         scene.add(paredeDireita);
 
-        let paredeNorteGeometry = new THREE.BoxGeometry(500, 500, 10);
+        let paredeNorteGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeNorte = new THREE.Mesh(paredeNorteGeometry, paredeMaterial);
-        paredeNorte.position.set(0, 240, -255);
+        paredeNorte.position.set(0, 24, -255);
         scene.add(paredeNorte);
 
-        let paredeSulGeometry = new THREE.BoxGeometry(500, 500, 10);
+        let paredeSulGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeSul = new THREE.Mesh(paredeSulGeometry, paredeMaterial);
-        paredeSul.position.set(0, 240, 255);
+        paredeSul.position.set(0, 24, 255);
         scene.add(paredeSul);
     }
 
