@@ -14,8 +14,9 @@ export default function () {
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane);
 
-    // Parede do ambiente
+    const objetosColidiveis = [];
 
+    // Parede do ambiente
     function criarParedes() {
         let paredeMaterial = setDefaultMaterial("grey");
         let paredeEsquerdaGeometry = new THREE.BoxGeometry(10, 50, 500);
@@ -24,6 +25,12 @@ export default function () {
             paredeMaterial
         );
         paredeEsquerda.position.set(-255, 24, 0);
+
+        paredeEsquerda.updateMatrixWorld();
+        objetosColidiveis.push({
+            nome: "paredeEsquerda",
+            box: new THREE.Box3().setFromObject(paredeEsquerda),
+        });
         scene.add(paredeEsquerda);
 
         let paredeDireitaGeometry = new THREE.BoxGeometry(10, 50, 500);
@@ -32,16 +39,32 @@ export default function () {
             paredeMaterial
         );
         paredeDireita.position.set(255, 24, 0);
+        paredeDireita.updateMatrixWorld();
+        objetosColidiveis.push({
+            nome: "paredeDireita",
+            box: new THREE.Box3().setFromObject(paredeDireita),
+        });
         scene.add(paredeDireita);
 
         let paredeNorteGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeNorte = new THREE.Mesh(paredeNorteGeometry, paredeMaterial);
         paredeNorte.position.set(0, 24, -255);
+        objetosColidiveis.push({
+            nome: "paredeNorte",
+            box: new THREE.Box3().setFromObject(paredeNorte),
+        });
+        paredeNorte.updateMatrixWorld();
         scene.add(paredeNorte);
 
         let paredeSulGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeSul = new THREE.Mesh(paredeSulGeometry, paredeMaterial);
+
         paredeSul.position.set(0, 24, 255);
+        objetosColidiveis.push({
+            nome: "paredeSul",
+            box: new THREE.Box3().setFromObject(paredeSul),
+        });
+        paredeSul.updateMatrixWorld();
         scene.add(paredeSul);
     }
 
@@ -170,5 +193,5 @@ export default function () {
 
     criarAreas();
 
-    return scene;
+    return { scene, objetosColidiveis };
 }
