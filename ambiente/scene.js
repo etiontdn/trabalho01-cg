@@ -10,10 +10,9 @@ export default function () {
     let scene, material;
     scene = new THREE.Scene();
     const light = initDefaultBasicLight(scene);
+    scene.add(light);
 
     material = setDefaultMaterial("red");
-    let axesHelper = new THREE.AxesHelper(12);
-    scene.add(axesHelper);
 
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane);
@@ -27,7 +26,7 @@ export default function () {
             paredeEsquerdaGeometry,
             paredeMaterial
         );
-        paredeEsquerda.position.set(-255, 250, 0);
+        paredeEsquerda.position.set(-255, 240, 0);
         scene.add(paredeEsquerda);
 
         let paredeDireitaGeometry = new THREE.BoxGeometry(10, 500, 500);
@@ -35,34 +34,35 @@ export default function () {
             paredeDireitaGeometry,
             paredeMaterial
         );
-        paredeDireita.position.set(255, 250, 0);
+        paredeDireita.position.set(255, 240, 0);
         scene.add(paredeDireita);
 
         let paredeNorteGeometry = new THREE.BoxGeometry(500, 500, 10);
         let paredeNorte = new THREE.Mesh(paredeNorteGeometry, paredeMaterial);
-        paredeNorte.position.set(0, 250, -255);
+        paredeNorte.position.set(0, 240, -255);
         scene.add(paredeNorte);
 
         let paredeSulGeometry = new THREE.BoxGeometry(500, 500, 10);
         let paredeSul = new THREE.Mesh(paredeSulGeometry, paredeMaterial);
-        paredeSul.position.set(0, 250, 255);
+        paredeSul.position.set(0, 240, 255);
         scene.add(paredeSul);
     }
 
     criarParedes();
 
-    function criarEscada(posX, posY, posZ, cor){ //Receber total de degraus também?
+    function criarEscada(posX, posY, posZ, cor) {
+        //Receber total de degraus também?
         let degrauMaterial = setDefaultMaterial(cor || "grey");
         let degrauGeo = new THREE.BoxGeometry(30, 2, 2);
         let degraus = 10; // Total de degraus
 
         let escada = new THREE.Object3D();
         escada.position.set(posX, posY, posZ);
-        
+
         // Para escada 30x20x20
         for (let i = 0; i < degraus; i++) {
             let degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
-            degrau.position.set(0, (i * -2) + 8, (i * 2) - 9 );
+            degrau.position.set(0, i * -2 + 8, i * 2 - 9);
             escada.add(degrau);
         }
 
