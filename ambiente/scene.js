@@ -25,12 +25,8 @@ export default function () {
             paredeMaterial
         );
         paredeEsquerda.position.set(-255, 24, 0);
-
-        paredeEsquerda.updateMatrixWorld();
-        objetosColidiveis.push({
-            nome: "paredeEsquerda",
-            box: new THREE.Box3().setFromObject(paredeEsquerda),
-        });
+        paredeEsquerda.name = "parede esquerda";
+        objetosColidiveis.push(paredeEsquerda);
         scene.add(paredeEsquerda);
 
         let paredeDireitaGeometry = new THREE.BoxGeometry(10, 50, 500);
@@ -39,32 +35,23 @@ export default function () {
             paredeMaterial
         );
         paredeDireita.position.set(255, 24, 0);
-        paredeDireita.updateMatrixWorld();
-        objetosColidiveis.push({
-            nome: "paredeDireita",
-            box: new THREE.Box3().setFromObject(paredeDireita),
-        });
+        paredeDireita.name = "parede direita";
+        objetosColidiveis.push(paredeDireita);
         scene.add(paredeDireita);
 
         let paredeNorteGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeNorte = new THREE.Mesh(paredeNorteGeometry, paredeMaterial);
         paredeNorte.position.set(0, 24, -255);
-        objetosColidiveis.push({
-            nome: "paredeNorte",
-            box: new THREE.Box3().setFromObject(paredeNorte),
-        });
-        paredeNorte.updateMatrixWorld();
+        paredeNorte.name = "parede norte";
+        objetosColidiveis.push(paredeNorte);
         scene.add(paredeNorte);
 
         let paredeSulGeometry = new THREE.BoxGeometry(500, 50, 10);
         let paredeSul = new THREE.Mesh(paredeSulGeometry, paredeMaterial);
 
         paredeSul.position.set(0, 24, 255);
-        objetosColidiveis.push({
-            nome: "paredeSul",
-            box: new THREE.Box3().setFromObject(paredeSul),
-        });
-        paredeSul.updateMatrixWorld();
+        paredeSul.name = "parede sul";
+        objetosColidiveis.push(paredeSul);
         scene.add(paredeSul);
     }
 

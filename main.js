@@ -7,13 +7,12 @@ import crosshair from "./crosshair.js";
 const renderer = initRenderer();
 const camera = createCamera();
 const { scene, objetosColidiveis } = createScene();
-const { personagemControls, update, personagem } = createPersonagem(
+const { update, personagem } = createPersonagem(
     camera,
     renderer,
     objetosColidiveis
 );
 
-scene.add(personagemControls.getObject());
 scene.add(personagem);
 
 window.addEventListener("resize", () => onWindowResize(camera, renderer));

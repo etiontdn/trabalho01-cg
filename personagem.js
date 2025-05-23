@@ -7,31 +7,24 @@ export default function createPersonagem(camera, renderer, objetosColidiveis) {
         camera,
         renderer.domElement
     );
-    const personagemObject = personagemControls.getObject();
-    const inicialPosition = new THREE.Vector3(0, 10, 0);
-    const inicialQuaternion = personagemObject.quaternion.clone();
-    //* const inicialLookAt      = new THREE.Vector3(0, 10, -10);
-    // personagemControls.addEventListener('change', () => console.log("Controls Change"))
-    // personagemControls.addEventListener('lock', () => menu.style.display = 'none')
-    // personagemControls.addEventListener('unlock', () => menu.style.display = 'block')
+    const inicialPosition = new THREE.Vector3(0, 5, 0);
+    const inicialQuaternion = personagemControls.getObject().quaternion.clone();
 
     let personagemMaterial = setDefaultMaterial("red");
-    let personagemGeometry = new THREE.CylinderGeometry(5, 5, 10);
-    //let personagemGeometry = new THREE.BoxGeometry(5, 10, 5);
-    let personagem = new THREE.Mesh(personagemGeometry, personagemMaterial);
-    personagem.position.set(0, -5, 0);
-    //personagem.visible = false;
-    let colisaoPersonagem = new THREE.Box3();
-    personagem.updateMatrixWorld();
-    colisaoPersonagem.setFromObject(personagem);
+    let personagemGeometry = new THREE.CylinderGeometry(2, 2, 10);
+    let personagemBody = new THREE.Mesh(personagemGeometry, personagemMaterial);
+    personagemBody.position.set(0, 0, 0);
+    personagemBody.visible = false;
+
+    let personagem = new THREE.Object3D();
+    personagem.add(personagemBody);
+    personagemControls.getObject().position.set(0, 5, 0);
+    personagem.add(personagemControls.getObject());
 
     function initPersonagem() {
-        personagemObject.position.copy(inicialPosition);
-        personagemObject.quaternion.copy(inicialQuaternion);
-
         personagem.position.copy(inicialPosition);
         personagem.quaternion.copy(inicialQuaternion);
-        //* camera.lookAt(inicialLookAt);
+        personagem.updateMatrixWorld();
     }
 
     document.addEventListener("click", () => {
@@ -88,35 +81,78 @@ export default function createPersonagem(camera, renderer, objetosColidiveis) {
     const clock = new THREE.Clock();
 
     function checarColisoes() {
+        const checkDistance = 0.5;
         personagem.updateMatrixWorld();
-        colisaoPersonagem.setFromObject(personagem);
-        const variacao = 0.5;
+        const colisaoPersonagem = new THREE.Box3();
+        colisaoPersonagem.setFromObject(personagemBody);
         const permitidas = {
             frente: true,
             tras: true,
             esquerda: true,
             direita: true,
-        };
-        const direcoes = {
-            frente: new THREE.Vector3(0, 0, -1),
-            tras: new THREE.Vector3(0, 0, 1),
-            esquerda: new THREE.Vector3(-1, 0, 0),
-            direita: new THREE.Vector3(1, 0, 0),
+            frenteEsquerda: true,
+            frenteDireita: true,
+            trasEsquerda: true,
+            trasDireita: true,
+            cima: true,
+            baixo: true,
         };
 
-        for (let dir in direcoes) {
-            const boundingBox = new THREE.Box3();
-            boundingBox.copy(colisaoPersonagem);
-            boundingBox.translate(direcoes[dir].multiplyScalar(variacao));
-            for (let { nome, box } of objetosColidiveis) {
-                if (boundingBox.intersectsBox(box)) {
-                    permitidas[dir] = false;
-                    console.log(permitidas);
+        // As direções devem ser baseadas na orientação ATUAL da mesh 'personagem',
+        // que já foi sincronizada com a câmera (personagemObject).
+        const direcoes = {
+            frente: new THREE.Vector3(0, 0, -1).applyQuaternion(
+                personagem.quaternion
+            ),
+            tras: new THREE.Vector3(0, 0, 1).applyQuaternion(
+                personagem.quaternion
+            ),
+            esquerda: new THREE.Vector3(-1, 0, 0).applyQuaternion(
+                personagem.quaternion
+            ),
+            direita: new THREE.Vector3(1, 0, 0).applyQuaternion(
+                personagem.quaternion
+            ),
+            frenteEsquerda: new THREE.Vector3(-1, 0, -1).applyQuaternion(
+                personagem.quaternion
+            ),
+            frenteDireita: new THREE.Vector3(1, 0, -1).applyQuaternion(
+                personagem.quaternion
+            ),
+            trasEsquerda: new THREE.Vector3(-1, 0, 1).applyQuaternion(
+                personagem.quaternion
+            ),
+            trasDireita: new THREE.Vector3(1, 0, 1).applyQuaternion(
+                personagem.quaternion
+            ),
+            cima: new THREE.Vector3(0, 1, 0).applyQuaternion(
+                personagem.quaternion
+            ),
+            baixo: new THREE.Vector3(0, -1, 0).applyQuaternion(
+                personagem.quaternion
+            ),
+        };
+
+        for (let dirKey in direcoes) {
+            const boundingBoxFantasma = new THREE.Box3();
+            boundingBoxFantasma.copy(colisaoPersonagem);
+            const tempVector = new THREE.Vector3();
+            tempVector.copy(direcoes[dirKey]).multiplyScalar(checkDistance);
+            boundingBoxFantasma.translate(tempVector);
+
+            for (let i = 0; i < objetosColidiveis.length; i++) {
+                const obj = objetosColidiveis[i];
+                const objbb = new THREE.Box3();
+                objbb.setFromObject(obj);
+                if (boundingBoxFantasma.intersectsBox(objbb)) {
+                    permitidas[dirKey] = false;
+                    console.log(
+                        `Colisão bloqueada na direção: ${dirKey} com ${obj.name}`
+                    ); // Para debug
                     break;
                 }
             }
         }
-
         return permitidas;
     }
 
@@ -124,31 +160,76 @@ export default function createPersonagem(camera, renderer, objetosColidiveis) {
         const delta = clock.getDelta();
         const speed = delta * 50;
 
-        let position = personagemObject.position.clone();
-        personagem.position.copy(position);
-        personagem.rotation.y = personagemObject.rotation.y;
-        personagem.updateMatrixWorld();
+        let currentCameraWorldQuaternion = new THREE.Quaternion();
+        camera.getWorldQuaternion(currentCameraWorldQuaternion);
 
-        const permitidas = checarColisoes();
+        let euler = new THREE.Euler(0, 0, 0, "YXZ");
+        euler.setFromQuaternion(currentCameraWorldQuaternion, "YXZ");
 
-        // const z = (move.forward ? 1 : 0) - (move.backward ? 1 : 0);
-        // const x = (move.right ? 1 : 0) - (move.left ? 1 : 0);
+        personagem.rotation.y = euler.y;
+        camera.rotation.x = euler.x;
+        camera.rotation.y = 0;
+        camera.rotation.z = 0;
 
-        if (permitidas.frente && move.forward) {
-            personagemControls.moveForward(speed);
-        }
-        if (permitidas.tras && move.backward) {
-            personagemControls.moveForward(-speed);
-        }
-        if (permitidas.esquerda && move.left) {
-            personagemControls.moveRight(-speed);
-        }
-        if (permitidas.direita && move.right) {
-            personagemControls.moveRight(speed);
-        }
+        const direcoesPermitidas = checarColisoes();
 
-        // if (z !== 0) personagemControls.moveForward(z * speed);
-        // if (x !== 0) personagemControls.moveRight(x * speed);
+        if (direcoesPermitidas.frenteEsquerda && move.forward && move.left) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (
+            direcoesPermitidas.frenteDireita &&
+            move.forward &&
+            move.right
+        ) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(speed / 2);
+        } else if (
+            direcoesPermitidas.trasEsquerda &&
+            move.backward &&
+            move.left
+        ) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (
+            direcoesPermitidas.trasDireita &&
+            move.backward &&
+            move.right
+        ) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(speed / 2);
+        } else if (direcoesPermitidas.frente && move.forward) {
+            personagem.translateZ(-speed);
+        } else if (direcoesPermitidas.tras && move.backward) {
+            personagem.translateZ(speed);
+        } else if (direcoesPermitidas.esquerda && move.left) {
+            personagem.translateX(-speed);
+        } else if (direcoesPermitidas.direita && move.right) {
+            personagem.translateX(speed);
+        } else if (move.forward && direcoesPermitidas.frenteDireita) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(speed / 2);
+        } else if (move.forward && direcoesPermitidas.frenteEsquerda) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (move.backward && direcoesPermitidas.trasDireita) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(speed / 2);
+        } else if (move.backward && direcoesPermitidas.trasEsquerda) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (move.left && direcoesPermitidas.frenteEsquerda) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (move.right && direcoesPermitidas.frenteDireita) {
+            personagem.translateZ(-speed / 2);
+            personagem.translateX(speed / 2);
+        } else if (move.left && direcoesPermitidas.trasEsquerda) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(-speed / 2);
+        } else if (move.right && direcoesPermitidas.trasDireita) {
+            personagem.translateZ(speed / 2);
+            personagem.translateX(speed / 2);
+        }
     }
 
     initPersonagem();
