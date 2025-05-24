@@ -6,6 +6,10 @@ import {
 } from "../../libs/util/util.js";
 
 export default function () {
+    
+    const objetosColidiveis = [];
+    const rampas = [];
+
     let scene;
     scene = new THREE.Scene();
     const light = initDefaultBasicLight(scene);
@@ -14,7 +18,8 @@ export default function () {
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane);
 
-    const objetosColidiveis = [];
+    objetosColidiveis.push(plane);
+
 
     // Parede do ambiente
     function criarParedes() {
@@ -58,7 +63,6 @@ export default function () {
     criarParedes();
 
     function criarEscada(posX, posY, posZ, cor) {
-        //Receber total de degraus também?
         let degrauMaterial = setDefaultMaterial(cor || "grey");
         let degrauGeo = new THREE.BoxGeometry(30, 2, 2);
         let degraus = 10; // Total de degraus
@@ -75,6 +79,25 @@ export default function () {
 
         return escada;
     }
+
+    function criarRampa(posX, posY, posZ, largura = 30, altura = 20, profundidade = 20) {
+        const rampGeo = new THREE.BoxGeometry(largura, 0.1, profundidade + 9);
+        const rampMat = new THREE.MeshBasicMaterial({ visible: true });
+        const ramp = new THREE.Mesh(rampGeo, rampMat);
+      
+        const angulo = Math.atan2(altura, profundidade);
+        ramp.rotation.x = angulo;
+      
+        ramp.position.set(
+          posX,
+          posY - 1.1,
+          posZ
+        );
+
+        rampas.push(ramp);
+        
+        return ramp;
+      }
 
     function criarAreas() {
         const altura = 20;
@@ -104,7 +127,11 @@ export default function () {
         area1Direita.position.set(20, 0, 0);
 
         area1.add(criarEscada(-25, 1, 40, "teal"));
+        area1.add(criarRampa(-25, 1, 40));
 
+        objetosColidiveis.push(area1Esquerda);
+        objetosColidiveis.push(area1Centro);
+        objetosColidiveis.push(area1Direita);
         scene.add(area1);
 
         let area2Material = setDefaultMaterial("salmon");
@@ -114,8 +141,7 @@ export default function () {
 
         const area2 = new THREE.Object3D();
         area2.position.set(pos2.x, pos2.y, pos2.z);
-        scene.add(area2);
-
+        
         let area2Esquerda = new THREE.Mesh(area2EsquerdaGeo, area2Material);
         area2.add(area2Esquerda);
         area2Esquerda.position.set(-20, 0, 0);
@@ -123,12 +149,19 @@ export default function () {
         let area2Centro = new THREE.Mesh(area2CentroGeo, area2Material);
         area2.add(area2Centro);
         area2Centro.position.set(25, 0, -10);
-
+        
         let area2Direita = new THREE.Mesh(area2DireitaGeo, area2Material);
         area2.add(area2Direita);
         area2Direita.position.set(45, 0, 0);
-
+        
         area2.add(criarEscada(25, 1, 40, "salmon"));
+        area2.add(criarRampa(25, 1, 40));
+        
+        objetosColidiveis.push(area2Esquerda);
+        objetosColidiveis.push(area2Centro);
+        objetosColidiveis.push(area2Direita);
+        
+        scene.add(area2);
 
         let area3Material = setDefaultMaterial("violet");
         let area3DireitaGeo = new THREE.BoxGeometry(30, altura, 100);
@@ -137,21 +170,27 @@ export default function () {
 
         const area3 = new THREE.Object3D();
         area3.position.set(pos3.x, pos3.y, pos3.z);
-        scene.add(area3);
-
+        
         let area3Esquerda = new THREE.Mesh(area3EsquerdaGeo, area3Material);
         area3.add(area3Esquerda);
         area3Esquerda.position.set(-30, 0, 0);
-
+        
         let area3Centro = new THREE.Mesh(area3CentroGeo, area3Material);
         area3.add(area3Centro);
         area3Centro.position.set(5, 0, -10);
-
+        
         let area3Direita = new THREE.Mesh(area3DireitaGeo, area3Material);
         area3.add(area3Direita);
         area3Direita.position.set(35, 0, 0);
-
+        
         area3.add(criarEscada(5, 1, 40, "violet"));
+        area3.add(criarRampa(5, 1, 40));
+        
+        objetosColidiveis.push(area3Esquerda);
+        objetosColidiveis.push(area3Centro);
+        objetosColidiveis.push(area3Direita);
+        
+        scene.add(area3);
 
         let area4Material = setDefaultMaterial("green");
         let area4LateralGeo = new THREE.BoxGeometry(135, altura, 100);
@@ -159,7 +198,6 @@ export default function () {
 
         const area4 = new THREE.Object3D();
         area4.position.set(pos4.x, pos4.y, pos4.z);
-        scene.add(area4);
 
         let area4Esquerda = new THREE.Mesh(area4LateralGeo, area4Material);
         area4.add(area4Esquerda);
@@ -175,10 +213,26 @@ export default function () {
 
         let area4Escada = criarEscada(0, 1, -40, "green");
         area4Escada.rotation.y = Math.PI;
+
+        let rampaHolder = new THREE.Object3D();
+        area4.add(rampaHolder);
+        rampaHolder.position.set(0, 1, -40);
+        rampaHolder.add(criarRampa(0, 0, 0));
+        rampaHolder.rotation.y = Math.PI;
+        
         area4.add(area4Escada);
+        area4.add(rampaHolder);
+
+        objetosColidiveis.push(area4Esquerda);
+        objetosColidiveis.push(area4Centro);
+        objetosColidiveis.push(area4Direita);
+        
+        scene.add(area4);
+
     }
 
     criarAreas();
 
-    return { scene, objetosColidiveis };
+
+    return { scene, objetosColidiveis, rampas };
 }

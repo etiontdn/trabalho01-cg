@@ -3,15 +3,19 @@ import { initRenderer, onWindowResize } from "../libs/util/util.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
+import createArmas from "./armas.js";
 
 const renderer = initRenderer();
 const camera = createCamera();
-const { scene, objetosColidiveis } = createScene();
-const { update, personagem } = createPersonagem(
+const { scene, objetosColidiveis, rampas } = createScene();
+const { personagem, personagemControls, updateControl} = createPersonagem(
     camera,
     renderer,
-    objetosColidiveis
+    objetosColidiveis,
+    rampas
 );
+//const { armas, updateArma } = createArmas(personagemControls);
+createArmas(personagemControls);
 
 scene.add(personagem);
 
@@ -25,6 +29,6 @@ function render() {
     //     crosshair.active = true;
     // }
     crosshair.animate(renderer);
-    update();
+    updateControl();
     renderer.render(scene, camera); // Render scene
 }
