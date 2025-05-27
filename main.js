@@ -15,7 +15,7 @@ const { personagem, personagemControls, updateControl} = createPersonagem(
     rampas
 );
 //const { armas, updateArma } = createArmas(personagemControls);
-createArmas(personagemControls);
+const{ armas, updateDisparos } = createArmas(scene, personagemControls, objetosColidiveis, rampas);
 
 scene.add(personagem);
 
@@ -30,5 +30,6 @@ function render() {
     // }
     crosshair.animate(renderer);
     updateControl();
+    updateDisparos();
     renderer.render(scene, camera); // Render scene
 }

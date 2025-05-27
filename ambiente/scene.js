@@ -82,7 +82,7 @@ export default function () {
 
     function criarRampa(posX, posY, posZ, largura = 30, altura = 20, profundidade = 20) {
         const rampGeo = new THREE.BoxGeometry(largura, 0.1, profundidade + 9);
-        const rampMat = new THREE.MeshBasicMaterial({ visible: true });
+        const rampMat = new THREE.MeshBasicMaterial({ visible: false });
         const ramp = new THREE.Mesh(rampGeo, rampMat);
       
         const angulo = Math.atan2(altura, profundidade);

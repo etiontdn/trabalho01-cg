@@ -1,55 +1,76 @@
 import * as THREE from 'three';
-import {
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    createGroundPlaneXZ,
-} from "../../libs/util/util.js";
+import { setDefaultMaterial } from "../../libs/util/util.js";
+import crosshair from './crosshair.js';
 
-const armas = [];
+const armas    = [];
+const disparos = [];
 
-export default function criarArmas(personagemControls){
-    let armaMat = setDefaultMaterial("grey");
-    let armaGeo = new THREE.CylinderGeometry(0.8, 0.8, 7);
-    let armaRotation = new THREE.Vector3(0, 0, 0);
-    armaRotation.x = - Math.PI / 0.7;
-    let arma1 = new THREE.Mesh( armaGeo, armaMat );
-    arma1.material.side = THREE.DoubleSide;
-    arma1.rotation.x = armaRotation.x;
-    personagemControls.getObject().add(arma1);
-    armas.push(arma1);
-    arma1.position.set(0, -5, -7);
-    
-    // let arma2 = new THREE.Object3D();
-    // let arma2_1 = new THREE.Mesh( armaGeo, armaMat );
-    // let arma2_2 = new THREE.Mesh( armaGeo, armaMat );
-    // arma2_1.material.side = THREE.DoubleSide;
-    // arma2_2.material.side = THREE.DoubleSide;
-    // arma2.add(arma2_1);
-    // arma2.add(arma2_2);
-    // arma2_1.position.set(0.6, 0, 0);
-    // arma2_2.position.set(-0.6, 0, 0);
-    // arma2.rotation.x = - Math.PI / 0.70;
-    // personagemControls.getObject().add(arma2);
-    // arma2.position.set(0, -5, -7);
-    // armas.push(arma2);
-    
+export default function criarArmas(scene, personagemControls, objetosColidiveis, rampas) {
+  const armaMat  = setDefaultMaterial("grey");
+  const armaGeo  = new THREE.CylinderGeometry(0.8, 0.8, 7);
+  const arma1 = new THREE.Mesh(armaGeo, armaMat);
+  arma1.material.side = THREE.DoubleSide;
+  arma1.rotation.x   = -Math.PI / 0.7;
+  arma1.position.set(0, -5, -7);
+  personagemControls.getObject().add(arma1);
+  armas.push(arma1);
 
-    function disparar(ativo = false){
-            // const disparos = [];
-            // let disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
-            // let disparoMat = setDefaultMaterial("black");
-            // let disparo = new THREE.Mesh( disparoGeo, disparoMat );
+  let calcDelta = 0;
+
+  let disparar = false;
+  document.addEventListener("mousedown", () => disparar = true);
+  document.addEventListener("mouseup",   () => disparar = false);
+
+  const clock = new THREE.Clock();
+
+  function criarDisparo() {
+    const disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
+    const disparoMat = setDefaultMaterial("black");
+    const tiro = new THREE.Mesh(disparoGeo, disparoMat);
+
+    crosshair.active = true;
+
+    arma1.getWorldPosition(tiro.position);
+    tiro.position.y += 3;
+    tiro.userData.dir = personagemControls.getObject().getWorldDirection(new THREE.Vector3()).clone();
+
+    scene.add(tiro);
+    disparos.push(tiro);
+  }
+
+  function updateDisparos() {
+    const delta = clock.getDelta();
+    const speed = 200;
+    calcDelta += delta;
+
+    if (disparar && calcDelta > 0.5){
+        criarDisparo();
+        calcDelta = 0;
     }
-    
-    // document.addEventListener("mousedown", () => {
-    //     if (mouseLocked){
-    //         crosshair.active = true;
-    //         diaparar(true);
-    //     }
-    // });
-    document.addEventListener("mouseUp", () => {
-        disparar(false);
-    });
 
-    //return { armas, disparar };
+    for (let i = 0; i < disparos.length; i++) {
+      const tiro = disparos[i];
+      const dir = tiro.userData.dir.clone().normalize();
+      tiro.position.addScaledVector(dir, speed * delta);
+
+      const tiroBB = new THREE.Box3().setFromObject(tiro);
+      let colidiu = false;
+      const alvos  = objetosColidiveis.concat(rampas);
+      for (let alvo of alvos) {
+        const alvoBB = new THREE.Box3().setFromObject(alvo);
+        if (tiroBB.intersectsBox(alvoBB)) {
+          colidiu = true;
+          break;
+        }
+      }
+
+      if (colidiu) {
+        scene.remove(tiro);
+        disparos.splice(i, 1);
+        i--;
+      }
+    }
+  }
+
+  return { armas, updateDisparos };
 }

@@ -1,7 +1,5 @@
 import * as THREE from "three";
 import { PointerLockControls } from "../build/jsm/controls/PointerLockControls.js";
-import crosshair from './crosshair.js';
-
 
 export default function createPersonagem(
   camera,
@@ -9,20 +7,20 @@ export default function createPersonagem(
   objetosColidiveis,
   rampas
 ) {
+
   //! Criação do personagem
   const personagemControls = new PointerLockControls(camera, renderer.domElement);
   const personagemObject   = personagemControls.getObject();
   const personagem         = new THREE.Object3D();
   personagem.add(personagemObject);
-
-  let mouseLocked = false;
-
+  
   //! Inicialização do personagem
   const alturaPersonagem = 10;
   const startPos  = new THREE.Vector3(0, alturaPersonagem, 0);
   const startQuat = personagemObject.quaternion.clone();
   personagem.position.copy(startPos);
   personagem.quaternion.copy(startQuat);
+  
   function initPersonagem() {
     personagem.position.copy(startPos);
     personagem.quaternion.copy(startQuat);
@@ -38,7 +36,7 @@ export default function createPersonagem(
   personagem.add(corpo);
   const raycasterDown = new THREE.Raycaster();
   let velY = 0;
-  const gravidade = -60;
+  const gravidade = -90;
 
   //???????? fez o bounding box do personagem eu acho
   const boxSize       = new THREE.Vector3(2, alturaPersonagem, 2);
@@ -52,18 +50,19 @@ export default function createPersonagem(
   const forwardV = new THREE.Vector3(0, 0, -1);
   const rightV   = new THREE.Vector3(1, 0,  0);
   const clock    = new THREE.Clock();
-
+  
   //! Controle do personagem
+  // let mouseLocked = false;
   document.addEventListener("click",   () => {
     personagemControls.lock();
-    mouseLocked = true;
+    // mouseLocked = true;
   });
 
-  document.addEventListener("mousedown", () => {
-    if (mouseLocked){
-        crosshair.active = true;
-    }
-  });
+  // document.addEventListener("mousedown", () => {
+  //   if (mouseLocked){
+  //       crosshair.active = true;
+  //   }
+  // });
 
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup",   onKeyUp);
@@ -106,10 +105,7 @@ export default function createPersonagem(
     camera.rotation.y     = 0;
     camera.rotation.z     = 0;
 
-    //* Multiplica pleo delta para cair levemente (não entendi exatamente o porque)
-    velY += gravidade * delta;
-    personagem.position.y += velY * delta;
-
+    
     const worldPos = new THREE.Vector3();
     corpo.getWorldPosition(worldPos);
     raycasterDown.ray.origin.copy(worldPos).y += alturaPersonagem/2;
@@ -118,12 +114,19 @@ export default function createPersonagem(
     const chaoERampas = rampas.concat(objetosColidiveis);
     const hits = raycasterDown.intersectObjects(chaoERampas);
 
-    const distancia = worldPos.y - alturaPersonagem/2 - hits[0].point.y;
-    if (distancia <= 5) {
-      personagem.position.y = hits[0].point.y + 5;
-      velY = 0;
+    if (hits.length > 0) {
+      const yChao = hits[0].point.y;
+      const distancia = worldPos.y - alturaPersonagem/2 - yChao;
+      if (distancia <= 5) {
+        personagem.position.y = yChao + 5;
+        velY = 0;
+      }
     }
-
+    
+    //* Multiplica pelo delta para cair levemente (não entendi exatamente o porque do delta 2x)
+    velY += gravidade * delta;
+    personagem.position.y += velY * delta;
+    
     // altura dos pés (para o filtro)
     const bottomY = personagem.position.y - alturaPersonagem/2 + 0.01;
 
@@ -149,7 +152,7 @@ export default function createPersonagem(
     const lateralObjs = objetosColidiveis.filter(obj => {
       const bb = new THREE.Box3().setFromObject(obj);
       //* se topo do box ≃ altura dos pés, ignoramos
-      if (Math.abs(bb.max.y - bottomY) < 2) return false;
+      if (Math.abs(bb.max.y - bottomY) < 1.5) return false;
       return true;
     });
     const obstacleBoxes = lateralObjs.map(obj =>
