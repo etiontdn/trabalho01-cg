@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { PointerLockControls } from "../build/jsm/controls/PointerLockControls.js";
 
+
+
 export default function createPersonagem(
   camera,
   renderer,

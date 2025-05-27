@@ -30,6 +30,6 @@ function render() {
     // }
     crosshair.animate(renderer);
     updateControl();
-    updateDisparos();
+    updateDisparos(renderer.info.render.frame);
     renderer.render(scene, camera); // Render scene
 }
