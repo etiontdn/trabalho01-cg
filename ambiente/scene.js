@@ -6,7 +6,6 @@ import {
 } from "../../libs/util/util.js";
 
 export default function () {
-    
     const objetosColidiveis = [];
     const rampas = [];
 
@@ -19,7 +18,6 @@ export default function () {
     scene.add(plane);
 
     objetosColidiveis.push(plane);
-
 
     // Parede do ambiente
     function criarParedes() {
@@ -80,24 +78,27 @@ export default function () {
         return escada;
     }
 
-    function criarRampa(posX, posY, posZ, largura = 30, altura = 20, profundidade = 20) {
+    function criarRampa(
+        posX,
+        posY,
+        posZ,
+        largura = 30,
+        altura = 20,
+        profundidade = 20
+    ) {
         const rampGeo = new THREE.BoxGeometry(largura, 0.1, profundidade + 9);
         const rampMat = new THREE.MeshBasicMaterial({ visible: false });
         const ramp = new THREE.Mesh(rampGeo, rampMat);
-      
+
         const angulo = Math.atan2(altura, profundidade);
         ramp.rotation.x = angulo;
-      
-        ramp.position.set(
-          posX,
-          posY - 1.1,
-          posZ
-        );
+
+        ramp.position.set(posX, posY - 1.1, posZ);
 
         rampas.push(ramp);
-        
+
         return ramp;
-      }
+    }
 
     function criarAreas() {
         const altura = 20;
@@ -141,7 +142,7 @@ export default function () {
 
         const area2 = new THREE.Object3D();
         area2.position.set(pos2.x, pos2.y, pos2.z);
-        
+
         let area2Esquerda = new THREE.Mesh(area2EsquerdaGeo, area2Material);
         area2.add(area2Esquerda);
         area2Esquerda.position.set(-20, 0, 0);
@@ -149,18 +150,18 @@ export default function () {
         let area2Centro = new THREE.Mesh(area2CentroGeo, area2Material);
         area2.add(area2Centro);
         area2Centro.position.set(25, 0, -10);
-        
+
         let area2Direita = new THREE.Mesh(area2DireitaGeo, area2Material);
         area2.add(area2Direita);
         area2Direita.position.set(45, 0, 0);
-        
+
         area2.add(criarEscada(25, 1, 40, "salmon"));
         area2.add(criarRampa(25, 1, 40));
-        
+
         objetosColidiveis.push(area2Esquerda);
         objetosColidiveis.push(area2Centro);
         objetosColidiveis.push(area2Direita);
-        
+
         scene.add(area2);
 
         let area3Material = setDefaultMaterial("violet");
@@ -170,26 +171,26 @@ export default function () {
 
         const area3 = new THREE.Object3D();
         area3.position.set(pos3.x, pos3.y, pos3.z);
-        
+
         let area3Esquerda = new THREE.Mesh(area3EsquerdaGeo, area3Material);
         area3.add(area3Esquerda);
         area3Esquerda.position.set(-30, 0, 0);
-        
+
         let area3Centro = new THREE.Mesh(area3CentroGeo, area3Material);
         area3.add(area3Centro);
         area3Centro.position.set(5, 0, -10);
-        
+
         let area3Direita = new THREE.Mesh(area3DireitaGeo, area3Material);
         area3.add(area3Direita);
         area3Direita.position.set(35, 0, 0);
-        
+
         area3.add(criarEscada(5, 1, 40, "violet"));
         area3.add(criarRampa(5, 1, 40));
-        
+
         objetosColidiveis.push(area3Esquerda);
         objetosColidiveis.push(area3Centro);
         objetosColidiveis.push(area3Direita);
-        
+
         scene.add(area3);
 
         let area4Material = setDefaultMaterial("green");
@@ -219,20 +220,69 @@ export default function () {
         rampaHolder.position.set(0, 1, -40);
         rampaHolder.add(criarRampa(0, 0, 0));
         rampaHolder.rotation.y = Math.PI;
-        
+
         area4.add(area4Escada);
         area4.add(rampaHolder);
 
         objetosColidiveis.push(area4Esquerda);
         objetosColidiveis.push(area4Centro);
         objetosColidiveis.push(area4Direita);
-        
-        scene.add(area4);
 
+        scene.add(area4);
     }
 
     criarAreas();
 
+    function criarLimitesInvisíveis() {
+        // céu: a 300u
+        let materialBasico = setDefaultMaterial("red");
+        const ceuGeometry = new THREE.BoxGeometry(600, 5, 600);
+        const ceu = new THREE.Mesh(ceuGeometry, materialBasico);
+        ceu.position.set(0, 300, 0);
+        scene.add(ceu);
+
+        // chão a -300u:
+        const chao = new THREE.Mesh(ceuGeometry, materialBasico);
+        chao.position.set(0, -300, 0);
+        scene.add(chao);
+
+        // paredes laterais: a 300u e -300u
+        const paredeGeometry = new THREE.BoxGeometry(5, 600, 600);
+        const parede1 = new THREE.Mesh(paredeGeometry, materialBasico);
+        parede1.position.set(300, 0, 0);
+        const parede2 = new THREE.Mesh(paredeGeometry, materialBasico);
+        parede2.position.set(-300, 0, 0);
+
+        scene.add(parede1);
+        scene.add(parede2);
+
+        // paredes frente e trás: a 300u e -300u
+        const paredeGeometry2 = new THREE.BoxGeometry(600, 600, 5);
+        const parede3 = new THREE.Mesh(paredeGeometry2, materialBasico);
+        parede3.position.set(0, 0, 300);
+        const parede4 = new THREE.Mesh(paredeGeometry2, materialBasico);
+        parede4.position.set(0, 0, -300);
+
+        scene.add(parede3);
+        scene.add(parede4);
+
+        objetosColidiveis.push(ceu);
+        objetosColidiveis.push(chao);
+        objetosColidiveis.push(parede1);
+        objetosColidiveis.push(parede2);
+        objetosColidiveis.push(parede3);
+        objetosColidiveis.push(parede4);
+
+        // deixar invisível
+        ceu.visible = false;
+        chao.visible = false;
+        parede1.visible = false;
+        parede2.visible = false;
+        parede3.visible = false;
+        parede4.visible = false;
+    }
+
+    criarLimitesInvisíveis()
 
     return { scene, objetosColidiveis, rampas };
 }
