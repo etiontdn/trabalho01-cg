@@ -92,7 +92,7 @@ export default function createPersonagem(
       const speed = delta * 50;
       if (personagem.position.y != lastY) {
           lastY = personagem.position.y;
-          console.log(lastY);
+          //console.log(lastY);
       }
 
       /* //! Sincroniza a rotação do personagem com a câmera
@@ -163,7 +163,8 @@ export default function createPersonagem(
       if (hits.length > 0) {
           const yChao = hits[0].point.y;
           const distancia = worldPos.y - alturaPersonagem / 2 - yChao;
-          if (distancia <= 5 && distancia > 0 && distancia < 15) {
+          console.log(distancia);
+          if (distancia <= 5 && distancia > 0) {
               personagem.position.y = yChao + 5;
               velY = 0;
           }
