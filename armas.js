@@ -79,7 +79,7 @@ export default function criarArmas(
     }
 
     function criarDisparo() {
-        const disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
+        const disparoGeo = new THREE.SphereGeometry(0.5, 10, 10);
         const disparoMat = setDefaultMaterial("black");
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
