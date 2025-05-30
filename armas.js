@@ -5,6 +5,8 @@ import crosshair from "./crosshair.js";
 const armas = [];
 const disparos = [];
 
+//TODO: disparo alinhada na mira ou não?
+
 export default function criarArmas(
     scene,
     personagemControls,
@@ -12,6 +14,25 @@ export default function criarArmas(
     rampas
 ) {
     const armaMat = new THREE.MeshPhongMaterial({ color: "grey" });
+
+    const armaGeo = new THREE.CylinderGeometry(0.8, 0.8, 7);
+    let arma2 = new THREE.Object3D();
+    let arma2_1 = new THREE.Mesh( armaGeo, armaMat );
+    let arma2_2 = new THREE.Mesh( armaGeo, armaMat );
+    arma2_1.material.side = THREE.DoubleSide;
+    arma2_2.material.side = THREE.DoubleSide;
+    arma2.add(arma2_1);
+    arma2.add(arma2_2);
+    arma2_1.position.set(0.6, 0, 0);
+    arma2_2.position.set(-0.6, 0, 0);
+    arma2.rotation.x = - Math.PI / 0.70;
+    personagemControls.getObject().add(arma2);
+    arma2.position.set(0, -5, -7);
+    armas.push(arma2);
+
+    arma2.cadencia = 0.75;
+    
+
     criarArma({raio: 0.8, comprimento:7}, 0.5);
     criarArma({raio: 0.6, comprimento:8}, 0.2)
 
@@ -27,6 +48,8 @@ export default function criarArmas(
             armaAtual = 0;
         } else if (e.key == 2) {
             armaAtual = 1;
+        } else if (e.key == 3) {
+            armaAtual = 2;
         }
     });
 
@@ -67,7 +90,7 @@ export default function criarArmas(
         // no trabalho pede para sair da arma, mas
         // nos jogos atuais o disparo sai da câmera e não da arma
         // e o disparo em si acaba sendo apenas um raycast comum
-        tiro.position.y += 4.5;
+        // tiro.position.y += 4.5;
         tiro.userData.dir = personagemControls
             .getObject()
             .getWorldDirection(new THREE.Vector3())

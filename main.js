@@ -8,14 +8,19 @@ import createArmas from "./armas.js";
 const renderer = initRenderer();
 const camera = createCamera();
 const { scene, objetosColidiveis, rampas } = createScene();
-const { personagem, personagemControls, updateControl} = createPersonagem(
+const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
     objetosColidiveis,
     rampas
 );
 //const { armas, updateArma } = createArmas(personagemControls);
-const{ armas, updateDisparos } = createArmas(scene, personagemControls, objetosColidiveis, rampas);
+const { armas, updateDisparos } = createArmas(
+    scene,
+    personagemControls,
+    objetosColidiveis,
+    rampas
+);
 
 scene.add(personagem);
 

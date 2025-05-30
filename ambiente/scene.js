@@ -82,7 +82,7 @@ export default function () {
         posX,
         posY,
         posZ,
-        largura = 30,
+        largura = 40,
         altura = 20,
         profundidade = 20
     ) {
@@ -96,6 +96,7 @@ export default function () {
         ramp.position.set(posX, posY - 1.1, posZ);
 
         rampas.push(ramp);
+        ramp.eRampa = true;
 
         return ramp;
     }
@@ -243,7 +244,7 @@ export default function () {
 
         // chão a -300u:
         const chao = new THREE.Mesh(ceuGeometry, materialBasico);
-        chao.position.set(0, -300, 0);
+        chao.position.set(0, -2.5, 0);
         scene.add(chao);
 
         // paredes laterais: a 300u e -300u
