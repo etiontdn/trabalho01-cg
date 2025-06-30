@@ -18,6 +18,20 @@ export default function () {
     scene.add(plane);
 
     objetosColidiveis.push(plane);
+    
+    //area1 chave e plataforma
+    let grupoChave;
+    let chave;
+    let subirGrupoChave = false; // flag de controle
+    const alturaFinal = 20;      // altura alvo
+    //area1 chave e plataforma
+
+    //area2chave e plataforma
+    let plataforma2;
+    let descerplataforma2 = false;
+    let porta; 
+    let portaaberta=false;
+    //area2 chave e plataforma
 
     // Parede do ambiente
     function criarParedes() {
@@ -107,26 +121,74 @@ export default function () {
         const pos2 = new THREE.Vector3(0, altura / 2, -150);
         const pos3 = new THREE.Vector3(150, altura / 2, -150);
         const pos4 = new THREE.Vector3(0, altura / 2, 150);
+          
 
+        // Area1
         let area1Material = setDefaultMaterial("teal");
         let area1EsquerdaGeo = new THREE.BoxGeometry(10, altura, 100);
         let area1DireitaGeo = new THREE.BoxGeometry(60, altura, 100);
         let area1CentroGeo = new THREE.BoxGeometry(30, altura, 80);
-
+       
         let area1 = new THREE.Object3D();
         area1.position.set(pos1.x, pos1.y, pos1.z);
+
+         // Colunas ao redor da área 1
+        const colunasArea1 = new THREE.Object3D();
+        const colunaGeo = new THREE.CylinderGeometry(1, 1, 50, 16);
+        const colunaMat = setDefaultMaterial("white");
+        const alturaColuna = 10;
+        const espacamento = 15;
+        const larguraArea = 80;
+        const profundidadeArea = 98;
 
         let area1Esquerda = new THREE.Mesh(area1EsquerdaGeo, area1Material);
         area1.add(area1Esquerda);
         area1Esquerda.position.set(-45, 0, 0);
 
+        // Lado esquerdo (x fixo em -largura/2)
+        for (let z = -128 / 2 + espacamento; z <= 130 / 2 - espacamento; z += espacamento) {
+            const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+            coluna.position.set(-98/ 2, alturaColuna / 2, z);
+            coluna.castShadow = true;
+            coluna.receiveShadow = true;
+            colunasArea1.add(coluna);
+        }
+
         let area1Centro = new THREE.Mesh(area1CentroGeo, area1Material);
         area1.add(area1Centro);
         area1Centro.position.set(-25, 0, -10);
+        
+        // Lado frontal (z fixo em -profundidade/2)
+        for (let x = -10/2; x <= larguraArea/2; x += espacamento) {
+            const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+            coluna.position.set(x, alturaColuna / 2, 98 / 2);
+            coluna.castShadow = true;
+            coluna.receiveShadow = true;
+            colunasArea1.add(coluna);
+        }
+
+        // Lado traseiro (z fixo em +profundidade/2)
+        for (let x = -40/ 2; x <=80 / 2; x += 20) {
+            const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+            coluna.position.set(x - 10, alturaColuna / 2, -98 / 2);
+            coluna.castShadow = true;
+            coluna.receiveShadow = true;
+            colunasArea1.add(coluna);
+        }
 
         let area1Direita = new THREE.Mesh(area1DireitaGeo, area1Material);
         area1.add(area1Direita);
         area1Direita.position.set(20, 0, 0);
+
+        // Lado direito (x fixo em +largura/2)
+        for (let z = -128/ 2 + espacamento; z <= 130 / 2 - espacamento; z += espacamento) {
+            const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+            coluna.position.set(98 / 2, alturaColuna / 2, z);
+            coluna.castShadow = true;
+            coluna.receiveShadow = true;
+            objetosColidiveis.push(coluna)
+            colunasArea1.add(coluna);
+        }
 
         area1.add(criarEscada(-25, 1, 40, "teal"));
         area1.add(criarRampa(-25, 1, 40));
@@ -136,6 +198,41 @@ export default function () {
         objetosColidiveis.push(area1Direita);
         scene.add(area1);
 
+        colunasArea1.position.copy(area1.position);
+        
+        scene.add(colunasArea1);
+
+         // Plataforma da chave
+        const plataformaGeo = new THREE.CylinderGeometry(5, 5, 25, 32);
+        const plataformaMat = setDefaultMaterial("darkred");
+        const plataforma1 = new THREE.Mesh(plataformaGeo, plataformaMat);
+        plataforma1.position.set(0, -5, 0); // subir ate 35
+        plataforma1.receiveShadow = true;
+        plataforma1.castShadow = true;
+
+        // Chave
+        const chaveGeo = new THREE.TorusGeometry(1.5, 0.5, 8, 16);
+        const chaveMat = setDefaultMaterial("yellow");
+        chave = new THREE.Mesh(chaveGeo, chaveMat);
+        chave.position.set(0, 9, 0); // ir pra posicao 20
+        chave.rotation.x = Math.PI / 2;
+        chave.castShadow = true;
+
+        // Agrupar chave e plataforma
+        grupoChave = new THREE.Object3D();
+        grupoChave.add(plataforma1);
+        grupoChave.add(chave);
+        grupoChave.position.copy(area1.position);
+        
+        scene.add(grupoChave);
+        objetosColidiveis.push(grupoChave);
+
+        
+
+
+        // Area1
+        
+        //area 2
         let area2Material = setDefaultMaterial("salmon");
         let area2DireitaGeo = new THREE.BoxGeometry(10, altura, 100);
         let area2EsquerdaGeo = new THREE.BoxGeometry(60, altura, 100);
@@ -156,14 +253,39 @@ export default function () {
         area2.add(area2Direita);
         area2Direita.position.set(45, 0, 0);
 
-        area2.add(criarEscada(25, 1, 40, "salmon"));
-        area2.add(criarRampa(25, 1, 40));
+        //plataforma
+        const plataforma2Geo = new THREE.BoxGeometry(30, 38, 19);
+        const plataforma2Mat = setDefaultMaterial("blue");
+        plataforma2 = new THREE.Mesh(plataforma2Geo, plataforma2Mat);
+        plataforma2.position.set(25, 1, -111); // ajuste conforme necessário
+        //plataforma2.position.set(25, -18, -110); // ajuste conforme necessário
+        plataforma2.receiveShadow = true;
+        plataforma2.castShadow = true;
+        plataforma2.visible = false;
+        scene.add(plataforma2)
+
+        //porta
+        const portaGeo = new THREE.BoxGeometry(30, 38, 0.1);
+        const portaMat = setDefaultMaterial("yellow");
+        porta = new THREE.Mesh(portaGeo, portaMat);
+        porta.position.set(25, 1, -100.2); // ajuste conforme necessário
+        //plataforma2.position.set(25, -18, -110); // ajuste conforme necessário
+        porta.receiveShadow = true;
+        porta.castShadow = true;
+        
+        objetosColidiveis.push(plataforma2,porta);
+
+        scene.add(porta)
+
+        
 
         objetosColidiveis.push(area2Esquerda);
         objetosColidiveis.push(area2Centro);
         objetosColidiveis.push(area2Direita);
 
         scene.add(area2);
+
+        //area2
 
         let area3Material = setDefaultMaterial("violet");
         let area3DireitaGeo = new THREE.BoxGeometry(30, altura, 100);
@@ -285,5 +407,62 @@ export default function () {
 
     criarLimitesInvisíveis()
 
-    return { scene, objetosColidiveis, rampas };
+        // Escuta a tecla K
+    window.addEventListener('keydown', function (event) {
+        if (event.key === 'k' || event.key === 'K') {
+            subirGrupoChave = true;
+            portaaberta = true;
+            plataforma2.visible = true;
+            if(!descerplataforma2)
+               descerplataforma2 = true;
+            else
+               descerplataforma2 = false;
+        }
+    });
+
+    // Loop de animação
+    function updateScene() {
+     if (subirGrupoChave && grupoChave.position.y < alturaFinal) {
+        grupoChave.position.y += 0.5;
+
+        if (grupoChave.position.y > alturaFinal) {
+            grupoChave.position.y = alturaFinal;
+        }
+    }
+
+    if (chave) {
+        chave.rotation.z += 0.05;
+    }
+
+
+   if (descerplataforma2 && plataforma2.position.y > -18 ) {
+    plataforma2.position.y -= 0.5;  // está descendo, então subtrai
+    if (plataforma2.position.y < -18) {
+        plataforma2.position.y = -18;
+    }
+   }
+   else if(!descerplataforma2 && plataforma2.position.y < 1){
+    plataforma2.position.y += 0.5;  // está descendo, então subtrai
+    if (plataforma2.position.y > 1) {
+        plataforma2.position.y = 1;
+    }
+    
+   }
+
+    if (portaaberta && porta.position.x > -6) {
+    porta.position.x -= 0.5;
+    if (porta.scale.x < -6) {
+        porta.scale.x = -6;
+    }
+}
+
+
+    
+}
+    
+
+    
+
+
+    return { scene, objetosColidiveis, rampas, updateScene };
 }
