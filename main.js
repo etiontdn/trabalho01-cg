@@ -5,16 +5,22 @@ import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 
+// Inicializa renderizador e câmera
 const renderer = initRenderer();
 const camera = createCamera();
-const { scene, objetosColidiveis, rampas } = createScene();
+
+// Cria a cena e recupera função de update da animação
+const { scene, objetosColidiveis, rampas, updateScene } = createScene();
+
+// Cria personagem e controles
 const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
     objetosColidiveis,
     rampas
 );
-//const { armas, updateArma } = createArmas(personagemControls);
+
+// Cria armas e sistema de disparos
 const { armas, updateDisparos } = createArmas(
     scene,
     personagemControls,
@@ -22,19 +28,25 @@ const { armas, updateDisparos } = createArmas(
     rampas
 );
 
+// Adiciona personagem à cena
 scene.add(personagem);
 
+// Atualiza tamanho ao redimensionar janela
 window.addEventListener("resize", () => onWindowResize(camera, renderer));
 
+// Loop de renderização
 render();
 function render() {
     requestAnimationFrame(render);
-    // NOTE: Apenas para teste de animação do crosshair
-    // if (renderer.info.render.frame % 120 == 0) {
-    //     crosshair.active = true;
-    // }
+
+    // Atualiza elementos animados da cena (grupoChave etc.)
+    updateScene();
+
+    // Atualiza outros elementos
     crosshair.animate(renderer);
     updateControl();
     updateDisparos(renderer.info.render.frame);
-    renderer.render(scene, camera); // Render scene
+
+    // Renderiza a cena
+    renderer.render(scene, camera);
 }
