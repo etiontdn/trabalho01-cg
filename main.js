@@ -1,11 +1,13 @@
 import createScene from "./ambiente/scene.js";
-import { initRenderer, onWindowResize } from "../libs/util/util.js";
+import * as THREE from "three";
+import { onWindowResize } from "../libs/util/util.js";
+import iniciarRenderer from "./renderer.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 
-const renderer = initRenderer();
+let renderer = iniciarRenderer();
 const camera = createCamera();
 const { scene, objetosColidiveis, rampas } = createScene();
 const { personagem, personagemControls, updateControl } = createPersonagem(

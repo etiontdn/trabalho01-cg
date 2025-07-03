@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import {
-    initDefaultBasicLight,
     setDefaultMaterial,
     createGroundPlaneXZ,
 } from "../../libs/util/util.js";
 
 import Area from "./area.js";
+import ParedeLimitante from "./parede.js";
+import Iluminacao from "./iluminacao.js";
 
 export default function () {
     const objetosColidiveis = [];
@@ -13,51 +14,59 @@ export default function () {
 
     let scene;
     scene = new THREE.Scene();
-    const light = initDefaultBasicLight(scene);
-    scene.add(light);
+
+    const iluminacao = new Iluminacao(scene);
+    iluminacao.adicionarIluminacaoAmbiente();
+    iluminacao.adicionarIluminacaoDirecional();
 
     let plane = createGroundPlaneXZ(500, 500);
-    scene.add(plane);
-
-    objetosColidiveis.push(plane);
+    scene.add(plane)
+    rampas.push(plane);
 
     // Parede do ambiente
     function criarParedes() {
-        let paredeMaterial = setDefaultMaterial("grey");
-        let paredeEsquerdaGeometry = new THREE.BoxGeometry(10, 50, 500);
-        let paredeEsquerda = new THREE.Mesh(
-            paredeEsquerdaGeometry,
-            paredeMaterial
+        const cor = "grey";
+        const pos1 = { x: -255, y: 24, z: 0 };
+        const pos2 = { x: 255, y: 24, z: 0 };
+        const pos3 = { x: 0, y: 24, z: -255 };
+        const pos4 = { x: 0, y: 24, z: 255 };
+        const tam1 = { x: 10, y: 50, z: 500 };
+        const tam2 = { x: 10, y: 50, z: 500 };
+        const tam3 = { x: 500, y: 50, z: 10 };
+        const tam4 = { x: 500, y: 50, z: 10 };
+
+        const paredeOeste = new ParedeLimitante(
+            pos1,
+            tam1,
+            cor,
+            scene,
+            "parede oeste"
         );
-        paredeEsquerda.position.set(-255, 24, 0);
-        paredeEsquerda.name = "parede esquerda";
-        objetosColidiveis.push(paredeEsquerda);
-        scene.add(paredeEsquerda);
-
-        let paredeDireitaGeometry = new THREE.BoxGeometry(10, 50, 500);
-        let paredeDireita = new THREE.Mesh(
-            paredeDireitaGeometry,
-            paredeMaterial
+        const paredeLeste = new ParedeLimitante(
+            pos2,
+            tam2,
+            cor,
+            scene,
+            "parede leste"
         );
-        paredeDireita.position.set(255, 24, 0);
-        paredeDireita.name = "parede direita";
-        objetosColidiveis.push(paredeDireita);
-        scene.add(paredeDireita);
+        const paredeNorte = new ParedeLimitante(
+            pos3,
+            tam3,
+            cor,
+            scene,
+            "parede norte"
+        );
+        const paredeSul = new ParedeLimitante(
+            pos4,
+            tam4,
+            cor,
+            scene,
+            "parede sul"
+        );
 
-        let paredeNorteGeometry = new THREE.BoxGeometry(500, 50, 10);
-        let paredeNorte = new THREE.Mesh(paredeNorteGeometry, paredeMaterial);
-        paredeNorte.position.set(0, 24, -255);
-        paredeNorte.name = "parede norte";
-        objetosColidiveis.push(paredeNorte);
-        scene.add(paredeNorte);
-
-        let paredeSulGeometry = new THREE.BoxGeometry(500, 50, 10);
-        let paredeSul = new THREE.Mesh(paredeSulGeometry, paredeMaterial);
-
-        paredeSul.position.set(0, 24, 255);
-        paredeSul.name = "parede sul";
-        objetosColidiveis.push(paredeSul);
-        scene.add(paredeSul);
+        objetosColidiveis.push(
+            ...[paredeOeste, paredeLeste, paredeNorte, paredeSul]
+        );
     }
 
     criarParedes();
@@ -81,19 +90,31 @@ export default function () {
         area2.makePart({ x: -15, z: 0 }, { x: 60, z: 100 }, "direita");
         area2.makePart({ x: 15, z: 0 }, { x: 10, z: 100 }, "esquerda");
         area2.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
+        // TODO: Adicionar o elevador aqui, provavelmente!
         objetosColidiveis.push(...area2.getParts());
 
         const area3 = new Area(pos3, altura, "violet", scene);
         area3.makePart({ x: -15, z: 0 }, { x: 40, z: 100 }, "direita");
         area3.makePart({ x: 15, z: 0 }, { x: 30, z: 100 }, "esquerda");
         area3.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
+        area3.criarEscada({ x: 0, z: 50 }, { x: 30, z: 20 }, "frente");
         objetosColidiveis.push(...area3.getParts());
+        rampas.push(...area3.ramps);
 
         const area4 = new Area(pos4, altura, "green", scene);
         area4.makePart({ x: -15, z: 0 }, { x: 135, z: 100 }, "direita");
         area4.makePart({ x: 15, z: 0 }, { x: 135, z: 100 }, "esquerda");
         area4.makePart({ x: 0, z: -30 }, { x: 30, z: 80 }, "fundo");
+        const escada = area4.criarEscada(
+            { x: 0, z: -50 },
+            { x: 30, z: 20 },
+            "fundo"
+        );
+        // inverte rotação da escada para ficar corretamente na frente do jogador
+
+        escada.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
         objetosColidiveis.push(...area4.getParts());
+        rampas.push(...area4.ramps);
     }
 
     criarAreas();

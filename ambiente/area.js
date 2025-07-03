@@ -1,9 +1,4 @@
 import * as THREE from "three";
-import {
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    createGroundPlaneXZ,
-} from "../../libs/util/util.js";
 
 const materialArea = THREE.MeshLambertMaterial;
 const castShadow = true;
@@ -34,6 +29,8 @@ const posAncora = (tamanho, ancora) => {
 class Area {
     constructor(pos, altura, cor, scene) {
         this.obj3D = new THREE.Object3D();
+        this.obj3D.castShadow = castShadow;
+        this.obj3D.receiveShadow = castShadow;
         this.obj3D.position.set(pos.x, altura / 2, pos.z);
         this.altura = altura;
         this.material = new materialArea({ color: cor });
@@ -59,13 +56,14 @@ class Area {
             pos.z + ancoraPosition.z
         );
         partMesh.castShadow = castShadow;
+        partMesh.receiveShadow = castShadow;
         this.obj3D.add(partMesh);
         this.parts.push(partMesh);
         return partMesh;
     }
 
     criarRampa(tamanho) {
-        const rampGeo = new THREE.BoxGeometry(tamanho.x, 0.1, tamanho.z);
+        const rampGeo = new THREE.BoxGeometry(tamanho.x, 0, tamanho.z);
         const rampMat = new THREE.MeshBasicMaterial({
             visible: rampaVisivel,
         });
@@ -108,6 +106,7 @@ class Area {
                 )
             );
             degrau.castShadow = castShadow;
+            degrau.receiveShadow = castShadow
             escada.add(degrau);
         }
 

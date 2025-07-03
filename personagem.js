@@ -10,7 +10,7 @@ export default function createPersonagem(
     //! Criação do personagem
     const personagemControls = new PointerLockControls(
         camera,
-        renderer.domElement
+        document.body
     );
     const personagemObject = personagemControls.getObject();
     const personagem = new THREE.Object3D();
@@ -144,19 +144,19 @@ export default function createPersonagem(
         corpo.getWorldPosition(worldPos);
         const ray1 = new THREE.Raycaster();
         ray1.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray1.ray.origin.x -= 2;
+        ray1.ray.origin.x -= 1;
         ray1.ray.direction.set(0, -1, 0);
         const ray2 = new THREE.Raycaster();
         ray2.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray2.ray.origin.x += 2;
+        ray2.ray.origin.x += 1;
         ray2.ray.direction.set(0, -1, 0);
         const ray3 = new THREE.Raycaster();
         ray3.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray3.ray.origin.z -= 2;
+        ray3.ray.origin.z -= 1;
         ray3.ray.direction.set(0, -1, 0);
         const ray4 = new THREE.Raycaster();
         ray4.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray4.ray.origin.z += 2;
+        ray4.ray.origin.z += 1;
         ray4.ray.direction.set(0, -1, 0);
 
         raycasterDown.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
@@ -198,7 +198,7 @@ export default function createPersonagem(
         }
 
         // altura dos pés (para o filtro)
-        const bottomY = personagem.position.y - alturaPersonagem / 2 + 0.01;
+        const bottomY = personagem.position.y - alturaPersonagem / 2 + 0.1;
 
         //! Movimentação do personagem
         /*
@@ -222,7 +222,7 @@ export default function createPersonagem(
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
             //* se topo do box ≃ altura dos pés, ignoramos
-            if (Math.abs(bb.max.y - bottomY) < 1.5) return false;
+            if (Math.abs(bb.max.y - bottomY) < 0.2) return false;
             return true;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>
