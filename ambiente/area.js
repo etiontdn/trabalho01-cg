@@ -41,7 +41,7 @@ class Area {
         this.parts = [];
         this.ramps = [];
 
-        console.log(this.obj3D);
+        // console.log(this.obj3D);
         scene.add(this.obj3D);
     }
 

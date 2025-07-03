@@ -5,7 +5,7 @@ import crosshair from "./crosshair.js";
 const armas = [];
 const disparos = [];
 
-//TODO: disparo alinhada na mira ou não?
+//TODO: disparo alinhada na mira ou não? Acho q sim!
 
 export default function criarArmas(
     scene,
@@ -23,15 +23,15 @@ export default function criarArmas(
         3,                          // total de frames no spritesheet
         3,                          // colunas
         1,                          // linhas
-        2.5,                          // largura em unidades
-        2                           // altura em unidades
+        1.7,                        // largura em unidades
+        1.2                           // altura em unidades
     );
     
     // lançador
-    criarArma({raio: 0.5, comprimento:5}, 0.5);
+    criarArma({raio: 0.23, comprimento:2}, 0.5);
     
     // Shotgun
-    const armaGeo = new THREE.CylinderGeometry(0.5, 0.5, 4);
+    const armaGeo = new THREE.CylinderGeometry(0.15, 0.15, 4);
     let arma2 = new THREE.Object3D();
     let arma2_1 = new THREE.Mesh( armaGeo, armaMat );
     let arma2_2 = new THREE.Mesh( armaGeo, armaMat );
@@ -39,16 +39,16 @@ export default function criarArmas(
     arma2_2.material.side = THREE.DoubleSide;
     arma2.add(arma2_1);
     arma2.add(arma2_2);
-    arma2_1.position.set(0.4, 0, 0);
-    arma2_2.position.set(-0.4, 0, 0);
+    arma2_1.position.set(0.1, 0, 0);
+    arma2_2.position.set(-0.1, 0, 0);
     arma2.rotation.x = - Math.PI / 0.70;
     personagemControls.getObject().add(arma2);
-    arma2.position.set(0, -3.5, -5);
+    arma2.position.set(0, -1, .4);
     armas.push(arma2);
     arma2.cadencia = 0.75;
 
     // Arma?
-    criarArma({raio: 0.3, comprimento:4}, 0.2);
+    criarArma({raio: 0.15, comprimento:2}, 0.2);
 
     let armaAtual = 0;
     let calcDelta = 0;
@@ -90,7 +90,7 @@ export default function criarArmas(
 
         const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(material);
-        sprite.position.set(0, -2, -3.92);
+        sprite.position.set(0, -.94, -2);
         sprite.scale.set(largura, altura, 1);
 
         
@@ -104,7 +104,7 @@ export default function criarArmas(
             frameDuration: cadencia / totalFrames,
             isAnimating: false
         };
-        
+
         personagemControls.getObject().add(sprite);
         armas.push(sprite);
     }
@@ -114,14 +114,14 @@ export default function criarArmas(
         const arma = new THREE.Mesh(armaGeo, armaMat);
         arma.material.side = THREE.DoubleSide;
         arma.rotation.x = -Math.PI / 0.7;
-        arma.position.set(0, -3, -4);
+        arma.position.set(0, -1, -1.1);
         personagemControls.getObject().add(arma);
         arma.cadencia = cadencia;
         armas.push(arma);
     }
 
     function criarDisparo() {
-        const disparoGeo = new THREE.SphereGeometry(0.3, 10, 10);
+        const disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
         const disparoMat = setDefaultMaterial("black");
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
@@ -132,7 +132,7 @@ export default function criarArmas(
         // no trabalho pede para sair da arma, mas
         // nos jogos atuais o disparo sai da câmera e não da arma
         // e o disparo em si acaba sendo apenas um raycast comum
-        // tiro.position.y += 4.5;
+        tiro.position.y += .2;
         tiro.userData.dir = personagemControls
             .getObject()
             .getWorldDirection(new THREE.Vector3())

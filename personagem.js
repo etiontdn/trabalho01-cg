@@ -190,7 +190,7 @@ export default function createPersonagem(
         if (hits.length > 0) {
             const yChao = hits[0].point.y;
             const distancia = worldPos.y - alturaPersonagem / 2 - yChao;
-            console.log(distancia);
+            // console.log(distancia);
             if (distancia <= alturaPersonagem / 2 && distancia > 0) {
                 personagem.position.y = yChao + alturaPersonagem / 2;
                 velY = 0;
