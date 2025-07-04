@@ -28,6 +28,7 @@ const posAncora = (tamanho, ancora) => {
 // Assume todas as partes com mesmo material e cor
 class Area {
     constructor(pos, altura, cor, scene) {
+        console.log(altura);
         this.obj3D = new THREE.Object3D();
         this.obj3D.castShadow = castShadow;
         this.obj3D.receiveShadow = castShadow;
@@ -37,7 +38,6 @@ class Area {
         this.scene = scene;
         this.parts = [];
         this.ramps = [];
-
         console.log(this.obj3D);
         scene.add(this.obj3D);
     }
@@ -98,7 +98,7 @@ class Area {
             let degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
             degrau.position.set(
                 0,
-                -this.altura / 2 + i * (this.altura / degraus),
+                -this.altura / 2 + i * (this.altura / degraus) + (this.altura/degraus)/2,
                 -(
                     -tamanho.z / 2 +
                     (i * tamanho.z) / degraus +

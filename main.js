@@ -9,14 +9,17 @@ import createArmas from "./armas.js";
 
 let renderer = iniciarRenderer();
 const camera = createCamera();
+let firstRender = false;
+
 const { scene, objetosColidiveis, rampas } = createScene();
+render();
+firstRender = true;
 const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
     objetosColidiveis,
     rampas
 );
-//const { armas, updateArma } = createArmas(personagemControls);
 const { armas, updateDisparos } = createArmas(
     scene,
     personagemControls,
@@ -28,7 +31,6 @@ scene.add(personagem);
 
 window.addEventListener("resize", () => onWindowResize(camera, renderer));
 
-render();
 function render() {
     requestAnimationFrame(render);
     // NOTE: Apenas para teste de animação do crosshair
@@ -36,7 +38,9 @@ function render() {
     //     crosshair.active = true;
     // }
     crosshair.animate(renderer);
-    updateControl();
-    updateDisparos(renderer.info.render.frame);
+    if (firstRender) {
+        updateControl();
+        updateDisparos(renderer.info.render.frame);
+    }
     renderer.render(scene, camera); // Render scene
 }

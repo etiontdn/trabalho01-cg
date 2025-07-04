@@ -19,9 +19,13 @@ export default function () {
     iluminacao.adicionarIluminacaoAmbiente();
     iluminacao.adicionarIluminacaoDirecional();
 
+    /*
     let plane = createGroundPlaneXZ(500, 500);
     scene.add(plane)
-    rampas.push(plane);
+    rampas.push(plane);*/
+
+    const chao = new ParedeLimitante({x:0, y:-0.5, z:0}, {x:500, y:1, z:500}, "lightgrey", scene, "chão");
+    rampas.push(chao);
 
     // Parede do ambiente
     function criarParedes() {

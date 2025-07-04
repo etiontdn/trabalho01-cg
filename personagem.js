@@ -6,7 +6,7 @@ export default function createPersonagem(
     renderer,
     objetosColidiveis,
     rampas
-) {
+) { 
     //! Criação do personagem
     const personagemControls = new PointerLockControls(
         camera,
