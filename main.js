@@ -8,13 +8,19 @@ import { LostSoul, Cacodemon, createEnemies } from './inimigos.js';
 
 const renderer = initRenderer();
 const camera = createCamera();
-const { scene, objetosColidiveis, rampas } = createScene();
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } = createScene(); // ✅ setPersonagem incluído
+
+// Cria personagem e controles
 const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
     objetosColidiveis,
     rampas
 );
+
+// ✅ Passa o personagem para o scene.js
+setPersonagem(personagem);
+
 const { armas, updateDisparos } = createArmas(
     scene,
     personagemControls,
@@ -43,5 +49,7 @@ function render() {
     updateControl();
     updateDisparos(renderer.info.render.frame);
     updateEnemies(renderer.info.render.frame);
+    updateScene();
+    
     renderer.render(scene, camera); // Render scene
 }
