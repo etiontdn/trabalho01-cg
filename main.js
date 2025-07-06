@@ -4,13 +4,11 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
+import { LostSoul, Cacodemon, createEnemies } from './inimigos.js';
 
-// Inicializa renderizador e câmera
 const renderer = initRenderer();
 const camera = createCamera();
-
-// Cria a cena e recupera função de update da animação
-const { scene, objetosColidiveis, rampas, updateScene } = createScene();
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } = createScene(); // ✅ setPersonagem incluído
 
 // Cria personagem e controles
 const { personagem, personagemControls, updateControl } = createPersonagem(
@@ -20,33 +18,38 @@ const { personagem, personagemControls, updateControl } = createPersonagem(
     rampas
 );
 
-// Cria armas e sistema de disparos
+// ✅ Passa o personagem para o scene.js
+setPersonagem(personagem);
+
 const { armas, updateDisparos } = createArmas(
     scene,
     personagemControls,
     objetosColidiveis,
     rampas
 );
+const updateEnemies = createEnemies(
+    scene,
+    objetosColidiveis,
+    rampas,
+    personagem,
+);
 
-// Adiciona personagem à cena
 scene.add(personagem);
 
-// Atualiza tamanho ao redimensionar janela
 window.addEventListener("resize", () => onWindowResize(camera, renderer));
 
-// Loop de renderização
 render();
 function render() {
     requestAnimationFrame(render);
-
-    // Atualiza elementos animados da cena (grupoChave etc.)
-    updateScene();
-
-    // Atualiza outros elementos
+    // NOTE: Apenas para teste de animação do crosshair
+    // if (renderer.info.render.frame % 120 == 0) {
+    //     crosshair.active = true;
+    // }
     crosshair.animate(renderer);
     updateControl();
     updateDisparos(renderer.info.render.frame);
-
-    // Renderiza a cena
-    renderer.render(scene, camera);
+    updateEnemies(renderer.info.render.frame);
+    updateScene();
+    
+    renderer.render(scene, camera); // Render scene
 }
