@@ -1,16 +1,22 @@
 import createScene from "./ambiente/scene.js";
-import { initRenderer, onWindowResize } from "../libs/util/util.js";
+import * as THREE from "three";
+import { onWindowResize } from "../libs/util/util.js";
+import iniciarRenderer from "./renderer.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
-import { LostSoul, Cacodemon, createEnemies } from './inimigos.js';
+import { LostSoul, Cacodemon, createEnemies } from "./inimigos.js";
 
-const renderer = initRenderer();
+let renderer = iniciarRenderer();
 const camera = createCamera();
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } = createScene(); // ✅ setPersonagem incluído
+let firstRender = false;
 
 // Cria personagem e controles
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } =
+    createScene(); // ✅ setPersonagem incluído
+render();
+firstRender = true;
 const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
@@ -31,14 +37,13 @@ const updateEnemies = createEnemies(
     scene,
     objetosColidiveis,
     rampas,
-    personagem,
+    personagem
 );
 
 scene.add(personagem);
 
 window.addEventListener("resize", () => onWindowResize(camera, renderer));
 
-render();
 function render() {
     requestAnimationFrame(render);
     // NOTE: Apenas para teste de animação do crosshair
@@ -46,10 +51,12 @@ function render() {
     //     crosshair.active = true;
     // }
     crosshair.animate(renderer);
-    updateControl();
-    updateDisparos(renderer.info.render.frame);
-    updateEnemies(renderer.info.render.frame);
-    updateScene();
-    
+
+    if (firstRender) {
+        updateControl();
+        updateDisparos(renderer.info.render.frame);
+        updateEnemies(renderer.info.render.frame);
+        updateScene();
+    }
     renderer.render(scene, camera); // Render scene
 }
