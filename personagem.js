@@ -15,7 +15,7 @@ export default function createPersonagem(
     personagem.add(personagemObject);
 
     const alturaPersonagem = 2;
-    const startPos = new THREE.Vector3(0, 2, 0);
+    const startPos = new THREE.Vector3(0, 4, 0);
     const startQuat = personagemObject.quaternion.clone();
     personagem.position.copy(startPos);
     personagem.quaternion.copy(startQuat);
@@ -111,54 +111,58 @@ export default function createPersonagem(
 
         const worldPos = new THREE.Vector3();
         corpo.getWorldPosition(worldPos);
-        const ray1 = new THREE.Raycaster();
-        ray1.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray1.ray.origin.x -= 1;
-        ray1.ray.direction.set(0, -1, 0);
-        const ray2 = new THREE.Raycaster();
-        ray2.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray2.ray.origin.x += 1;
-        ray2.ray.direction.set(0, -1, 0);
-        const ray3 = new THREE.Raycaster();
-        ray3.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray3.ray.origin.z -= 1;
-        ray3.ray.direction.set(0, -1, 0);
-        const ray4 = new THREE.Raycaster();
-        ray4.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        ray4.ray.origin.z += 1;
-        ray4.ray.direction.set(0, -1, 0);
 
-        raycasterDown.ray.origin.copy(worldPos).y -= alturaPersonagem / 2;
-        raycasterDown.ray.direction.set(0, -1, 0);
-
-        const hits = raycasterDown.intersectObjects(
-            rampas.concat(objetosColidiveis)
-        );
-        if (hits.length > 0) {
-            const yChao = hits[0].point.y;
-            const distancia = worldPos.y - alturaPersonagem / 2 - yChao;
-            if (distancia <= alturaPersonagem / 2 && distancia > 0) {
-                personagem.position.y = yChao + alturaPersonagem / 2;
-                velY = 0;
-            } else {
-                velY += gravidade * delta;
-                personagem.position.y += velY * delta;
+        function testarRaycasts() {
+            function criarRaycastLimite(x = 0, z = 0) {
+                const bottom = new THREE.Vector3();
+                bottom.copy(worldPos).y -= alturaPersonagem / 2 + 0.01;
+                const ray = new THREE.Raycaster();
+                ray.ray.origin.copy(bottom);
+                ray.ray.origin.z += z;
+                ray.ray.origin.x += x;
+                ray.ray.direction.set(0, -1, 0);
+                return ray;
             }
+            function onHitGoUp(allHits) {
+                let maiorYChao = 0;
+                for (let hits of allHits) {
+                    if (hits.length > 0) {
+                        const yChao = hits[0].point.y;
+                        if (yChao > maiorYChao) {
+                            maiorYChao = yChao;
+                        }
+                    }
+                }
+                const distancia = worldPos.y - alturaPersonagem / 2 - maiorYChao;
+                if (distancia <= alturaPersonagem / 2 && distancia > 0) {
+                    personagem.position.y = maiorYChao + alturaPersonagem / 2;
+                    velY = 0;
+                } else {
+                    velY += gravidade * delta;
+                    personagem.position.y += velY * delta;
+                }
+            }
+            const rays = [
+                [1, 0],
+                [-1, 0],
+                [0, 1],
+                [0, -1],
+                [0, 0],
+            ];
+            const allHits = [];
+            for (const ray of rays) {
+                const rayObj = criarRaycastLimite(...ray);
+                const hits = rayObj.intersectObjects(
+                    rampas.concat(objetosColidiveis)
+                );
+                allHits.push(hits);
+            }
+            onHitGoUp(allHits);
         }
 
-        if (hits.length > 0) {
-            const yChao = hits[0].point.y;
-            const distancia = worldPos.y - alturaPersonagem / 2 - yChao;
-            console.log(distancia);
-            if (distancia <= alturaPersonagem / 2 && distancia > 0) {
-                personagem.position.y = yChao + alturaPersonagem / 2;
-                velY = 0;
-            }
-        }
-
+        testarRaycasts();
         // altura dos pés (para o filtro)
-        const bottomY = personagem.position.y - alturaPersonagem / 2 + 0.1;
-
+        const bottomY = personagem.position.y - alturaPersonagem / 2;
         //! Movimentação do personagem
         /*
          * se for para a direita, soma 1 em x
@@ -176,7 +180,7 @@ export default function createPersonagem(
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
             //* se topo do box ≃ altura dos pés, ignoramos
-            if (Math.abs(bb.max.y - bottomY) < 0.2) return false;
+            if (Math.abs(bb.max.y - bottomY) < 0.3) return false;
             return true;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>

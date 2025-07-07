@@ -203,7 +203,7 @@ export default function () {
         grupoChave1.add(suporte1);
         grupoChave1.add(chave1);
         grupoChave1.position.copy(area1.obj3D.position);
-        objetosColidiveis.push(grupoChave1);
+        rampas.push(grupoChave1);
         scene.add(grupoChave1);
 
         // Área 2: plataforma, porta, altar e chave 2
@@ -229,6 +229,7 @@ export default function () {
         );
         porta.position.set(15, 0, -100.09);
         porta.castShadow = porta.receiveShadow = true;
+        objetosColidiveis.push(porta);
         scene.add(porta);
 
         altar = new THREE.Mesh(
