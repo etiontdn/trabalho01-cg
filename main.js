@@ -13,8 +13,7 @@ const camera = createCamera();
 let firstRender = false;
 
 // Cria personagem e controles
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } =
-    createScene(); // ✅ setPersonagem incluído
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } = createScene(); // ✅ setPersonagem incluído
 render();
 firstRender = true;
 const { personagem, personagemControls, updateControl } = createPersonagem(

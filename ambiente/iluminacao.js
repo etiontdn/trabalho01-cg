@@ -4,7 +4,7 @@ const corAmbiente = "rgb(255,255,255)";
 const intensidadeLuzAmbiente = 0.5;
 
 //Como fazer a luz perto de 11h que o professor pediu?
-const posicaoLuzDirecional = new THREE.Vector3(200, 200, 0);
+const posicaoLuzDirecional = new THREE.Vector3(200, 200, 25);
 const intensidadeLuzDirecional = 2.5;
 const corLuzDirecional = "rgb(255,255,255)";
 
