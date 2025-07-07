@@ -36,7 +36,8 @@ class Entidade {
         };
 
         this.alerta = false;
-        scene.add(entidade);
+        this.ultimaPosicaoInimigo = new THREE.Vector3(0,0,0);
+        scene.add(this.entidade);
     }
 
     loopDeComportamento(frameAtual) {
@@ -48,19 +49,19 @@ class Entidade {
             this.framesDesdeOUltimoEstado(frameAtual) >=
             this.duracaoEstados[this.estadoAtual]
         ) {
-            switch (estadoInicial) {
+            this.buscarPersonagem();
+            switch (this.estadoAtual) {
                 case "patrulha":
-                    this.buscarPersonagem();
                     if (this.alerta) this.estadoAtual = "perseguicao";
                     break;
                 case "perseguicao":
-                    if (this.checarPodeAtacarADistancia()) {
-                        this.estadoAtual = "ataque a distancia";
-                    } else if (this.checharPodeAtacar()) {
-                        this.estadoAtual = "ataque";
-                    } else if (this.distRecuo > 0) {
-                        this.estadoAtual = "recuo";
-                    }
+                    // if (this.checarPodeAtacarADistancia()) {
+                    //     this.estadoAtual = "ataque a distancia";
+                    // } else if (this.checharPodeAtacar()) {
+                    //     this.estadoAtual = "ataque";
+                    // } else if (this.distRecuo > 0) {
+                    //     this.estadoAtual = "recuo";
+                    // }
                     break;
                 case "ataque a distancia":
                     this.estadoAtual = "perseguicao";
@@ -76,17 +77,21 @@ class Entidade {
                     }
                     break;
                 case "morre":
-                    removeEntidade();
+                    //removeEntidade();
                     break;
             }
             this.ultimoFrame = frameAtual;
         }
     }
 
-    framesDesdeOUltimoEstado(frameAtual) {}
+    framesDesdeOUltimoEstado(frameAtual) {
+        return this.frameAtual - this.ultimoFrame;
+    }
     // altera a propriedade alerta se o personagem esta perto o suficiente
     buscarPersonagem() {}
     checarPodeAtacarADistancia() {}
     checharPodeAtacar() {}
     movimento() {}
 }
+
+export default Entidade;

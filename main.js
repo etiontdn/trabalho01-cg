@@ -6,7 +6,7 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
-import { LostSoul, Cacodemon, createEnemies } from "./inimigos.js";
+import { createEnemies } from "./inimigos.js";
 
 let renderer = iniciarRenderer();
 const camera = createCamera();
