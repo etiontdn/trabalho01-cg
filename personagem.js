@@ -33,7 +33,6 @@ export default function createPersonagem(
     corpo.position.set(0, alturaPersonagem / 2, 0);
     personagem.add(corpo);
 
-    const raycasterDown = new THREE.Raycaster();
     let velY = 0;
     const gravidade = -150;
 
@@ -133,7 +132,8 @@ export default function createPersonagem(
                         }
                     }
                 }
-                const distancia = worldPos.y - alturaPersonagem / 2 - maiorYChao;
+                const distancia =
+                    worldPos.y - alturaPersonagem / 2 - maiorYChao;
                 if (distancia <= alturaPersonagem / 2 && distancia > 0) {
                     personagem.position.y = maiorYChao + alturaPersonagem / 2;
                     velY = 0;
@@ -143,11 +143,13 @@ export default function createPersonagem(
                 }
             }
             const rays = [
-                [1, 0],
-                [-1, 0],
-                [0, 1],
-                [0, -1],
                 [0, 0],
+                [0, 1],
+                [1, 0],
+                [1, 1],
+                [-1, -1],
+                [-1, 0],
+                [0, -1],
             ];
             const allHits = [];
             for (const ray of rays) {
@@ -198,7 +200,13 @@ export default function createPersonagem(
                 new THREE.Vector3(dirWorld.x, 0, 0)
             );
             personagemBox.setFromCenterAndSize(posX, boxSize);
-            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
+            if (
+                !obstacleBoxes.some((b) => {
+                    if (personagemBox.intersectsBox(b)) {
+                        return true;
+                    }
+                })
+            ) {
                 personagem.position.x = posX.x;
             }
 
@@ -206,7 +214,13 @@ export default function createPersonagem(
                 new THREE.Vector3(0, 0, dirWorld.z)
             );
             personagemBox.setFromCenterAndSize(posZ, boxSize);
-            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
+            if (
+                !obstacleBoxes.some((b) => {
+                    if (personagemBox.intersectsBox(b)) {
+                        return true;
+                    }
+                })
+            ) {
                 personagem.position.z = posZ.z;
             }
         }
