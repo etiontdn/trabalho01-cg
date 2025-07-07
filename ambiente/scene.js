@@ -215,7 +215,7 @@ export default function () {
         objetosColidiveis.push(...area2.getParts());
 
         plataforma = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 8, 20),
+            new THREE.BoxGeometry(30, 8.1, 20),
             setDefaultMaterial("blue")
         );
         plataforma.position.set(15, 0, -111);
@@ -410,13 +410,13 @@ export default function () {
         // Elevação dos grupos com chaves
         if (subirGrupoChave1 && grupoChave1.position.y < alturaFinal1) {
             grupoChave1.position.y = Math.min(
-                grupoChave1.position.y + 0.5,
+                grupoChave1.position.y + 0.1,
                 alturaFinal1
             );
         }
         if (subirGrupoChave2 && grupoChave2.position.y < alturaFinal2) {
             grupoChave2.position.y = Math.min(
-                grupoChave2.position.y + 0.5,
+                grupoChave2.position.y + 0.1,
                 alturaFinal2
             );
         }
@@ -483,20 +483,20 @@ export default function () {
                     !emCima
                 ) {
                     plataforma.position.y = Math.max(
-                        plataforma.position.y - 0.3,
+                        plataforma.position.y - 0.1,
                         -4
                     );
                 }
                 if (emCima && personagem.position.y < 5) {
                     plataforma.position.y = Math.min(
-                        plataforma.position.y + 0.3,
+                        plataforma.position.y + 0.1,
                         0.01
                     );
                 }
             } else {
                 if (emCima && plataforma.position.y > -4) {
                     plataforma.position.y = Math.max(
-                        plataforma.position.y - 0.3,
+                        plataforma.position.y - 0.1,
                         -4
                     );
                 }

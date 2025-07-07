@@ -22,7 +22,7 @@ const { personagem, personagemControls, updateControl } = createPersonagem(
     objetosColidiveis,
     rampas
 );
-
+scene.add(personagem);
 // ✅ Passa o personagem para o scene.js
 setPersonagem(personagem);
 
@@ -38,8 +38,6 @@ const updateEnemies = createEnemies(
     rampas,
     personagem
 );
-
-scene.add(personagem);
 
 window.addEventListener("resize", () => onWindowResize(camera, renderer));
 
