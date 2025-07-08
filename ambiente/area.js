@@ -34,7 +34,7 @@ class Area {
         this.obj3D.receiveShadow = castShadow;
         this.obj3D.position.set(pos.x, altura / 2, pos.z);
         this.altura = altura;
-        this.material = new materialArea({ color: cor });
+        this.material = new THREE.MeshLambertMaterial({ color: cor})
         this.scene = scene;
         this.parts = [];
         this.ramps = [];
@@ -65,7 +65,7 @@ class Area {
 
     criarRampa(tamanho) {
         const rampGeo = new THREE.BoxGeometry(tamanho.x, 0, tamanho.z);
-        const rampMat = new THREE.MeshBasicMaterial({
+        const rampMat = new THREE.MeshLambertMaterial({
             visible: rampaVisivel,
         });
         const ramp = new THREE.Mesh(rampGeo, rampMat);
