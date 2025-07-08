@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { setDefaultMaterial } from "../../libs/util/util.js";
 import { CSG } from '../../libs/other/CSGMesh.js'  
 
 export function criarChave(corHex = 0xffff00, escala = 1.0) {
@@ -46,12 +45,12 @@ export function criarChave(corHex = 0xffff00, escala = 1.0) {
     chaveMesh.position.set(0, 0, 0);
 
     // Criar luz pontual dentro do cubo
-    const luzInterna = new THREE.PointLight(corHex, 50, 20);
+    const luzInterna = new THREE.PointLight(corHex, 20, 20);
     luzInterna.position.set(0, 0, 0);
 
     // Criar esfera emissiva para a bola de luz
     const esferaGeo = new THREE.SphereGeometry(0.7, 32, 32);
-    const esferaMat = new THREE.MeshBasicMaterial({ color: corHex, emissive: new THREE.Color(corHex), emissiveIntensity: 1 });
+    const esferaMat = new THREE.MeshPhongMaterial({ color: corHex, emissive: new THREE.Color(corHex), emissiveIntensity: 1 });
     const esferaLuz = new THREE.Mesh(esferaGeo, esferaMat);
     esferaLuz.position.set(0, 0, 0);
 

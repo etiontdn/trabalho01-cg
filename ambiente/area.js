@@ -1,9 +1,4 @@
 import * as THREE from "three";
-import {
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    createGroundPlaneXZ,
-} from "../../libs/util/util.js";
 
 const materialArea = THREE.MeshLambertMaterial;
 const castShadow = true;
@@ -33,10 +28,13 @@ const posAncora = (tamanho, ancora) => {
 // Assume todas as partes com mesmo material e cor
 class Area {
     constructor(pos, altura, cor, scene) {
+        console.log(altura);
         this.obj3D = new THREE.Object3D();
+        this.obj3D.castShadow = castShadow;
+        this.obj3D.receiveShadow = castShadow;
         this.obj3D.position.set(pos.x, altura / 2, pos.z);
         this.altura = altura;
-        this.material = new materialArea({ color: cor });
+        this.material = new THREE.MeshLambertMaterial({ color: cor})
         this.scene = scene;
         this.parts = [];
         this.ramps = [];
@@ -59,14 +57,15 @@ class Area {
             pos.z + ancoraPosition.z
         );
         partMesh.castShadow = castShadow;
+        partMesh.receiveShadow = castShadow;
         this.obj3D.add(partMesh);
         this.parts.push(partMesh);
         return partMesh;
     }
 
     criarRampa(tamanho) {
-        const rampGeo = new THREE.BoxGeometry(tamanho.x, 0.1, tamanho.z);
-        const rampMat = new THREE.MeshBasicMaterial({
+        const rampGeo = new THREE.BoxGeometry(tamanho.x, 0, tamanho.z);
+        const rampMat = new THREE.MeshLambertMaterial({
             visible: rampaVisivel,
         });
         const ramp = new THREE.Mesh(rampGeo, rampMat);
@@ -100,7 +99,9 @@ class Area {
             let degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
             degrau.position.set(
                 0,
-                -this.altura / 2 + i * (this.altura / degraus),
+                -this.altura / 2 +
+                    i * (this.altura / degraus) +
+                    this.altura / degraus / 2,
                 -(
                     -tamanho.z / 2 +
                     (i * tamanho.z) / degraus +
@@ -108,6 +109,7 @@ class Area {
                 )
             );
             degrau.castShadow = castShadow;
+            degrau.receiveShadow = castShadow;
             escada.add(degrau);
         }
 

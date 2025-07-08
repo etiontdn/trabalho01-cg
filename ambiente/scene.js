@@ -1,15 +1,12 @@
 import * as THREE from "three";
-import {
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    createGroundPlaneXZ,
-} from "../../libs/util/util.js";
 import { criarChave } from "./chave.js";
 import Area from "./area.js";
+import ParedeLimitante from "./parede.js";
+import Iluminacao from "./iluminacao.js";
 
 // Variáveis globais
 let personagem = null;
-let chave1Coletada = false;
+let chave1Coletada = true;
 
 export default function () {
     // Listas de objetos interativos
@@ -19,12 +16,18 @@ export default function () {
     // Cena principal
     const scene = new THREE.Scene();
 
-    // Luz e plano base
-    const light = initDefaultBasicLight(scene);
-    scene.add(light);
-    const plane = createGroundPlaneXZ(500, 500);
-    scene.add(plane);
-    objetosColidiveis.push(plane);
+    const iluminacao = new Iluminacao(scene);
+    iluminacao.adicionarIluminacaoAmbiente();
+    iluminacao.adicionarIluminacaoDirecional();
+
+    const chao = new ParedeLimitante(
+        { x: 0, y: -0.5, z: 0 },
+        { x: 500, y: 1, z: 500 },
+        "lightgrey",
+        scene,
+        "chão"
+    );
+    rampas.push(chao);
 
     // Estado das chaves
     let possechave1 = false;
@@ -37,6 +40,10 @@ export default function () {
 
     // Elementos interativos
     let plataforma, porta, altar;
+    let subida = false;
+    let subida2 = false;
+    let descida = false;
+    let descida2 = false;
     let portaaberta = false;
     let altar_ativo = false;
     let noChao = true;
@@ -45,27 +52,28 @@ export default function () {
     function setPersonagem(p) {
         personagem = p;
     }
-
     // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
 
     // Cria as paredes externas do ambiente
     function criarParedes() {
-        let mat = setDefaultMaterial("grey");
+        let mat = new THREE.MeshLambertMaterial({ color: 0x333333});
 
         const paredes = [
             { nome: "esquerda", pos: [-255, 24, 0], tam: [10, 50, 500] },
             { nome: "direita", pos: [255, 24, 0], tam: [10, 50, 500] },
             { nome: "norte", pos: [0, 24, -255], tam: [500, 50, 10] },
-            { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] }
+            { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] },
         ];
 
         for (let { nome, pos, tam } of paredes) {
-            const geo = new THREE.BoxGeometry(...tam);
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(...pos);
-            mesh.name = `parede ${nome}`;
-            objetosColidiveis.push(mesh);
-            scene.add(mesh);
+            const parede = new ParedeLimitante(
+                new THREE.Vector3(...pos),
+                new THREE.Vector3(...tam),
+                "grey",
+                scene,
+                `parede ${nome}`
+            );
+            objetosColidiveis.push(parede);
         }
     }
 
@@ -78,7 +86,7 @@ export default function () {
         const pos4 = new THREE.Vector3(0, altura / 2, 150);
 
         // Área 1: contém a primeira chave
-        const area1 = new Area(pos1, altura, "teal", scene);
+        const area1 = new Area(pos1, altura, 0x008080, scene);
         area1.makePart({ x: -15, z: 0 }, { x: 10, z: 100 }, "direita");
         area1.makePart({ x: 15, z: 0 }, { x: 60, z: 100 }, "esquerda");
         area1.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
@@ -87,97 +95,102 @@ export default function () {
         rampas.push(...area1.ramps);
 
         function criarFileiraColunas({
-        eixoFixo,         // "x" ou "z"
-        valorFixo,        // posição fixa no eixo escolhido
-        eixoVariavel,     // "x" ou "z" (oposto ao eixo fixo)
-        inicio,           // início da distribuição
-        fim,              // fim da distribuição
-        quantidade,       // número de colunas
-        alturaColuna = 20,
-        raio = 2,
-        cor = "white"
-    }) {
-        const fileira = new THREE.Object3D();
-        const colunaGeo = new THREE.CylinderGeometry(raio, raio, alturaColuna, 16);
-        const colunaMat = setDefaultMaterial(cor);
+            eixoFixo, // "x" ou "z"
+            valorFixo, // posição fixa no eixo escolhido
+            eixoVariavel, // "x" ou "z" (oposto ao eixo fixo)
+            inicio, // início da distribuição
+            fim, // fim da distribuição
+            quantidade, // número de colunas
+            alturaColuna = 20,
+            raio = 2,
+            cor = 0xffffff,
+        }) {
+            const fileira = new THREE.Object3D();
+            const colunaGeo = new THREE.CylinderGeometry(
+                raio,
+                raio,
+                alturaColuna,
+                16
+            );
+            const colunaMat = new THREE.MeshLambertMaterial({ color: cor });
+            
 
-        for (let i = 0; i < quantidade; i++) {
-            const t = quantidade === 1 ? 0.5 : i / (quantidade - 1); // evita divisão por zero
-            const variavel = inicio + t * (fim - inicio);
+            for (let i = 0; i < quantidade; i++) {
+                const t = quantidade === 1 ? 0.5 : i / (quantidade - 1); // evita divisão por zero
+                const variavel = inicio + t * (fim - inicio);
 
-            const coluna = new THREE.Mesh(colunaGeo, colunaMat);
-            const pos = { x: 0, y: alturaColuna / 2, z: 0 };
-            pos[eixoFixo] = valorFixo;
-            pos[eixoVariavel] = variavel;
+                const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+                const pos = { x: 0, y: alturaColuna / 2, z: 0 };
+                pos[eixoFixo] = valorFixo;
+                pos[eixoVariavel] = variavel;
 
-            coluna.position.set(pos.x, pos.y, pos.z);
-            coluna.castShadow = coluna.receiveShadow = true;
-            objetosColidiveis.push(coluna);
-            fileira.add(coluna);
+                coluna.position.set(pos.x, pos.y, pos.z);
+                coluna.castShadow = coluna.receiveShadow = true;
+                objetosColidiveis.push(coluna);
+                fileira.add(coluna);
+            }
+
+            return fileira;
         }
 
-        return fileira;
-    }
+        // Agrupador das colunas da área 1
+        const colunasArea1 = new THREE.Object3D();
 
-    // Agrupador das colunas da área 1
-    const colunasArea1 = new THREE.Object3D();
+        // Fileira esquerda
+        const fileiraEsquerda = criarFileiraColunas({
+            eixoFixo: "x",
+            valorFixo: -22,
+            eixoVariavel: "z",
+            inicio: -32,
+            fim: 42,
+            quantidade: 6,
+            cor: "white",
+        });
+        colunasArea1.add(fileiraEsquerda);
 
-    // Fileira esquerda
-    const fileiraEsquerda = criarFileiraColunas({
-        eixoFixo: "x",
-        valorFixo: -22,
-        eixoVariavel: "z",
-        inicio: -32,
-        fim: 42,
-        quantidade: 6,
-        cor: "white"
-    });
-    colunasArea1.add(fileiraEsquerda);
+        // Fileira direita
+        const fileiraDireita = criarFileiraColunas({
+            eixoFixo: "x",
+            valorFixo: 72,
+            eixoVariavel: "z",
+            inicio: -30,
+            fim: 30,
+            quantidade: 5,
+            cor: "white",
+        });
+        colunasArea1.add(fileiraDireita);
 
-    // Fileira direita
-    const fileiraDireita = criarFileiraColunas({
-        eixoFixo: "x",
-        valorFixo: 72,
-        eixoVariavel: "z",
-        inicio: -30,
-        fim: 30,
-        quantidade: 5,
-        cor: "white"
-    });
-    colunasArea1.add(fileiraDireita);
+        // Fileira da fund0
+        const fileiraFrente = criarFileiraColunas({
+            eixoFixo: "z",
+            valorFixo: -46,
+            eixoVariavel: "x",
+            inicio: 72,
+            fim: -22,
+            quantidade: 7,
+            cor: "white",
+        });
+        colunasArea1.add(fileiraFrente);
 
-    // Fileira da fund0
-    const fileiraFrente = criarFileiraColunas({
-        eixoFixo: "z",
-        valorFixo: -46,
-        eixoVariavel: "x",
-        inicio: 72,
-        fim: -22,
-        quantidade: 7,
-        cor: "white"
-    });
-    colunasArea1.add(fileiraFrente);
+        // Fileira do frente
+        const fileiraFundo = criarFileiraColunas({
+            eixoFixo: "z",
+            valorFixo: 47,
+            eixoVariavel: "x",
+            inicio: 72,
+            fim: 20,
+            quantidade: 4,
+            cor: "white",
+        });
+        colunasArea1.add(fileiraFundo);
 
-    // Fileira do frente
-    const fileiraFundo = criarFileiraColunas({
-        eixoFixo: "z",
-        valorFixo: 47,
-        eixoVariavel: "x",
-        inicio: 72,
-        fim: 20,
-        quantidade: 4,
-        cor: "white"
-    });
-    colunasArea1.add(fileiraFundo);
-
-    // Adiciona todas as colunas à área 1
-    area1.obj3D.add(colunasArea1);
-    
+        // Adiciona todas as colunas à área 1
+        area1.obj3D.add(colunasArea1);
 
         // Suporte e chave 1
         const suporte1 = new THREE.Mesh(
             new THREE.CylinderGeometry(2, 2, 10, 32),
-            setDefaultMaterial("darkred")
+            new THREE.MeshLambertMaterial({ color: 0x8b0000 })
         );
         suporte1.position.set(25, -10, 0);
         suporte1.castShadow = suporte1.receiveShadow = true;
@@ -191,37 +204,52 @@ export default function () {
         grupoChave1.add(suporte1);
         grupoChave1.add(chave1);
         grupoChave1.position.copy(area1.obj3D.position);
+        rampas.push(grupoChave1);
         objetosColidiveis.push(grupoChave1);
         scene.add(grupoChave1);
 
         // Área 2: plataforma, porta, altar e chave 2
-        const area2 = new Area(pos2, altura, "salmon", scene);
+        const area2 = new Area(pos2, altura, 0xfa8072, scene);
         area2.makePart({ x: -15, z: 0 }, { x: 60, z: 100 }, "direita");
         area2.makePart({ x: 15, z: 0 }, { x: 10, z: 100 }, "esquerda");
         area2.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
+        // TODO: Adicionar o elevador aqui, provavelmente!
         objetosColidiveis.push(...area2.getParts());
 
-        plataforma = new THREE.Mesh(new THREE.BoxGeometry(30, 8, 20),setDefaultMaterial("blue"));
+        plataforma = new THREE.Mesh(
+            new THREE.BoxGeometry(30, 8.1, 20),
+            new THREE.MeshLambertMaterial({ color: 0x0000ff })
+        );
         plataforma.position.set(15, 0, -111);
         plataforma.castShadow = plataforma.receiveShadow = true;
         objetosColidiveis.push(plataforma);
         scene.add(plataforma);
 
-        porta = new THREE.Mesh(new THREE.BoxGeometry(30, 8, 0.1),setDefaultMaterial("yellow"));
-        porta.position.set(15, 0, -100.09);
+        porta = new THREE.Mesh(
+            new THREE.BoxGeometry(30, 8, 0.1),
+            new THREE.MeshLambertMaterial({ color: 0xffff00 })
+        );
+        porta.position.set(15, -0.001, -100.09);
         porta.castShadow = porta.receiveShadow = true;
+        objetosColidiveis.push(porta);
         scene.add(porta);
 
-        altar = new THREE.Mesh(new THREE.BoxGeometry(2, 3.5, 2),setDefaultMaterial("green"));
+        altar = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 3.5, 2),
+            new THREE.MeshLambertMaterial({ color: 0x00ff00 })
+        );
         altar.position.set(-2, 0, -99);
         objetosColidiveis.push(altar);
         scene.add(altar);
 
-        const suporte2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 10, 32),setDefaultMaterial("darkred"));
+        const suporte2 = new THREE.Mesh(
+            new THREE.CylinderGeometry(2, 2, 10, 32),
+            new THREE.MeshLambertMaterial({ color: 0x8b0000 })
+        );
         suporte2.position.set(-25, -10, 0);
         suporte2.castShadow = suporte2.receiveShadow = true;
 
-        chave2 = criarChave(0x800080, 0.4);
+        chave2 = criarChave(0xffff00, 0.4);
         chave2.position.set(-25, -3, 0);
         chave2.rotation.x = Math.PI / 2;
         chave2.castShadow = true;
@@ -233,95 +261,67 @@ export default function () {
         objetosColidiveis.push(grupoChave2);
         scene.add(grupoChave2);
 
-        const objeto1Geo = new THREE.BoxGeometry(10, 50, 10);
-        const objeto1Mat = setDefaultMaterial("purple");
-        let objeto1 = new THREE.Mesh(objeto1Geo , objeto1Mat);
-        objeto1.position.set(0,20, -190); // ajuste conforme necessário
-        objeto1.receiveShadow = true;
-        objeto1 .castShadow = true;
-        
+        // Função auxiliar para criar objetos 3D simples
+        function criarObjeto({ geoArgs, color, pos }, scene, listaColisao) {
+            const geometry = new THREE.BoxGeometry(...geoArgs);
+            const material = new THREE.MeshLambertMaterial({ color });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(...pos);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            listaColisao.push(mesh);
+            return mesh;
+        }
 
-        const objeto2Geo = new THREE.BoxGeometry(10, 30, 10);
-        const objeto2Mat = setDefaultMaterial("purple");
-        let objeto2= new THREE.Mesh(objeto2Geo, objeto2Mat);
-        objeto2.position.set(-30, 15, -180); // ajuste conforme necessário
-        objeto2.receiveShadow = true;
-        objeto2.castShadow = true;
-       
+        // Objetos decorativos
+        const objetos_Area2 = [
+            { geoArgs: [10, 70, 10], color: 0x800080, pos: [0, 20, -190] },
+            { geoArgs: [10, 50, 10], color: 0x800080, pos: [-30, 15, -180] },
+            { geoArgs: [10, 30, 10], color: 0x800080, pos: [30, 10, -180] },
+            { geoArgs: [5, 10, 5],   color: 0x800080, pos: [30, 8, -150] },
+            { geoArgs: [5, 15, 5],   color: 0x800080, pos: [-25, 8, -150] },
+            { geoArgs: [5, 13, 5],   color: 0x800080, pos: [-15, 8, -130] },
+            { geoArgs: [5, 20, 5],   color: 0x800080, pos: [20, 8, -130] },
+            { geoArgs: [5, 12, 5],   color: 0x800080, pos: [-40, 7, -120] },
+            { geoArgs: [5, 14, 5],   color: 0x800080, pos: [10, 7, -160] },
+            { geoArgs: [5, 8, 5],    color: 0x800080, pos: [-50, 7, -150] },
+            { geoArgs: [5, 8, 5],    color: 0x800080, pos: [-18, 7, -110] },
+            { geoArgs: [5, 17, 5],   color: 0x800080, pos: [2, 7, -140] },
+            { geoArgs: [5, 25, 5],   color: 0x800080, pos: [-40, 7, -135] },
+        ];
 
-        const objeto3Geo= new THREE.BoxGeometry(10, 20, 10);
-        const objeto3Mat  = setDefaultMaterial("purple");
-        let objeto3 = new THREE.Mesh(objeto3Geo, objeto3Mat);
-        objeto3.position.set(30, 10, -180); // ajuste conforme necessário
-        objeto3.receiveShadow = true;
-        objeto3.castShadow = true;
-        
-
-        const objeto4Geo= new THREE.BoxGeometry(5, 5, 5);
-        const objeto4Mat  = setDefaultMaterial("purple");
-        let objeto4 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto4.position.set(30,8, -150); // ajuste conforme necessário
-        objeto4.receiveShadow = true;
-        objeto4.castShadow = true;
-        
-
-        let objeto5 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto5.position.set(-25,8, -150); // ajuste conforme necessário
-        objeto5.receiveShadow = true;
-        objeto5.castShadow = true;
-        
-
-        let objeto6 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto6.position.set(-15,8, -130); // ajuste conforme necessário
-        objeto6.receiveShadow = true;
-        objeto6.castShadow = true;
-       
-
-        let objeto7 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto7.position.set(20,8, -130); // ajuste conforme necessário
-        objeto7.receiveShadow = true;
-        objeto7.castShadow = true;
-        
-
-        let objeto8 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto8.position.set(-40,7, -120); // ajuste conforme necessário
-        objeto8.receiveShadow = true;
-        objeto8.castShadow = true;
-        
-
-        let objeto9 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto9.position.set(10,7, -160); // ajuste conforme necessário
-        objeto9.receiveShadow = true;
-        objeto9.castShadow = true;
-        
-
-        let objeto10 = new THREE.Mesh(objeto4Geo, objeto4Mat);
-        objeto10.position.set(-50,7, -150); // ajuste conforme necessário
-        objeto10.receiveShadow = true;
-        objeto10.castShadow = true;
-        
-        scene.add(objeto1, objeto2, objeto3,objeto4, objeto5, objeto6,objeto7, objeto8, objeto9,objeto10);
-        objetosColidiveis.push(objeto1, objeto2, objeto3,objeto4, objeto5, objeto6,objeto7, objeto8, objeto9,objeto10);
-        
-        
+        // Cria todos os objetos
+         objetos_Area2.forEach(obj => criarObjeto(obj, scene, objetosColidiveis));
 
         // Áreas 3 e 4 (apenas cenário)
-        const area3 = new Area(pos3, altura, "violet", scene);
+        const area3 = new Area(pos3, altura, 0xee82ee, scene);
         area3.makePart({ x: -15, z: 0 }, { x: 40, z: 100 }, "direita");
         area3.makePart({ x: 15, z: 0 }, { x: 30, z: 100 }, "esquerda");
         area3.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
+        area3.criarEscada({ x: 0, z: 50 }, { x: 30, z: 20 }, "frente");
         objetosColidiveis.push(...area3.getParts());
+        rampas.push(...area3.ramps);
 
-        const area4 = new Area(pos4, altura, "green", scene);
+        const area4 = new Area(pos4, altura, 0x00ff00, scene);
         area4.makePart({ x: -15, z: 0 }, { x: 135, z: 100 }, "direita");
         area4.makePart({ x: 15, z: 0 }, { x: 135, z: 100 }, "esquerda");
         area4.makePart({ x: 0, z: -30 }, { x: 30, z: 80 }, "fundo");
+        const escada = area4.criarEscada(
+            { x: 0, z: -50 },
+            { x: 30, z: 20 },
+            "fundo"
+        );
+        // inverte rotação da escada para ficar corretamente na frente do jogador
+
+        escada.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
         objetosColidiveis.push(...area4.getParts());
+        rampas.push(...area4.ramps);
     }
 
     // Cria limites invisíveis para evitar que o personagem caia fora do mapa
     function criarLimitesInvisíveis() {
-        const mat = setDefaultMaterial("red");
+        const mat = new THREE.MeshLambertMaterial({ color: 0xff0000});
         const ceuGeo = new THREE.BoxGeometry(600, 5, 600);
 
         const limites = [
@@ -330,7 +330,7 @@ export default function () {
             { pos: [300, 0, 0], geo: new THREE.BoxGeometry(5, 600, 600) },
             { pos: [-300, 0, 0], geo: new THREE.BoxGeometry(5, 600, 600) },
             { pos: [0, 0, 300], geo: new THREE.BoxGeometry(600, 600, 5) },
-            { pos: [0, 0, -300], geo: new THREE.BoxGeometry(600, 600, 5) }
+            { pos: [0, 0, -300], geo: new THREE.BoxGeometry(600, 600, 5) },
         ];
 
         for (let { pos, geo } of limites) {
@@ -361,15 +361,27 @@ export default function () {
 
         // Elevação dos grupos com chaves
         if (subirGrupoChave1 && grupoChave1.position.y < alturaFinal1) {
-            grupoChave1.position.y = Math.min(grupoChave1.position.y + 0.5, alturaFinal1);
+            grupoChave1.position.y = Math.min(
+                grupoChave1.position.y + 0.1,
+                alturaFinal1
+            );
         }
         if (subirGrupoChave2 && grupoChave2.position.y < alturaFinal2) {
-            grupoChave2.position.y = Math.min(grupoChave2.position.y + 0.5, alturaFinal2);
+            grupoChave2.position.y = Math.min(
+                grupoChave2.position.y + 0.1,
+                alturaFinal2
+            );
         }
 
         // Coleta da chave 1
-        if (!chave1Coletada && personagem && grupoChave1.position.y >= alturaFinal1) {
-            const distancia = personagem.position.distanceTo(chave1.getWorldPosition(new THREE.Vector3()));
+        if (
+            !chave1Coletada &&
+            personagem &&
+            grupoChave1.position.y >= alturaFinal1
+        ) {
+            const distancia = personagem.position.distanceTo(
+                chave1.getWorldPosition(new THREE.Vector3())
+            );
             if (distancia < 7) {
                 chave1.visible = false;
                 chave1Coletada = true;
@@ -379,7 +391,9 @@ export default function () {
 
         // Entrega da chave no altar e abertura da porta
         if (chave1Coletada) {
-            const distanciaAltar = personagem.position.distanceTo(altar.getWorldPosition(new THREE.Vector3()));
+            const distanciaAltar = personagem.position.distanceTo(
+                altar.getWorldPosition(new THREE.Vector3())
+            );
             if (distanciaAltar < 10) {
                 altar.add(chave1);
                 chave1.visible = true;
@@ -389,36 +403,97 @@ export default function () {
             }
         }
 
-        if (portaaberta && porta.position.x > -16 && altar_ativo) {
-            porta.position.x = Math.max(porta.position.x - 0.5, -16);
-        }
-
-        // Lógica da plataforma móvel
-        const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
-        const dx = personagem.position.x - posPlataforma.x;
-        const dz = personagem.position.z - posPlataforma.z;
-        const distanciaPlataforma = Math.hypot(dx, dz);
-
-        const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
-                       personagem.position.z > -120 && personagem.position.z < -105;
-
-        if (portaaberta && porta.position.x === -16) {
-            if (personagem.position.y === 1 && !emCima) noChao = true;
-            else if ((personagem.position.y === 5 || personagem.position.y === 5.01) && !emCima) noChao = false;
-
-            if (noChao) {
-                if (distanciaPlataforma <= 14 && plataforma.position.y > -4 && !emCima) {
-                    plataforma.position.y = Math.max(plataforma.position.y - 0.3, -4);
-                }
-                if (emCima && personagem.position.y < 5) {
-                    plataforma.position.y = Math.min(plataforma.position.y + 0.3, 0.01);
-                }
-            } else {
-                if (emCima && plataforma.position.y > -4) {
-                    plataforma.position.y = Math.max(plataforma.position.y - 0.3, -4);
-                }
-            }
-        }
+       if (portaaberta && porta.position.x > -16 && altar_ativo) {
+                   porta.position.x = Math.max(porta.position.x - 0.3, -16);
+               }
+       
+               // Lógica da plataforma móvel
+               const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
+               const PosicaoSubida = -0.01;
+               const PosicaoDescida= -4;
+               const distanciaX_da_Plataforma = 15;
+               const distanciaZ_da_Plataforma = 14;
+               const posicaoChao = 1;
+               const posicaoTopo = 5;
+               const dx = personagem.position.x - posPlataforma.x;
+               const dz = personagem.position.z - posPlataforma.z;
+               const distanciaPlataformaZ_Atual = Math.abs( dz);
+               const distanciaPlataformaX_Atual = Math.abs( dx);
+               const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
+                              personagem.position.z > -120 && personagem.position.z < -105;
+       
+           function ajustarPlataforma(subindo, alvo) {
+           if (subindo) {
+               plataforma.position.y = Math.min(plataforma.position.y + 0.05, alvo);
+               if (plataforma.position.y === alvo) return false;
+           } else {
+               plataforma.position.y = Math.max(plataforma.position.y - 0.05, alvo);
+               if (plataforma.position.y === alvo) return false;
+           }
+           return true;
+       }
+       
+       if (portaaberta && porta.position.x === -16) {
+           // Atualiza estado noChao
+           if (personagem.position.y === posicaoChao && !emCima) noChao = true;
+           else if ((personagem.position.y === posicaoTopo ) && !emCima) noChao = false;
+       
+           if (noChao) {
+               // Descida quando no chão
+               if (((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma && distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma -3 )&& distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y > PosicaoDescida&& !emCima && !descida && !subida) {
+                   descida2 = true;
+                   descida2 = ajustarPlataforma(false, PosicaoDescida);
+               } else if (distanciaPlataformaZ_Atual> distanciaZ_da_Plataforma && plataforma.position.y > PosicaoDescida && !emCima && descida2 && !descida && !subida) {
+                   descida2 = ajustarPlataforma(false, PosicaoDescida);
+               }
+       
+               // Subida com personagem em cima
+               if (emCima && plataforma.position.y <  PosicaoSubida ) {
+                   subida = true;
+                   subida = ajustarPlataforma(true,  PosicaoSubida );
+               }
+       
+               // Subida e descida enquanto não em cima
+               if (!emCima && subida) {
+                   subida = ajustarPlataforma(true,  PosicaoSubida );
+               }
+               if (!emCima && descida) {
+                   descida = ajustarPlataforma(false, PosicaoDescida);
+               }
+           } else {
+               // Subida quando no ar
+               if ((distanciaPlataformaZ_Atual<= distanciaZ_da_Plataforma && distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y <  PosicaoSubida  && !emCima && !descida && !subida) {
+                   subida2 = true;
+                   subida2 = ajustarPlataforma(true,  PosicaoSubida );
+               } else if (distanciaPlataformaZ_Atual > distanciaZ_da_Plataforma && plataforma.position.y <  PosicaoSubida  && !emCima && subida2 && !descida && !subida) {
+                   subida2 = ajustarPlataforma(true,  PosicaoSubida );
+               }
+       
+               // Descida com personagem em cima
+               if (emCima && plataforma.position.y > PosicaoDescida) {
+                   descida = true;
+                   descida = ajustarPlataforma(false, PosicaoDescida);
+               }
+       
+               // Subida e descida enquanto não em cima
+               if (!emCima && subida) {
+                   subida = ajustarPlataforma(true,  PosicaoSubida );
+               }
+               if (!emCima && descida) {
+                   descida = ajustarPlataforma(false, PosicaoDescida);
+               }
+           }
+       
+           // Correção final de subida/descida em caso de valores intermediários
+           if (personagem.position.y !== posicaoChao&& personagem.position.y !== posicaoTopo ) {
+               if (subida && !emCima) {
+                   subida = ajustarPlataforma(true,  PosicaoSubida );
+               } else if (descida && !emCima) {
+                   descida = ajustarPlataforma(false, PosicaoDescida);
+               }
+           }
+       }
+       
     }
 
     // Execução das funções de setup
@@ -432,6 +507,6 @@ export default function () {
         objetosColidiveis,
         rampas,
         updateScene,
-        setPersonagem
+        setPersonagem,
     };
 }
