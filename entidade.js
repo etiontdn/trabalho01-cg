@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
+
 
 const estados = [
     "patrulha" /* espera até algum evento acontecer, e inicia perseguicao */,
@@ -21,7 +23,8 @@ class Entidade {
         this.entidade = new THREE.Object3D();
         this.entidade.position.copy(spawn);
 
-        this.hp = 0;
+        this.maxHp = 0;
+        this.hp = this.maxHp;
         this.speed = 0;
         this.tamanho = new THREE.Vector3();
         this.altMinima = 0;
@@ -37,10 +40,30 @@ class Entidade {
 
         this.alerta = false;
         this.ultimaPosicaoInimigo = new THREE.Vector3(0,0,0);
+
+        // === CRIAÇÃO DA BARRA DE VIDA ===
+        const container = document.createElement('div');
+        container.className = 'health-bar-container';
+        const fill = document.createElement('div');
+        fill.className = 'health-bar-fill';
+        container.appendChild(fill);
+        this.healthBarFill = fill;
+
+        // Gera o CSS2DObject para a barra
+        const label = new CSS2DObject(container);
+        label.position.set(0, this.tamanho.y + 2, 0);
+        this.entidade.add(label);
+
         scene.add(this.entidade);
     }
 
     loopDeComportamento(frameAtual) {
+        const pct = Math.max(this.hp / this.maxHp, 0);
+        this.healthBarFill.style.width = `${pct * 100}%`;
+        if (pct <= 0) {
+            this.healthBarFill.parentElement.style.display = 'none';
+        }
+
         if (this.hp <= 0) {
             this.estadoAtual = "morre";
             this.ultimoFrame = frameAtual;

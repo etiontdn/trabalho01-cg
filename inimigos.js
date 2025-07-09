@@ -11,7 +11,8 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(10, 8, 1);
-        this.hp = 20;
+        this.maxHp = 20;
+        this.hp = this.maxHp;
         this.speed = 0.8;
         this.altMinima = 3;
         this.distRecuo = 0;
@@ -94,7 +95,7 @@ export class LostSoul extends Entidade {
     }
 
     patrulha(enemy, speed) {
-        this.estadoAtual = "perseguicao"
+        // this.estadoAtual = "perseguicao"
     }
 
     atacar(alvo) {
@@ -121,7 +122,8 @@ export class Cacodemon extends Entidade {
         this.scene = scene;
         this.spawn = spawn;
         this.scale = scale;
-        this.hp = 50;
+        this.maxHp = 50;
+        this.hp = this.maxHp;
         this.speed = 0.6;
         this.distRecuo = 0;
         this.altMinima = 9.5;

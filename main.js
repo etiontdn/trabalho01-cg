@@ -5,10 +5,18 @@ import iniciarRenderer from "./renderer.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
+import { takeDamage } from "./damage.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
+import { CSS2DRenderer, CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
 
 let renderer = iniciarRenderer();
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position = 'absolute';
+labelRenderer.domElement.style.top = '0px';
+document.body.appendChild(labelRenderer.domElement);
+
 const camera = createCamera();
 let firstRender = false;
 
@@ -39,7 +47,16 @@ const updateEnemies = createEnemies(
     personagem
 );
 
-window.addEventListener("resize", () => onWindowResize(camera, renderer));
+window.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "e") {
+    takeDamage();
+  }
+});
+
+window.addEventListener("resize", () => { 
+    onWindowResize(camera, renderer);
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 function render() {
     requestAnimationFrame(render);
@@ -56,4 +73,5 @@ function render() {
         updateScene();
     }
     renderer.render(scene, camera); // Render scene
+    labelRenderer.render(scene, camera);
 }
