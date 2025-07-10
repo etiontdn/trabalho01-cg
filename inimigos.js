@@ -24,11 +24,11 @@ export class LostSoul extends Entidade {
 
     createEnemy() {
         // Cria uma esfera para representar o inimigo no local da entidade
-        const geometry = new THREE.SphereGeometry(this.tamanho.x/2, 16, 16);
-        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        const sphere = new THREE.Mesh(geometry, material);
-        sphere.position.set(0, 0, 0);
-        this.entidade.add(sphere);
+        // const geometry = new THREE.SphereGeometry(this.tamanho.x/2, 16, 16);
+        // const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        // const sphere = new THREE.Mesh(geometry, material);
+        // sphere.position.set(0, 0, 0);
+        // this.entidade.add(sphere);
 
         const loader = new OBJLoader();
 
