@@ -11,15 +11,13 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(10, 8, 1);
-        this.maxHp = 20;
-        this.hp = this.maxHp;
+        this.hp = 20;
         this.speed = 0.8;
         this.altMinima = 3;
         this.distRecuo = 0;
-        
+
         this.url = "./assets/skull.obj";
         this.createEnemy();
-        this.bb.setFromObject(this.entidade);
         inimigos.push(this);
     }
 
@@ -40,9 +38,6 @@ export class LostSoul extends Entidade {
 
     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
-
-        if(this.bb && this.enemyObj)
-            this.bb.setFromObject(this.entidade);
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -99,7 +94,7 @@ export class LostSoul extends Entidade {
     }
 
     patrulha(enemy, speed) {
-        // this.estadoAtual = "perseguicao"
+        this.estadoAtual = "perseguicao"
     }
 
     atacar(alvo) {
@@ -126,8 +121,7 @@ export class Cacodemon extends Entidade {
         this.scene = scene;
         this.spawn = spawn;
         this.scale = scale;
-        this.maxHp = 50;
-        this.hp = this.maxHp;
+        this.hp = 50;
         this.speed = 0.6;
         this.distRecuo = 0;
         this.altMinima = 9.5;
@@ -225,9 +219,9 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     function updateEnemies(frameAtual) {
         inimigos.forEach((inimigo) => {
             inimigo.animateEnemy(frameAtual, personagem.position);
-            inimigo.loopDeComportamento(frameAtual, personagem.position);
+            inimigo.loopDeComportamento(frameAtual);
         });
     }
 
-    return {updateEnemies, inimigos};
+    return updateEnemies;
 }
