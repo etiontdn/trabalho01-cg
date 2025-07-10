@@ -11,13 +11,17 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(10, 8, 1);
-        this.hp = 20;
+        this.maxHp = 20;
+        this.hp = this.maxHp;
         this.speed = 0.8;
         this.altMinima = 3;
         this.distRecuo = 0;
+        this.fadeOut = 1.0; // opacidade usada na transição
+        this.estadoAtual = "patrulha"; // inicializa o estado
 
         this.url = "./assets/skull.obj";
         this.createEnemy();
+        this.bb.setFromObject(this.entidade);
         inimigos.push(this);
     }
 
@@ -28,6 +32,10 @@ export class LostSoul extends Entidade {
                 if (c.isMesh) {
                     c.geometry.computeBoundingBox();
                     c.geometry.center();
+                    if (c.material) {
+                        c.material.transparent = true;
+                        c.material.opacity = 1.0;
+                    }
                 }
             });
 
@@ -36,8 +44,17 @@ export class LostSoul extends Entidade {
         });
     }
 
-    animateEnemy(frameAtual, alvo) {
+     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
+
+        if (this.bb && this.enemyObj)
+            this.bb.setFromObject(this.entidade);
+
+        // Verifica morte e inicia fade-out
+        if (this.hp <= 0 && this.estadoAtual !== "morre") {
+            this.estadoAtual = "morre";
+            this.fadeOut = 1.0;
+        }
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -46,8 +63,6 @@ export class LostSoul extends Entidade {
             case "perseguicao":
                 this.perseguicao(this.entidade, alvo, this.speed);
                 break;
-            case "ataque a distancia":
-                break;
             case "ataque":
                 this.atacar(alvo);
                 break;
@@ -55,6 +70,22 @@ export class LostSoul extends Entidade {
                 this.recua(alvo);
                 break;
             case "morre":
+                if (this.fadeOut > 0) {
+                    this.fadeOut -= 0.01;
+
+                    this.entidade.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            child.material.transparent = true;
+                            child.material.opacity = this.fadeOut;
+                        }
+                    });
+
+                    if (this.fadeOut <= 0) {
+                        this.scene.remove(this.entidade);
+                        const index = inimigos.indexOf(this);
+                        if (index !== -1) inimigos.splice(index, 1);
+                    }
+                }
                 break;
         }
 
@@ -94,7 +125,7 @@ export class LostSoul extends Entidade {
     }
 
     patrulha(enemy, speed) {
-        this.estadoAtual = "perseguicao"
+        // this.estadoAtual = "perseguicao"
     }
 
     atacar(alvo) {
@@ -121,7 +152,8 @@ export class Cacodemon extends Entidade {
         this.scene = scene;
         this.spawn = spawn;
         this.scale = scale;
-        this.hp = 50;
+        this.maxHp = 50;
+        this.hp = this.maxHp;
         this.speed = 0.6;
         this.distRecuo = 0;
         this.altMinima = 9.5;
@@ -219,9 +251,9 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     function updateEnemies(frameAtual) {
         inimigos.forEach((inimigo) => {
             inimigo.animateEnemy(frameAtual, personagem.position);
-            inimigo.loopDeComportamento(frameAtual);
+            inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
     }
 
-    return updateEnemies;
+    return {updateEnemies, inimigos};
 }
