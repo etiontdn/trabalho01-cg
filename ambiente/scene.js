@@ -422,7 +422,7 @@ export default function () {
                const distanciaPlataformaX_Atual = Math.abs( dx);
                const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
                               personagem.position.z > -119&& personagem.position.z < -105;
-            console.log(distanciaPlataformaZ_Atual)
+            // console.log(distanciaPlataformaZ_Atual)
            function ajustarPlataforma(subindo, alvo) {
            if (subindo) {
                plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma , alvo);

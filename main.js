@@ -8,7 +8,7 @@ import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
-import { CSS2DRenderer, CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DRenderer } from '../build/jsm/renderers/CSS2DRenderer.js';
 
 let renderer = iniciarRenderer();
 const labelRenderer = new CSS2DRenderer();

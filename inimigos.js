@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import Entidade from "./entidade.js";
-import { Box3 } from "../build/three.module.js";
 
 const inimigos = [];
 

@@ -11,7 +11,8 @@ export default function criarArmas(
     scene,
     personagemControls,
     objetosColidiveis,
-    rampas
+    rampas,
+    inimigos
 ) {
 
     const armaMat = new THREE.MeshPhongMaterial({ color: "grey" });
@@ -24,11 +25,12 @@ export default function criarArmas(
         3,                          // colunas
         1,                          // linhas
         1.7,                        // largura em unidades
-        1.2                         // altura em unidades
+        1.2,                        // altura em unidades
+        2                           // dano da arma
     );
     
     // lançador
-    criarArma({raio: 0.23, comprimento:2}, 0.5);
+    criarArma({raio: 0.23, comprimento:2}, 0.5, 5);
     
     // Shotgun
     const armaGeo = new THREE.CylinderGeometry(0.15, 0.15, 4);
@@ -46,9 +48,10 @@ export default function criarArmas(
     arma2.position.set(0, -1, .4);
     armas.push(arma2);
     arma2.cadencia = 0.75;
+    arma2.dano = 7;
 
     // Arma?
-    criarArma({raio: 0.15, comprimento:2}, 0.2);
+    criarArma({raio: 0.15, comprimento:2}, 0.2, 3);
 
     let armaAtual = 0;
     let calcDelta = 0;
@@ -85,7 +88,7 @@ export default function criarArmas(
 
     let frameAtual = 0;  // contador de frames para controlar troca de arma
 
-    function criarArmaSprite(spriteUrl, cadencia, totalFrames, cols, rows, largura, altura) {
+    function criarArmaSprite(spriteUrl, cadencia, totalFrames, cols, rows, largura, altura, dano) {
         const texture = new THREE.TextureLoader().load(spriteUrl);
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(1 / cols, 1 / rows);
@@ -108,10 +111,11 @@ export default function criarArmas(
         };
 
         personagemControls.getObject().add(sprite);
+        sprite.dano = dano;
         armas.push(sprite);
     }
 
-    function criarArma(tamanho, cadencia) {
+    function criarArma(tamanho, cadencia, dano) {
         const armaGeo = new THREE.CylinderGeometry(tamanho.raio, tamanho.raio, tamanho.comprimento);
         const arma = new THREE.Mesh(armaGeo, armaMat);
         arma.material.side = THREE.DoubleSide;
@@ -119,6 +123,7 @@ export default function criarArmas(
         arma.position.set(0, -1, -1.1);
         personagemControls.getObject().add(arma);
         arma.cadencia = cadencia;
+        arma.dano = dano;
         armas.push(arma);
     }
 
@@ -224,6 +229,15 @@ export default function criarArmas(
                     break;
                 }
             }
+            for (let inimigo of inimigos) {
+                if (!inimigo.bb || !inimigo.enemyObj) continue;
+                inimigo.bb.setFromObject(inimigo.enemyObj); // ou .entidade, dependendo do seu código
+                if (tiroBB.intersectsBox(inimigo.bb)) {
+                    colidiu = true;
+                    inimigo.hp -= armas[armaAtual].dano;
+                    break;
+                }
+            }   
 
             if (colidiu) {
                 scene.remove(tiro);
@@ -233,5 +247,5 @@ export default function criarArmas(
         }
     }
 
-    return { armas, updateDisparos };
+    return updateDisparos;
 }
