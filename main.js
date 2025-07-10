@@ -34,17 +34,20 @@ scene.add(personagem);
 // ✅ Passa o personagem para o scene.js
 setPersonagem(personagem);
 
-const { armas, updateDisparos } = createArmas(
-    scene,
-    personagemControls,
-    objetosColidiveis,
-    rampas
-);
-const updateEnemies = createEnemies(
+
+const { updateEnemies, inimigos } = createEnemies(
     scene,
     objetosColidiveis,
     rampas,
     personagem
+);
+
+const updateDisparos = createArmas(
+    scene,
+    personagemControls,
+    objetosColidiveis,
+    rampas, 
+    inimigos
 );
 
 window.addEventListener("keydown", (e) => {

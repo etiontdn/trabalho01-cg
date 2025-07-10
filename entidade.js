@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
+import { Box3 } from "../build/three.module.js";
 
 
 const estados = [
@@ -27,6 +28,7 @@ class Entidade {
         this.hp = this.maxHp;
         this.speed = 0;
         this.tamanho = new THREE.Vector3();
+        this.bb = new THREE.Box3();
         this.altMinima = 0;
         this.distRecuo = 0;
         this.duracaoEstados = {
@@ -53,21 +55,27 @@ class Entidade {
         const label = new CSS2DObject(container);
         label.position.set(0, this.tamanho.y + 2, 0);
         this.entidade.add(label);
+        this.healthBarObj = label;
 
         scene.add(this.entidade);
     }
 
-    loopDeComportamento(frameAtual) {
+    loopDeComportamento(frameAtual, alvo) {
         const pct = Math.max(this.hp / this.maxHp, 0);
         this.healthBarFill.style.width = `${pct * 100}%`;
-        if (pct <= 0) {
-            this.healthBarFill.parentElement.style.display = 'none';
-        }
 
-        if (this.hp <= 0) {
+        if (
+            alvo &&
+            this.entidade.position.distanceTo(alvo) < 60 &&
+            pct > 0
+        ) {
+            this.healthBarObj.visible = true;
+        } else {
+            this.healthBarObj.visible = false;
             this.estadoAtual = "morre";
             this.ultimoFrame = frameAtual;
         }
+        
         if (
             this.framesDesdeOUltimoEstado(frameAtual) >=
             this.duracaoEstados[this.estadoAtual]
@@ -108,7 +116,7 @@ class Entidade {
     }
 
     framesDesdeOUltimoEstado(frameAtual) {
-        return this.frameAtual - this.ultimoFrame;
+        return frameAtual - this.ultimoFrame;
     }
     // altera a propriedade alerta se o personagem esta perto o suficiente
     buscarPersonagem() {}

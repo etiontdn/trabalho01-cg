@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import Entidade from "./entidade.js";
+import { Box3 } from "../build/three.module.js";
 
 const inimigos = [];
 
@@ -16,9 +17,10 @@ export class LostSoul extends Entidade {
         this.speed = 0.8;
         this.altMinima = 3;
         this.distRecuo = 0;
-
+        
         this.url = "./assets/skull.obj";
         this.createEnemy();
+        this.bb.setFromObject(this.entidade);
         inimigos.push(this);
     }
 
@@ -39,6 +41,9 @@ export class LostSoul extends Entidade {
 
     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
+
+        if(this.bb && this.enemyObj)
+            this.bb.setFromObject(this.entidade);
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -221,9 +226,9 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     function updateEnemies(frameAtual) {
         inimigos.forEach((inimigo) => {
             inimigo.animateEnemy(frameAtual, personagem.position);
-            inimigo.loopDeComportamento(frameAtual);
+            inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
     }
 
-    return updateEnemies;
+    return {updateEnemies, inimigos};
 }
