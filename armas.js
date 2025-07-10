@@ -24,7 +24,7 @@ export default function criarArmas(
         3,                          // colunas
         1,                          // linhas
         1.7,                        // largura em unidades
-        1.2                           // altura em unidades
+        1.2                         // altura em unidades
     );
     
     // lançador
@@ -83,6 +83,8 @@ export default function criarArmas(
 
     const clock = new THREE.Clock();
 
+    let frameAtual = 0;  // contador de frames para controlar troca de arma
+
     function criarArmaSprite(spriteUrl, cadencia, totalFrames, cols, rows, largura, altura) {
         const texture = new THREE.TextureLoader().load(spriteUrl);
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -100,7 +102,7 @@ export default function criarArmas(
             totalFrames,
             cols,
             rows,
-            elapsedTime: 0,
+            elapsed: 0,
             frameDuration: cadencia / totalFrames,
             isAnimating: false
         };
@@ -128,10 +130,6 @@ export default function criarArmas(
         crosshair.active = true;
 
         armas[armaAtual].getWorldPosition(tiro.position);
-        // talvez seria bom mudar? assim fica óbvio que não sai da arma direito
-        // no trabalho pede para sair da arma, mas
-        // nos jogos atuais o disparo sai da câmera e não da arma
-        // e o disparo em si acaba sendo apenas um raycast comum
         tiro.position.y += .2;
         tiro.userData.dir = personagemControls
             .getObject()
@@ -143,122 +141,97 @@ export default function criarArmas(
     }
 
     function updateArmas(frameAtual) {
-        if (frameAtual % 30 == 0) {
+        if (frameAtual % 30 === 0) {
             if (changeWeaponEvent.deltaY > 0) {
-                armaAtual += 1;
-                if (armaAtual >= armas.length) {
-                    armaAtual = 0;
-                }
+                armaAtual++;
+                if (armaAtual >= armas.length) armaAtual = 0;
             } else if (changeWeaponEvent.deltaY < 0) {
-                armaAtual -= 1;
-                if (armaAtual < 0) {
-                    armaAtual = armas.length - 1;
-                }
+                armaAtual--;
+                if (armaAtual < 0) armaAtual = armas.length - 1;
             }
             changeWeaponEvent = { deltaY: 0 };
         }
         for (let i = 0; i < armas.length; i++) {
-            if (i == armaAtual) {
-                armas[i].visible = true;
-            } else {
-                armas[i].visible = false;
-            }
+            armas[i].visible = (i === armaAtual);
         }
     }
 
     function animateSprites(sprite, delta) {
-    const d = sprite.userData;
-    if (!d.isAnimating) return;
+        const d = sprite.userData;
+        if (!d.isAnimating) return;
 
-    d.elapsed += delta;
-    while (d.elapsed >= d.frameDuration) {
-      d.elapsed -= d.frameDuration;
-      d.currentFrame++;
+        d.elapsed += delta;
+        while (d.elapsed >= d.frameDuration) {
+            d.elapsed -= d.frameDuration;
+            d.currentFrame++;
 
-      if (d.currentFrame < d.totalFrames) {
-        const col = d.currentFrame % d.cols;
-        const row = Math.floor(d.currentFrame / d.cols);
-        sprite.material.map.offset.set(col / d.cols, 1 - (row + 1) / d.rows);
-        sprite.material.map.needsUpdate = true;
+            if (d.currentFrame < d.totalFrames) {
+                const col = d.currentFrame % d.cols;
+                const row = Math.floor(d.currentFrame / d.cols);
+                sprite.material.map.offset.set(col / d.cols, 1 - (row + 1) / d.rows);
+                sprite.material.map.needsUpdate = true;
 
-        if (d.currentFrame === 1) {
-          criarDisparo();
-        }
-      } else {
-        d.currentFrame = 0;
-        d.isAnimating = false;
-        d.elapsed = 0;
-        sprite.material.map.offset.set(0, 1 - 1 / d.rows);
-        sprite.material.map.needsUpdate = true;
-        break;
-      }
-    }
-  }
-
-    function updateDisparos() {
-    const delta = clock.getDelta();
-    updateArmas();
-
-    const arma = armas[armaAtual];
-    if (arma instanceof THREE.Sprite) {
-      if (disparar && !arma.userData.isAnimating) {
-        arma.userData.isAnimating = true;
-        arma.userData.elapsed = 0;
-        arma.userData.currentFrame = -1;
-      }
-      animateSprites(arma, delta);
-    } else {
-      calcDelta += delta;
-      if (disparar && calcDelta > arma.cadencia) {
-        criarDisparo();
-        calcDelta = 0;
-      }
-    }
-
-    const speed = 200;
-
-    for (let i = 0; i < disparos.length; i++) {
-        const tiro = disparos[i];
-        const dir = tiro.userData.dir.clone().normalize();
-        tiro.position.addScaledVector(dir, speed * delta);
-
-        const tiroBB = new THREE.Box3().setFromObject(tiro);
-        let colidiu = false;
-        const alvos = objetosColidiveis.concat(rampas);
-        for (let alvo of alvos) {
-            const alvoBB = new THREE.Box3().setFromObject(alvo);
-            if (tiroBB.intersectsBox(alvoBB)) {
-                colidiu = true;
+                if (d.currentFrame === 1) {
+                    criarDisparo();
+                }
+            } else {
+                d.currentFrame = 0;
+                d.isAnimating = false;
+                d.elapsed = 0;
+                sprite.material.map.offset.set(0, 1 - 1 / d.rows);
+                sprite.material.map.needsUpdate = true;
                 break;
             }
         }
+    }
 
-        if (colidiu) {
-            scene.remove(tiro);
-            disparos.splice(i, 1);
-            i--;
+    function updateDisparos() {
+        const delta = clock.getDelta();
+
+        updateArmas(frameAtual);
+        frameAtual++;
+
+        const arma = armas[armaAtual];
+        if (arma instanceof THREE.Sprite) {
+            if (disparar && !arma.userData.isAnimating) {
+                arma.userData.isAnimating = true;
+                arma.userData.elapsed = 0;
+                arma.userData.currentFrame = -1;
+            }
+            animateSprites(arma, delta);
+        } else {
+            calcDelta += delta;
+            if (disparar && calcDelta > arma.cadencia) {
+                criarDisparo();
+                calcDelta = 0;
+            }
+        }
+
+        const speed = 200;
+
+        for (let i = 0; i < disparos.length; i++) {
+            const tiro = disparos[i];
+            const dir = tiro.userData.dir.clone().normalize();
+            tiro.position.addScaledVector(dir, speed * delta);
+
+            const tiroBB = new THREE.Box3().setFromObject(tiro);
+            let colidiu = false;
+            const alvos = objetosColidiveis.concat(rampas);
+            for (let alvo of alvos) {
+                const alvoBB = new THREE.Box3().setFromObject(alvo);
+                if (tiroBB.intersectsBox(alvoBB)) {
+                    colidiu = true;
+                    break;
+                }
+            }
+
+            if (colidiu) {
+                scene.remove(tiro);
+                disparos.splice(i, 1);
+                i--;
+            }
         }
     }
-    
-    // for (let i = 0; i < disparos.length; i++) {
-    //   const tiro = disparos[i];
-    //   tiro.position.addScaledVector(
-    //     tiro.userData.dir.clone().normalize(),
-    //     speed * delta
-    //   );
-    //   const bb = new THREE.Box3().setFromObject(tiro);
-    //   if (
-    //     objetosColidiveis.concat(rampas).some(alvo =>
-    //       new THREE.Box3().setFromObject(alvo).intersectsBox(bb)
-    //     )
-    //   ) {
-    //     scene.remove(tiro);
-    //     disparos.splice(i, 1);
-    //     i--;
-    //   }
-    // }
-
-  }
 
     return { armas, updateDisparos };
 }
