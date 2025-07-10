@@ -10,6 +10,7 @@ const estados = [
     "ataque a distancia" /* se perto o suficiente, e tem uma direcao direta->atira e depois volta a perseguicao */,
     "ataque" /* se perto o suficiente, e tem uma direcao direta->atira e depois volta a perseguicao */,
     "recuo" /* se perto demais recua */,
+    "espera",
     "morre",
 ];
 
@@ -36,14 +37,16 @@ class Entidade {
         this.duracaoEstados = {
             patrulha: 20,
             perseguicao: 60,
-            "ataque a distancia": 15,
-            ataque: 15,
+            "ataque a distancia": 50,
+            ataque: 200,
             recuo: 30,
             morre: 15,
+            espera: 120,
         };
 
         this.alerta = false;
         this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
+        this.ultimaPosicaoEntidade = new THREE.Vector3(0, 0, 0);
         scene.add(this.entidade);
     }
 
@@ -64,12 +67,22 @@ class Entidade {
                     break;
                 case "perseguicao":
                     this.pathFinding = encontrarCaminho(this);
+                    if (this.checarEstaPertoDemais()) {
+                        this.estadoAtual = "patrulha";
+                    }
+                    console.log(this.checarPodeAtacar());
+                    if (this.checarPodeAtacar()) {
+                        this.estadoAtual = "ataque";
+                    }
+                    if (this.checarPodeAtacarADistancia()) {
+                        this.estadoAtual = "ataque a distancia";
+                    }
                     break;
                 case "ataque a distancia":
-                    this.estadoAtual = "perseguicao";
+                    this.estadoAtual = "espera";
                     break;
                 case "ataque":
-                    this.estadoAtual = "perseguicao";
+                    this.estadoAtual = "espera";
                     break;
                 case "recuo":
                     if (this.distRecuo > 0) {
@@ -81,6 +94,8 @@ class Entidade {
                 case "morre":
                     //removeEntidade();
                     break;
+                case "espera":
+                    this.estadoAtual = "patrulha"
             }
             this.ultimoFrame = frameAtual;
         }
@@ -91,8 +106,8 @@ class Entidade {
     }
     // altera a propriedade alerta se o personagem esta perto o suficiente
     buscarPersonagem() {
-        //console.log("buscando personagem");
-
+        console.log(this.ultimaPosicaoEntidade);
+        this.ultimaPosicaoEntidade.copy(this.entidade.position);
         this.ultimaPosicaoInimigo.copy(
             this.scene.personagem
                 ? this.scene.personagem.position
@@ -100,9 +115,15 @@ class Entidade {
         );
         this.alerta = true;
     }
-    checarPodeAtacarADistancia() {}
-    checharPodeAtacar() {}
-    movimento() {}
+    checarPodeAtacarADistancia() {
+        return false;
+    }
+    checarPodeAtacar() {
+        return false;
+    }
+    checarEstaPertoDemais() {
+        return false;
+    }
 }
 
 export default Entidade;

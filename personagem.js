@@ -33,6 +33,8 @@ export default function createPersonagem(
     corpo.position.set(0, alturaPersonagem / 2, 0);
     personagem.add(corpo);
 
+    personagem.colisao = corpo;
+
     let velY = 0;
     const gravidade = -150;
 
