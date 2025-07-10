@@ -413,6 +413,7 @@ export default function () {
                const PosicaoDescida= -4;
                const distanciaX_da_Plataforma = 15;
                const distanciaZ_da_Plataforma = 14;
+               const velocidade_plataforma = 0.05;
                const posicaoChao = 1;
                const posicaoTopo = 5;
                const dx = personagem.position.x - posPlataforma.x;
@@ -421,19 +422,20 @@ export default function () {
                const distanciaPlataformaX_Atual = Math.abs( dx);
                const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
                               personagem.position.z > -119&& personagem.position.z < -105;
-       
+            console.log(distanciaPlataformaZ_Atual)
            function ajustarPlataforma(subindo, alvo) {
            if (subindo) {
-               plataforma.position.y = Math.min(plataforma.position.y + 0.05, alvo);
+               plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma , alvo);
                if (plataforma.position.y === alvo) return false;
            } else {
-               plataforma.position.y = Math.max(plataforma.position.y - 0.05, alvo);
+               plataforma.position.y = Math.max(plataforma.position.y - velocidade_plataforma , alvo);
                if (plataforma.position.y === alvo) return false;
            }
            return true;
        }
        
        if (portaaberta && porta.position.x === -16) {
+        
            // Atualiza estado noChao
            if (personagem.position.y === posicaoChao && !emCima) noChao = true;
            else if ((personagem.position.y === posicaoTopo ) && !emCima) noChao = false;
@@ -472,6 +474,7 @@ export default function () {
        
                // Descida com personagem em cima
                if (emCima && plataforma.position.y > PosicaoDescida) {
+                   personagem.position.y -= velocidade_plataforma + 0.01;
                    descida = true;
                    descida = ajustarPlataforma(false, PosicaoDescida);
                }
