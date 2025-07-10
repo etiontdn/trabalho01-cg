@@ -15,6 +15,8 @@ export default function () {
 
     // Cena principal
     const scene = new THREE.Scene();
+    scene.objetosColidiveis = objetosColidiveis;
+    scene.rampas = rampas;
 
     const iluminacao = new Iluminacao(scene);
     iluminacao.adicionarIluminacaoAmbiente();

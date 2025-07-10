@@ -23,6 +23,7 @@ const { personagem, personagemControls, updateControl } = createPersonagem(
     rampas
 );
 scene.add(personagem);
+scene.personagem = personagem;
 // ✅ Passa o personagem para o scene.js
 setPersonagem(personagem);
 

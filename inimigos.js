@@ -10,11 +10,12 @@ const raioDeVisao = 60;
 export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
-        this.scale = new THREE.Vector3(10, 8, 1);
+        this.scale = new THREE.Vector3(5, 4, 0.5);
         this.hp = 20;
-        this.speed = 0.8;
+        this.speed = 10;
         this.altMinima = 3;
         this.distRecuo = 0;
+        this.tamanho = new THREE.Vector3(3, 3, 3);
 
         this.url = "./assets/skull.obj";
         this.createEnemy();
@@ -22,7 +23,15 @@ export class LostSoul extends Entidade {
     }
 
     createEnemy() {
+        // Cria uma esfera para representar o inimigo no local da entidade
+        const geometry = new THREE.SphereGeometry(this.tamanho.x/2, 16, 16);
+        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.set(0, 0, 0);
+        this.entidade.add(sphere);
+
         const loader = new OBJLoader();
+
         loader.load(this.url, (enemyMesh) => {
             enemyMesh.traverse((c) => {
                 if (c.isMesh) {
@@ -44,7 +53,7 @@ export class LostSoul extends Entidade {
                 this.patrulha(this.entidade, this.speed);
                 break;
             case "perseguicao":
-                this.perseguicao(this.entidade, alvo, this.speed);
+                this.perseguicao();
                 break;
             case "ataque a distancia":
                 break;
@@ -80,22 +89,31 @@ export class LostSoul extends Entidade {
         // }
     }
 
-    perseguicao(enemy, alvo, speed) {
+    perseguicao() {
+        const vetorPos = this.pathFinding.vetorPos;
+        const posAtual = this.entidade.position;
+
+        // Calcula o vetor direção do ponto atual até o destino
+        const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
+        const distancia = direcao.length();
+
+        if (distancia > 0.01) {
+            // Evita jitter quando já está no destino
+            direcao.normalize();
+            const deslocamento = Math.min(
+                this.speed / this.duracaoEstados["perseguicao"],
+                distancia
+            );
+            this.entidade.position.add(direcao.multiplyScalar(deslocamento));
+        }
         const dummy = new THREE.Object3D();
-        dummy.position.copy(enemy.position);
-        dummy.lookAt(alvo);
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(vetorPos);
 
-        enemy.quaternion.slerp(dummy.quaternion, 0.04);
-
-        const direction = new THREE.Vector3()
-            .subVectors(alvo, enemy.position)
-            .normalize();
-        enemy.position.add(direction.multiplyScalar(speed * 0.1));
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
     }
 
-    patrulha(enemy, speed) {
-        this.estadoAtual = "perseguicao"
-    }
+    patrulha(enemy, speed) {}
 
     atacar(alvo) {
         //atacar

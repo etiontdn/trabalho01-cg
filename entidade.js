@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import encontrarCaminho from "./pathfinding.js";
+import { Vector3 } from "../build/three.module.js";
 
 const estados = [
     "patrulha" /* espera até algum evento acontecer, e inicia perseguicao */,
@@ -20,23 +22,28 @@ class Entidade {
         this.ultimoFrame = 0;
         this.entidade = new THREE.Object3D();
         this.entidade.position.copy(spawn);
+        this.scene = scene;
+        this.pathFinding = {
+            vetorDirecao: new THREE.Vector3(),
+            vetorPos: new THREE.Vector3(),
+        };
 
         this.hp = 0;
         this.speed = 0;
-        this.tamanho = new THREE.Vector3();
+        this.tamanho = new THREE.Vector3(0, 0, 0);
         this.altMinima = 0;
         this.distRecuo = 0;
         this.duracaoEstados = {
-            patrulha: 0,
-            perseguicao: 20,
-            "ataque a distancia": 5,
-            ataque: 5,
-            recuo: 10,
-            morre: 5,
+            patrulha: 20,
+            perseguicao: 60,
+            "ataque a distancia": 15,
+            ataque: 15,
+            recuo: 30,
+            morre: 15,
         };
 
         this.alerta = false;
-        this.ultimaPosicaoInimigo = new THREE.Vector3(0,0,0);
+        this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
         scene.add(this.entidade);
     }
 
@@ -45,6 +52,7 @@ class Entidade {
             this.estadoAtual = "morre";
             this.ultimoFrame = frameAtual;
         }
+        //console.log([frameAtual, this.framesDesdeOUltimoEstado(frameAtual), this.duracaoEstados[this.estadoAtual]])
         if (
             this.framesDesdeOUltimoEstado(frameAtual) >=
             this.duracaoEstados[this.estadoAtual]
@@ -55,13 +63,7 @@ class Entidade {
                     if (this.alerta) this.estadoAtual = "perseguicao";
                     break;
                 case "perseguicao":
-                    // if (this.checarPodeAtacarADistancia()) {
-                    //     this.estadoAtual = "ataque a distancia";
-                    // } else if (this.checharPodeAtacar()) {
-                    //     this.estadoAtual = "ataque";
-                    // } else if (this.distRecuo > 0) {
-                    //     this.estadoAtual = "recuo";
-                    // }
+                    this.pathFinding = encontrarCaminho(this);
                     break;
                 case "ataque a distancia":
                     this.estadoAtual = "perseguicao";
@@ -85,10 +87,19 @@ class Entidade {
     }
 
     framesDesdeOUltimoEstado(frameAtual) {
-        return this.frameAtual - this.ultimoFrame;
+        return frameAtual - this.ultimoFrame;
     }
     // altera a propriedade alerta se o personagem esta perto o suficiente
-    buscarPersonagem() {}
+    buscarPersonagem() {
+        //console.log("buscando personagem");
+
+        this.ultimaPosicaoInimigo.copy(
+            this.scene.personagem
+                ? this.scene.personagem.position
+                : new THREE.Vector3(0, 0, 0)
+        );
+        this.alerta = true;
+    }
     checarPodeAtacarADistancia() {}
     checharPodeAtacar() {}
     movimento() {}
