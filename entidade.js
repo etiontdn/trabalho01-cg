@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import encontrarCaminho from "./pathfinding.js";
 import { Vector3 } from "../build/three.module.js";
+import { CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
+import { Box3 } from "../build/three.module.js";
+
 
 const estados = [
     "patrulha" /* espera até algum evento acontecer, e inicia perseguicao */,
@@ -29,9 +32,11 @@ class Entidade {
             vetorPos: new THREE.Vector3(),
         };
 
-        this.hp = 0;
+        this.maxHp = 0;
+        this.hp = this.maxHp;
         this.speed = 0;
         this.tamanho = new THREE.Vector3(0, 0, 0);
+        this.bb = new THREE.Box3();
         this.altMinima = 0;
         this.distRecuo = 0;
         this.duracaoEstados = {
@@ -48,11 +53,36 @@ class Entidade {
         this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
         this.ultimaPosicaoEntidade = new THREE.Vector3(0, 0, 0);
         this.ultimoAtaque = 0;
+
+        // === CRIAÇÃO DA BARRA DE VIDA ===
+        const container = document.createElement('div');
+        container.className = 'health-bar-container';
+        const fill = document.createElement('div');
+        fill.className = 'health-bar-fill';
+        container.appendChild(fill);
+        this.healthBarFill = fill;
+
+        // Gera o CSS2DObject para a barra
+        const label = new CSS2DObject(container);
+        label.position.set(0, this.tamanho.y + 2, 0);
+        this.entidade.add(label);
+        this.healthBarObj = label;
+
         scene.add(this.entidade);
     }
 
-    loopDeComportamento(frameAtual) {
-        if (this.hp <= 0) {
+    loopDeComportamento(frameAtual, alvo) {
+        const pct = Math.max(this.hp / this.maxHp, 0);
+        this.healthBarFill.style.width = `${pct * 100}%`;
+
+        if (
+            alvo &&
+            this.entidade.position.distanceTo(alvo) < 60 &&
+            pct > 0
+        ) {
+            this.healthBarObj.visible = true;
+        } else {
+            this.healthBarObj.visible = false;
             this.estadoAtual = "morre";
             this.ultimoFrame = frameAtual;
         }

@@ -219,7 +219,7 @@ export default function () {
         objetosColidiveis.push(...area2.getParts());
 
         plataforma = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 8.1, 20),
+            new THREE.BoxGeometry(30, 8.1, 18),
             new THREE.MeshLambertMaterial({ color: 0x0000ff })
         );
         plataforma.position.set(15, 0, -111);
@@ -408,13 +408,14 @@ export default function () {
        if (portaaberta && porta.position.x > -16 && altar_ativo) {
                    porta.position.x = Math.max(porta.position.x - 0.3, -16);
                }
-       
+               
                // Lógica da plataforma móvel
                const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
                const PosicaoSubida = -0.01;
                const PosicaoDescida= -4;
                const distanciaX_da_Plataforma = 15;
                const distanciaZ_da_Plataforma = 14;
+               const velocidade_plataforma = 0.05;
                const posicaoChao = 1;
                const posicaoTopo = 5;
                const dx = personagem.position.x - posPlataforma.x;
@@ -422,27 +423,28 @@ export default function () {
                const distanciaPlataformaZ_Atual = Math.abs( dz);
                const distanciaPlataformaX_Atual = Math.abs( dx);
                const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
-                              personagem.position.z > -120 && personagem.position.z < -105;
-       
+                              personagem.position.z > -119&& personagem.position.z < -105;
+            // console.log(distanciaPlataformaZ_Atual)
            function ajustarPlataforma(subindo, alvo) {
            if (subindo) {
-               plataforma.position.y = Math.min(plataforma.position.y + 0.05, alvo);
+               plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma , alvo);
                if (plataforma.position.y === alvo) return false;
            } else {
-               plataforma.position.y = Math.max(plataforma.position.y - 0.05, alvo);
+               plataforma.position.y = Math.max(plataforma.position.y - velocidade_plataforma , alvo);
                if (plataforma.position.y === alvo) return false;
            }
            return true;
        }
        
        if (portaaberta && porta.position.x === -16) {
+        
            // Atualiza estado noChao
            if (personagem.position.y === posicaoChao && !emCima) noChao = true;
            else if ((personagem.position.y === posicaoTopo ) && !emCima) noChao = false;
-       
+           
            if (noChao) {
                // Descida quando no chão
-               if (((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma && distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma -3 )&& distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y > PosicaoDescida&& !emCima && !descida && !subida) {
+               if (((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma && distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma -5 )&& distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y > PosicaoDescida&& !emCima && !descida && !subida&& personagem.position.y == posicaoChao ) {
                    descida2 = true;
                    descida2 = ajustarPlataforma(false, PosicaoDescida);
                } else if (distanciaPlataformaZ_Atual> distanciaZ_da_Plataforma && plataforma.position.y > PosicaoDescida && !emCima && descida2 && !descida && !subida) {
@@ -451,20 +453,21 @@ export default function () {
        
                // Subida com personagem em cima
                if (emCima && plataforma.position.y <  PosicaoSubida ) {
+                
                    subida = true;
                    subida = ajustarPlataforma(true,  PosicaoSubida );
                }
        
                // Subida e descida enquanto não em cima
                if (!emCima && subida) {
-                   subida = ajustarPlataforma(true,  PosicaoSubida );
+                subida = ajustarPlataforma(true,  PosicaoSubida );
                }
                if (!emCima && descida) {
-                   descida = ajustarPlataforma(false, PosicaoDescida);
+                descida = ajustarPlataforma(false, PosicaoDescida);
                }
            } else {
                // Subida quando no ar
-               if ((distanciaPlataformaZ_Atual<= distanciaZ_da_Plataforma && distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y <  PosicaoSubida  && !emCima && !descida && !subida) {
+               if ((distanciaPlataformaZ_Atual<= distanciaZ_da_Plataforma && distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y <  PosicaoSubida  && !emCima && !descida && !subida && personagem.position.y == posicaoTopo) {
                    subida2 = true;
                    subida2 = ajustarPlataforma(true,  PosicaoSubida );
                } else if (distanciaPlataformaZ_Atual > distanciaZ_da_Plataforma && plataforma.position.y <  PosicaoSubida  && !emCima && subida2 && !descida && !subida) {
@@ -473,6 +476,7 @@ export default function () {
        
                // Descida com personagem em cima
                if (emCima && plataforma.position.y > PosicaoDescida) {
+                   personagem.position.y -= velocidade_plataforma + 0.01;
                    descida = true;
                    descida = ajustarPlataforma(false, PosicaoDescida);
                }
