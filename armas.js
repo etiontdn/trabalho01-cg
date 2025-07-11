@@ -127,12 +127,13 @@ export default function criarArmas(
         armas.push(arma);
     }
 
-    function criarDisparo() {
+    function criarDisparo(visivel = true) {
         const disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
         const disparoMat = new THREE.MeshLambertMaterial({ color: 0x000000});
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
         crosshair.active = true;
+        tiro.visible = visivel;
 
         armas[armaAtual].getWorldPosition(tiro.position);
         tiro.position.y += .2;
@@ -177,7 +178,7 @@ export default function criarArmas(
                 sprite.material.map.needsUpdate = true;
 
                 if (d.currentFrame === 1) {
-                    criarDisparo();
+                    criarDisparo(false);
                 }
             } else {
                 d.currentFrame = 0;
