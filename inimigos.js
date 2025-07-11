@@ -4,7 +4,9 @@ import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { caminhoEValido } from "./pathfinding.js";
 import Entidade from "./entidade.js";
 
-const inimigos = [];
+const list_LostSouls = [];
+const list_Cacodemons = [];
+
 
 const raioDeVisao = 60;
 
@@ -25,7 +27,7 @@ export class LostSoul extends Entidade {
         this.url = "./assets/skull.obj";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
-        inimigos.push(this);
+        list_LostSouls.push(this);
     }
 
     createEnemy() {
@@ -94,8 +96,8 @@ export class LostSoul extends Entidade {
 
                     if (this.fadeOut <= 0) {
                         this.scene.remove(this.entidade);
-                        const index = inimigos.indexOf(this);
-                        if (index !== -1) inimigos.splice(index, 1);
+                        const index = list_LostSouls.indexOf(this);
+                        if (index !== -1) list_LostSouls.splice(index, 1);
                     }
                 }
                 break;
@@ -255,7 +257,6 @@ export class LostSoul extends Entidade {
     }
 
     recua(alvo) {
-        console.log("recua");
         const dir = new THREE.Vector3()
             .subVectors(this.enemyObj.position, alvo)
             .normalize();
@@ -285,9 +286,8 @@ export class Cacodemon extends Entidade {
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
-        this.duracaoEstados.perseguicao = 180;
 
-        inimigos.push(this);
+        list_Cacodemons.push(this);
     }
 
     createEnemy() {
@@ -303,8 +303,6 @@ export class Cacodemon extends Entidade {
 
     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
-
-        console.log("CACODEMON: estado atual: " + this.estadoAtual)
 
         if (this.bb && this.enemyObj) this.bb.setFromObject(this.entidade);
 
@@ -343,8 +341,8 @@ export class Cacodemon extends Entidade {
 
                     if (this.fadeOut <= 0) {
                         this.scene.remove(this.entidade);
-                        const index = inimigos.indexOf(this);
-                        if (index !== -1) inimigos.splice(index, 1);
+                        const index = list_Cacodemons.indexOf(this);
+                        if (index !== -1) list_Cacodemons.splice(index, 1);
                     }
                 }
                 break;
@@ -383,7 +381,7 @@ export class Cacodemon extends Entidade {
         dummy.position.copy(this.entidade.position);
         dummy.lookAt(vetorPos);
 
-        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04); 
     }
 
     checarPodeAtacarADistancia() {
@@ -409,9 +407,11 @@ export class Cacodemon extends Entidade {
 
         dir.y = 0;
 
-        const step = this.speed*0.05;
+        const step = this.speed * 0.4;
+        const move = Math.min(step, this.distRecuo);
 
-        this.entidade.position.add(dir.multiplyScalar(step));
+        this.enemyObj.position.add(dir.multiplyScalar(move));
+        this.distRecuo -= move;
     }
 }
 /*
@@ -509,16 +509,27 @@ export class Cacodemon extends Entidade {
 } */
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
-    //new LostSoul(scene, new THREE.Vector3(30, 10, -20));
-    new Cacodemon(scene, new THREE.Vector3(30, 10, 0));
+    new LostSoul(scene, new THREE.Vector3(-170, 10, -180));
+    new LostSoul(scene, new THREE.Vector3(-160, 10, -170));
+    new LostSoul(scene, new THREE.Vector3(-140, 10, -160));
+    new LostSoul(scene, new THREE.Vector3(-120, 10, -170));
+    new LostSoul(scene, new THREE.Vector3(-100, 10, -180));
+    
+    new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
+    new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
+    new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
     function updateEnemies(frameAtual) {
-        inimigos.forEach((inimigo) => {
-            inimigo.alerta = true;
+        list_LostSouls.forEach((inimigo) => {
+            inimigo.animateEnemy(frameAtual, personagem.position);
+            inimigo.loopDeComportamento(frameAtual, personagem.position);
+        });
+
+        list_Cacodemons.forEach((inimigo) => {
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
     }
 
-    return { updateEnemies, inimigos };
+    return { updateEnemies, inimigos: { lostSouls: list_LostSouls, cacodemons: list_Cacodemons } };
 }

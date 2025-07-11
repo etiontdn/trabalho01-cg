@@ -21,7 +21,7 @@ document.body.appendChild(labelRenderer.domElement);
 const camera = createCamera();
 
 // Cria personagem e controles
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } =
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem, setInimigos } =
     createScene(new THREE.Scene()); // ✅ setPersonagem incluído
 let primeiroFrame = false;
 render();
@@ -44,12 +44,17 @@ const { updateEnemies, inimigos } = createEnemies(
     personagem
 );
 
+setInimigos(inimigos.lostSouls, inimigos.cacodemons);
+
+
+
+const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons];
 const updateDisparos = createArmas(
     scene,
     personagemControls,
     objetosColidiveis,
     rampas,
-    inimigos
+    todosInimigos
 );
 
 window.addEventListener("keydown", (e) => {
