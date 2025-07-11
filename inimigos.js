@@ -255,6 +255,7 @@ export class LostSoul extends Entidade {
     }
 
     recua(alvo) {
+        console.log("recua");
         const dir = new THREE.Vector3()
             .subVectors(this.enemyObj.position, alvo)
             .normalize();
@@ -284,6 +285,7 @@ export class Cacodemon extends Entidade {
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
+        this.duracaoEstados.perseguicao = 180;
 
         inimigos.push(this);
     }
@@ -301,6 +303,8 @@ export class Cacodemon extends Entidade {
 
     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
+
+        console.log("CACODEMON: estado atual: " + this.estadoAtual)
 
         if (this.bb && this.enemyObj) this.bb.setFromObject(this.entidade);
 
@@ -379,7 +383,7 @@ export class Cacodemon extends Entidade {
         dummy.position.copy(this.entidade.position);
         dummy.lookAt(vetorPos);
 
-        this.entidade.quaternion.slerp(dummy.quaternion, 0.04); 
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
     }
 
     checarPodeAtacarADistancia() {
@@ -405,11 +409,9 @@ export class Cacodemon extends Entidade {
 
         dir.y = 0;
 
-        const step = this.speed * 0.4;
-        const move = Math.min(step, this.distRecuo);
+        const step = this.speed*0.05;
 
-        this.enemyObj.position.add(dir.multiplyScalar(move));
-        this.distRecuo -= move;
+        this.entidade.position.add(dir.multiplyScalar(step));
     }
 }
 /*
@@ -507,11 +509,12 @@ export class Cacodemon extends Entidade {
 } */
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
-    new LostSoul(scene, new THREE.Vector3(30, 10, -20));
+    //new LostSoul(scene, new THREE.Vector3(30, 10, -20));
     new Cacodemon(scene, new THREE.Vector3(30, 10, 0));
 
     function updateEnemies(frameAtual) {
         inimigos.forEach((inimigo) => {
+            inimigo.alerta = true;
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });

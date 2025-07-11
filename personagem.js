@@ -102,6 +102,12 @@ export default function createPersonagem(
         const delta = clock.getDelta();
         const speed = delta * 50;
 
+
+        /* simplesmente para evitar a queda infinita: */
+        if (personagem.position.y < 0) {
+            personagem.position.copy(startPos);
+        }
+
         const camQ = new THREE.Quaternion();
         camera.getWorldQuaternion(camQ);
         const euler = new THREE.Euler().setFromQuaternion(camQ, "YXZ");

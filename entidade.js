@@ -44,10 +44,11 @@ class Entidade {
             perseguicao: 60,
             "ataque a distancia": 50,
             ataque: 200,
-            recuo: 30,
+            recuo: 60,
             morre: 15,
             espera: 120,
         };
+        this.minDistRecuar = 5;
 
         this.alerta = false;
         this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
@@ -98,14 +99,14 @@ class Entidade {
                     break;
                 case "perseguicao":
                     this.pathFinding = encontrarCaminho(this);
-                    if (this.checarEstaPertoDemais()) {
-                        this.estadoAtual = "patrulha";
-                    }
                     if (this.checarPodeAtacar()) {
                         this.estadoAtual = "ataque";
                     }
                     if (this.checarPodeAtacarADistancia()) {
                         this.estadoAtual = "ataque a distancia";
+                    }
+                    if (this.checarEstaPertoDemais()) {
+                        this.estadoAtual = "recuo";
                     }
                     break;
                 case "ataque a distancia":
@@ -115,7 +116,7 @@ class Entidade {
                     this.estadoAtual = "espera";
                     break;
                 case "recuo":
-                    if (this.distRecuo > 0) {
+                    if (this.checarEstaPertoDemais()) {
                         this.estadoAtual = "recuo";
                     } else {
                         this.estadoAtual = "perseguicao";
@@ -151,6 +152,9 @@ class Entidade {
         return false;
     }
     checarEstaPertoDemais() {
+        if (this.entidade.position.distanceTo(this.scene.personagem.position) <= this.minDistRecuar) {
+            return true;
+        }
         return false;
     }
 }

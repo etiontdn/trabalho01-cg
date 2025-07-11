@@ -56,6 +56,13 @@ function caminhoEValido(entidade, distancia, vetorDirecao, vetorPos) {
             return false;
         }
     }
+   
+    console.log(centro.distanceTo(entidade.scene.personagem.position));
+    if (centro.distanceTo(entidade.scene.personagem.position) <= entidade.minDistRecuar) {
+        return false;
+    }
+    
+
     return true;
 }
 
