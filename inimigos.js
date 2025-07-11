@@ -104,9 +104,9 @@ export class LostSoul extends Entidade {
         const inimigoPos = this.entidade.position.clone();
         const personagemPos = this.ultimaPosicaoInimigo;
 
-        if (inimigoPos.distanceTo(personagemPos) >= 25) {
+        if (inimigoPos.distanceTo(personagemPos) >= 20) {
             return false;
-        }
+        } 
 
         // Calcula a direção do inimigo para o personagem
         const direcao = new THREE.Vector3()
@@ -158,6 +158,7 @@ export class LostSoul extends Entidade {
     patrulha(enemy, speed) {}
 
     atacar(frameAtual) {
+        this.ultimoAtaque = frameAtual;
         const velocidadeAtaque = 100; // Ajuste este valor para controlar a velocidade da investida.
                                      // O valor 40 original era muito alto para ser um deslocamento direto.
         const vetorPos = this.ultimaPosicaoInimigo; // Posição do alvo

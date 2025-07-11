@@ -47,6 +47,7 @@ class Entidade {
         this.alerta = false;
         this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
         this.ultimaPosicaoEntidade = new THREE.Vector3(0, 0, 0);
+        this.ultimoAtaque = 0;
         scene.add(this.entidade);
     }
 
