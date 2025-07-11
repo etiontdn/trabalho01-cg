@@ -101,7 +101,6 @@ class Entidade {
                     if (this.checarEstaPertoDemais()) {
                         this.estadoAtual = "patrulha";
                     }
-                    console.log(this.checarPodeAtacar());
                     if (this.checarPodeAtacar()) {
                         this.estadoAtual = "ataque";
                     }
@@ -144,7 +143,6 @@ class Entidade {
                 ? this.scene.personagem.position
                 : new THREE.Vector3(0, 0, 0)
         );
-        this.alerta = true;
     }
     checarPodeAtacarADistancia() {
         return false;

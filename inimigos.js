@@ -232,9 +232,15 @@ export class LostSoul extends Entidade {
         const dumPos = new THREE.Vector3().copy(this.entidade.position);
         dumPos.add(movimentoPorFrame);
 
-
-        if (caminhoEValido(this, movimentoPorFrame.length(), movimentoPorFrame, dumPos)) {
-            this.entidade.position.add(movimentoPorFrame);   
+        if (
+            caminhoEValido(
+                this,
+                movimentoPorFrame.length(),
+                movimentoPorFrame,
+                dumPos
+            )
+        ) {
+            this.entidade.position.add(movimentoPorFrame);
         }
     }
 
@@ -277,6 +283,8 @@ export class Cacodemon extends Entidade {
         this.url = "./assets/cacodemon.glb";
         this.createEnemy();
 
+        this.duracaoEstados.espera = 20;
+
         inimigos.push(this);
     }
 
@@ -310,6 +318,9 @@ export class Cacodemon extends Entidade {
                 this.perseguicao();
                 break;
             case "ataque":
+                //this.atacar(alvo);
+                break;
+            case "ataque a distancia":
                 this.atacar(alvo);
                 break;
             case "recuo":
@@ -360,12 +371,31 @@ export class Cacodemon extends Entidade {
         this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
     }
 
-    patrulha(enemy, speed) {
-        // this.estadoAtual = "perseguicao"
+    patrulha(enemy, speed) {}
+
+    atacar() {
+        const vetorPos = this.pathFinding.vetorPos;
+        const dummy = new THREE.Object3D();
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(vetorPos);
+
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04); 
     }
 
-    atacar(alvo) {
-        //atacar
+    checarPodeAtacarADistancia() {
+        console.log(
+            this.entidade.position,
+            this.scene.personagem.position,
+            this.entidade.position.distanceTo(this.scene.personagem.position)
+        );
+        if (
+            this.entidade.position.distanceTo(this.scene.personagem.position) <=
+            40
+        ) {
+            console.log("cacodemon pode atacar!");
+            return true;
+        }
+        return false;
     }
 
     recua(alvo) {
