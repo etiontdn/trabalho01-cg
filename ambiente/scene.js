@@ -6,7 +6,10 @@ import Iluminacao from "./iluminacao.js";
 
 // Variáveis globais
 let personagem = null;
-let chave1Coletada = true;
+let LostSouls = [];
+let lostSoulsAtivados = false;
+let Cacodemons = [];
+let CacodemonsAtivados = false;
 
 export default function (scene) {
     // Listas de objetos interativos
@@ -31,7 +34,7 @@ export default function (scene) {
     rampas.push(chao);
 
     // Estado das chaves
-    let possechave1 = false;
+    let chave1Coletada = false;
     let grupoChave1, chave1;
     let grupoChave2, chave2;
     let subirGrupoChave1 = false;
@@ -52,6 +55,11 @@ export default function (scene) {
     // Função para injetar personagem
     function setPersonagem(p) {
         personagem = p;
+    }
+
+    function setInimigos(LostSoul, Cacodemon) {
+        LostSouls = LostSoul;
+        Cacodemons = Cacodemon;
     }
     // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
 
@@ -227,10 +235,10 @@ export default function (scene) {
         scene.add(plataforma);
 
         porta = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 8, 0.1),
+            new THREE.BoxGeometry(30, 8, 0.2),
             new THREE.MeshLambertMaterial({ color: 0xffff00 })
         );
-        porta.position.set(15, -0.001, -100.09);
+        porta.position.set(15, -0.001, -100.2);
         porta.castShadow = porta.receiveShadow = true;
         objetosColidiveis.push(porta);
         scene.add(porta);
@@ -345,14 +353,6 @@ export default function (scene) {
 
     // ------------------- EVENTOS E LÓGICA ------------------- //
 
-    // Evento: subir as chaves com tecla "K"
-    window.addEventListener("keydown", (event) => {
-        if (event.key.toLowerCase() === "k") {
-            subirGrupoChave1 = true;
-            subirGrupoChave2 = true;
-        }
-    });
-
     // Atualização contínua da cena
     function updateScene() {
         chave1.rotation.y += 0.02;
@@ -360,26 +360,28 @@ export default function (scene) {
         chave2.rotation.y += 0.02;
         chave2.rotation.x += 0.02;
 
+        if(LostSouls.length==0){
+            subirGrupoChave1=true;
+        }
+
+        if(Cacodemons.length ==0){
+            subirGrupoChave2=true;
+        }
+
         // Elevação dos grupos com chaves
         if (subirGrupoChave1 && grupoChave1.position.y < alturaFinal1) {
-            grupoChave1.position.y = Math.min(
-                grupoChave1.position.y + 0.1,
-                alturaFinal1
-            );
+            grupoChave1.position.y = Math.min(grupoChave1.position.y + 0.1, alturaFinal1);
+            if(grupoChave1.position.y == alturaFinal1)
+                subirGrupoChave1=false;
         }
         if (subirGrupoChave2 && grupoChave2.position.y < alturaFinal2) {
-            grupoChave2.position.y = Math.min(
-                grupoChave2.position.y + 0.1,
-                alturaFinal2
-            );
+            grupoChave2.position.y = Math.min(grupoChave2.position.y + 0.1,alturaFinal2);
+            if(grupoChave2.position.y == alturaFinal1)
+                subirGrupoChave2=false;
         }
 
         // Coleta da chave 1
-        if (
-            !chave1Coletada &&
-            personagem &&
-            grupoChave1.position.y >= alturaFinal1
-        ) {
+        if (!chave1Coletada &&personagem &&grupoChave1.position.y >= alturaFinal1) {
             const distancia = personagem.position.distanceTo(
                 chave1.getWorldPosition(new THREE.Vector3())
             );
@@ -401,30 +403,30 @@ export default function (scene) {
                 chave1.position.set(0, 3, 0);
                 altar_ativo = true;
                 portaaberta = true;
+                
             }
         }
 
-       if (portaaberta && porta.position.x > -16 && altar_ativo) {
+        if (portaaberta && porta.position.x > -16 && altar_ativo) {
                    porta.position.x = Math.max(porta.position.x - 0.3, -16);
                }
                
                // Lógica da plataforma móvel
-               const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
-               const PosicaoSubida = -0.01;
-               const PosicaoDescida= -4;
-               const distanciaX_da_Plataforma = 15;
-               const distanciaZ_da_Plataforma = 14;
-               const velocidade_plataforma = 0.05;
-               const posicaoChao = 1;
-               const posicaoTopo = 5;
-               const dx = personagem.position.x - posPlataforma.x;
-               const dz = personagem.position.z - posPlataforma.z;
-               const distanciaPlataformaZ_Atual = Math.abs( dz);
-               const distanciaPlataformaX_Atual = Math.abs( dx);
-               const emCima = personagem.position.x > 0 && personagem.position.x < 30 &&
-                              personagem.position.z > -119&& personagem.position.z < -105;
-            // console.log(distanciaPlataformaZ_Atual)
-           function ajustarPlataforma(subindo, alvo) {
+        const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
+        const PosicaoSubida = -0.01;
+        const PosicaoDescida= -4;
+        const distanciaX_da_Plataforma = 15;
+        const distanciaZ_da_Plataforma = 14;
+        const velocidade_plataforma = 0.05;
+        const posicaoChao = 1;
+        const posicaoTopo = 5;
+        const dx = personagem.position.x - posPlataforma.x;
+        const dz = personagem.position.z - posPlataforma.z;
+        const distanciaPlataformaZ_Atual = Math.abs( dz);
+        const distanciaPlataformaX_Atual = Math.abs( dx);
+        const emCima = personagem.position.x > 0 && personagem.position.x < 30 && personagem.position.z > -119&& personagem.position.z < -105;
+            
+        function ajustarPlataforma(subindo, alvo) {
            if (subindo) {
                plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma , alvo);
                if (plataforma.position.y === alvo) return false;
@@ -498,6 +500,24 @@ export default function (scene) {
                }
            }
        }
+
+        const x = personagem.position.x;
+        const z = personagem.position.z;
+
+        if (!lostSoulsAtivados &&  (x >= -220 && x <= -100 && z >= -200 && z <= -120)) {
+            lostSoulsAtivados =true;
+            for (const inimigo of LostSouls) {
+                console.log(inimigo);
+            }
+        }
+
+        if (!CacodemonsAtivados && (x >= -20 && x <= 60 && z >= -200 && z <= -120))
+        {   
+            CacodemonsAtivados =true;
+            for (const inimigo of Cacodemons ) {
+                console.log(inimigo);
+            }
+        }
        
     }
 
@@ -513,5 +533,6 @@ export default function (scene) {
         rampas,
         updateScene,
         setPersonagem,
+        setInimigos,
     };
 }
