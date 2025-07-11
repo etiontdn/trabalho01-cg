@@ -146,6 +146,24 @@ export default function criarArmas(
         disparos.push(tiro);
     }
 
+    function criarDisparoCacodemon(visivel = true) {
+        const disparoGeo = new THREE.SphereGeometry(5, 10, 10);
+        const disparoMat = new THREE.MeshLambertMaterial({ color: 0xff0000});
+        const tiro = new THREE.Mesh(disparoGeo, disparoMat);
+
+        crosshair.active = true;
+
+        armas[armaAtual].getWorldPosition(tiro.position);
+        tiro.position.y += 3;
+        tiro.userData.dir = personagemControls
+            .getObject()
+            .getWorldDirection(new THREE.Vector3())
+            .clone();
+
+        scene.add(tiro);
+        disparos.push(tiro);
+    }
+
     function updateArmas(frameAtual) {
         if (frameAtual % 30 === 0) {
             if (changeWeaponEvent.deltaY > 0) {
@@ -178,7 +196,8 @@ export default function criarArmas(
                 sprite.material.map.needsUpdate = true;
 
                 if (d.currentFrame === 1) {
-                    criarDisparo(false);
+                    // criarDisparo(false);
+                    criarDisparoCacodemon();
                 }
             } else {
                 d.currentFrame = 0;
@@ -212,6 +231,17 @@ export default function criarArmas(
                 calcDelta = 0;
             }
         }
+
+        inimigos.forEach(inimigo => {
+            if(inimigo.estadoAtual == "ataque a distancia") {
+                if (
+                inimigo.framesDesdeOUltimoEstado(frameAtual) >=
+                inimigo.duracaoEstados[inimigo.estadoAtual]
+                ) {
+                    criarDisparoCacodemon(inimigo.entidade.position);
+                }
+            }
+        });
 
         const speed = 200;
 
