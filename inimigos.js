@@ -273,8 +273,10 @@ export class Cacodemon extends Entidade {
         this.speed = 5;
         this.distRecuo = 0;
         this.altMinima = 4;
+        this.fadeOut = 1.0; // opacidade usada na transição
         this.url = "./assets/cacodemon.glb";
         this.createEnemy();
+
         inimigos.push(this);
     }
 
@@ -291,6 +293,14 @@ export class Cacodemon extends Entidade {
 
     animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
+
+        if (this.bb && this.enemyObj) this.bb.setFromObject(this.entidade);
+
+        // Verifica morte e inicia fade-out
+        if (this.hp <= 0 && this.estadoAtual !== "morre") {
+            this.estadoAtual = "morre";
+            this.fadeOut = 1.0;
+        }
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -468,7 +478,7 @@ export class Cacodemon extends Entidade {
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new LostSoul(scene, new THREE.Vector3(30, 10, -20));
-    //new Cacodemon(scene, new THREE.Vector3(30, 10, 0));
+    new Cacodemon(scene, new THREE.Vector3(30, 10, 0));
 
     function updateEnemies(frameAtual) {
         inimigos.forEach((inimigo) => {
