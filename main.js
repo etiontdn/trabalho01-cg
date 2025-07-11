@@ -8,22 +8,24 @@ import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
-import { CSS2DRenderer } from '../build/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
+import { PMREMGenerator } from "../build/three.module.js";
 
 let renderer = iniciarRenderer();
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0px';
+labelRenderer.domElement.style.position = "absolute";
+labelRenderer.domElement.style.top = "0px";
 document.body.appendChild(labelRenderer.domElement);
 
 const camera = createCamera();
-let firstRender = false;
 
 // Cria personagem e controles
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } = createScene(); // ✅ setPersonagem incluído
+const { scene, objetosColidiveis, rampas, updateScene, setPersonagem } =
+    createScene(new THREE.Scene()); // ✅ setPersonagem incluído
+let primeiroFrame = false;
 render();
-firstRender = true;
+primeiroFrame = true;
 const { personagem, personagemControls, updateControl } = createPersonagem(
     camera,
     renderer,
@@ -34,7 +36,6 @@ scene.add(personagem);
 scene.personagem = personagem;
 // ✅ Passa o personagem para o scene.js
 setPersonagem(personagem);
-
 
 const { updateEnemies, inimigos } = createEnemies(
     scene,
@@ -47,17 +48,17 @@ const updateDisparos = createArmas(
     scene,
     personagemControls,
     objetosColidiveis,
-    rampas, 
+    rampas,
     inimigos
 );
 
 window.addEventListener("keydown", (e) => {
-  if (e.key.toLowerCase() === "e") {
-    takeDamage();
-  }
+    if (e.key.toLowerCase() === "e") {
+        takeDamage();
+    }
 });
 
-window.addEventListener("resize", () => { 
+window.addEventListener("resize", () => {
     onWindowResize(camera, renderer);
     labelRenderer.setSize(window.innerWidth, window.innerHeight);
 });
@@ -70,12 +71,13 @@ function render() {
     // }
     crosshair.animate(renderer);
 
-    if (firstRender) {
+    if (primeiroFrame) {
         updateControl();
         updateDisparos(renderer.info.render.frame);
         updateEnemies(renderer.info.render.frame);
         updateScene();
     }
+
     renderer.render(scene, camera); // Render scene
     labelRenderer.render(scene, camera);
 }

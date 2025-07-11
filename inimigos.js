@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
+import { caminhoEValido } from "./pathfinding.js";
 import Entidade from "./entidade.js";
 
 const inimigos = [];
@@ -11,12 +12,12 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(5, 4, 0.5);
-        
+
         this.speed = 10;
         this.altMinima = 3;
         this.distRecuo = 0;
         this.tamanho = new THREE.Vector3(3, 3, 3);
-        
+
         this.maxHp = 20;
         this.hp = this.maxHp;
         this.fadeOut = 1.0; // opacidade usada na transição
@@ -54,11 +55,10 @@ export class LostSoul extends Entidade {
         });
     }
 
-     animateEnemy(frameAtual, alvo) {
+    animateEnemy(frameAtual, alvo) {
         if (!this.enemyObj) return;
 
-        if (this.bb && this.enemyObj)
-            this.bb.setFromObject(this.entidade);
+        if (this.bb && this.enemyObj) this.bb.setFromObject(this.entidade);
 
         // Verifica morte e inicia fade-out
         if (this.hp <= 0 && this.estadoAtual !== "morre") {
@@ -82,6 +82,22 @@ export class LostSoul extends Entidade {
                 this.recua(alvo);
                 break;
             case "morre":
+                if (this.fadeOut > 0) {
+                    this.fadeOut -= 0.01;
+
+                    this.entidade.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            child.material.transparent = true;
+                            child.material.opacity = this.fadeOut;
+                        }
+                    });
+
+                    if (this.fadeOut <= 0) {
+                        this.scene.remove(this.entidade);
+                        const index = inimigos.indexOf(this);
+                        if (index !== -1) inimigos.splice(index, 1);
+                    }
+                }
                 break;
             case "espera":
                 this.espera();
@@ -124,7 +140,7 @@ export class LostSoul extends Entidade {
 
         if (inimigoPos.distanceTo(personagemPos) >= 20) {
             return false;
-        } 
+        }
 
         // Calcula a direção do inimigo para o personagem
         const direcao = new THREE.Vector3()
@@ -178,7 +194,7 @@ export class LostSoul extends Entidade {
     atacar(frameAtual) {
         this.ultimoAtaque = frameAtual;
         const velocidadeAtaque = 100; // Ajuste este valor para controlar a velocidade da investida.
-                                     // O valor 40 original era muito alto para ser um deslocamento direto.
+        // O valor 40 original era muito alto para ser um deslocamento direto.
         const vetorPos = this.ultimaPosicaoInimigo; // Posição do alvo
         const posInicial = this.ultimaPosicaoEntidade;
 
@@ -209,8 +225,17 @@ export class LostSoul extends Entidade {
         // Use `this.speed` ou `velocidadeAtaque` como preferir para controlar o avanço.
         // Importante: use `delta` (tempo entre frames) para um movimento consistente.
         // Assumindo que `delta` é passado ou acessível de algum lugar (e.g., this.scene.deltaTime)
-        const movimentoPorFrame = direcao.multiplyScalar(velocidadeAtaque/100); // <-- Use deltaTime aqui!
-        this.entidade.position.add(movimentoPorFrame);
+        const movimentoPorFrame = direcao.multiplyScalar(
+            velocidadeAtaque / 100
+        );
+
+        const dumPos = new THREE.Vector3().copy(this.entidade.position);
+        dumPos.add(movimentoPorFrame);
+
+
+        if (caminhoEValido(this, movimentoPorFrame.length(), movimentoPorFrame, dumPos)) {
+            this.entidade.position.add(movimentoPorFrame);   
+        }
     }
 
     espera() {
@@ -452,5 +477,5 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
         });
     }
 
-    return {updateEnemies, inimigos};
+    return { updateEnemies, inimigos };
 }

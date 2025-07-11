@@ -25,7 +25,7 @@ export default function createPersonagem(
         personagem.quaternion.copy(startQuat);
         camera.rotation.x = 0;
     }
-
+    
     personagemObject.position.set(0, alturaPersonagem, 0);
     const corpoGeo = new THREE.CylinderGeometry(1, 1, alturaPersonagem, 8);
     const corpoMat = new THREE.MeshBasicMaterial({ visible: false });

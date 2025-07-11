@@ -42,6 +42,7 @@ function caminhoEValido(entidade, distancia, vetorDirecao, vetorPos) {
 
     // Bounding box do boxMesh
     boxMesh.updateMatrixWorld(true);
+    console.log(boxMesh.position);
     const boxBB = new THREE.Box3().setFromObject(boxMesh);
 
     const colidiveis = entidade.scene.rampas.concat(
@@ -131,3 +132,4 @@ function encontrarCaminho(entidade) {
 }
 
 export default encontrarCaminho;
+export {caminhoEValido};

@@ -83,8 +83,8 @@ class Entidade {
             this.healthBarObj.visible = true;
         } else {
             this.healthBarObj.visible = false;
-            this.estadoAtual = "morre";
-            this.ultimoFrame = frameAtual;
+            //this.estadoAtual = "morre";
+            //this.ultimoFrame = frameAtual;
         }
         //console.log([frameAtual, this.framesDesdeOUltimoEstado(frameAtual), this.duracaoEstados[this.estadoAtual]])
         if (

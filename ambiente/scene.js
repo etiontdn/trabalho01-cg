@@ -8,13 +8,12 @@ import Iluminacao from "./iluminacao.js";
 let personagem = null;
 let chave1Coletada = true;
 
-export default function () {
+export default function (scene) {
     // Listas de objetos interativos
     const objetosColidiveis = [];
     const rampas = [];
 
     // Cena principal
-    const scene = new THREE.Scene();
     scene.objetosColidiveis = objetosColidiveis;
     scene.rampas = rampas;
 
