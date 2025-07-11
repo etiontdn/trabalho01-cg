@@ -507,7 +507,7 @@ export default function (scene) {
         if (!lostSoulsAtivados &&  (x >= -220 && x <= -100 && z >= -200 && z <= -120)) {
             lostSoulsAtivados =true;
             for (const inimigo of LostSouls) {
-                console.log(inimigo);
+                inimigo.estadoAtual = "patrulha";
             }
         }
 
@@ -515,7 +515,7 @@ export default function (scene) {
         {   
             CacodemonsAtivados =true;
             for (const inimigo of Cacodemons ) {
-                console.log(inimigo);
+                inimigo.estadoAtual = "patrulha";
             }
         }
        
