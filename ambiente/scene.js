@@ -511,15 +511,16 @@ export default function (scene) {
 
         const x = personagem.position.x;
         const z = personagem.position.z;
+        
 
-        if (!lostSoulsAtivados &&  (x >= -220 && x <= -100 && z >= -200 && z <= -120)) {
+        if (!lostSoulsAtivados &&  (x >= -180 && x <= -100 && z >= -200 && z <= -120)) {
             lostSoulsAtivados =true;
             for (const inimigo of LostSouls) {
                 inimigo.alerta = true;
             }
         }
 
-        if (!CacodemonsAtivados && (x >= -20 && x <= 60 && z >= -200 && z <= -120))
+        if (!CacodemonsAtivados && (x >= -20 && x <= 41 && z >= -200 && z <= -120))
         {   
             CacodemonsAtivados =true;
             for (const inimigo of Cacodemons ) {
