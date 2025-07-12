@@ -353,6 +353,14 @@ export default function (scene) {
 
     // ------------------- EVENTOS E LÓGICA ------------------- //
 
+        // Evento: subir as chaves com tecla "K"
+    window.addEventListener("keydown", (event) => {
+        if (event.key.toLowerCase() === "k") {
+            subirGrupoChave1 = true;
+            subirGrupoChave2 = true;
+        }
+    });
+
     // Atualização contínua da cena
     function updateScene() {
         chave1.rotation.y += 0.02;
@@ -507,7 +515,7 @@ export default function (scene) {
         if (!lostSoulsAtivados &&  (x >= -220 && x <= -100 && z >= -200 && z <= -120)) {
             lostSoulsAtivados =true;
             for (const inimigo of LostSouls) {
-                inimigo.estadoAtual = "patrulha";
+                inimigo.alerta = true;
             }
         }
 
@@ -515,7 +523,7 @@ export default function (scene) {
         {   
             CacodemonsAtivados =true;
             for (const inimigo of Cacodemons ) {
-                inimigo.estadoAtual = "patrulha";
+                inimigo.alerta = true;
             }
         }
        

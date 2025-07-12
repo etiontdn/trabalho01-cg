@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { setDefaultMaterial } from "../../libs/util/util.js";
 import crosshair from "./crosshair.js";
+import { takeDamage } from "./damage.js";
 
 const armas = [];
 const disparos = [];
@@ -25,11 +26,11 @@ export default function criarArmas(
         1, // linhas
         1.7, // largura em unidades
         1.2, // altura em unidades
-        2 // dano da arma
+        1 // dano da arma
     );
 
     // lançador
-    criarArma({ raio: 0.23, comprimento: 2 }, 0.5, 5);
+    criarArma({ raio: 0.23, comprimento: 2 }, 0.5, 10);
 
     // Shotgun
     const armaGeo = new THREE.CylinderGeometry(0.15, 0.15, 4);
@@ -160,19 +161,18 @@ export default function criarArmas(
         disparos.push(tiro);
     }
 
-    function criarDisparoCacodemon(posicao) {
-        const disparoGeo = new THREE.SphereGeometry(5, 10, 10);
+    function criarDisparoCacodemon(inimigo) {
+        const disparoGeo = new THREE.SphereGeometry(2, 10, 10);
         const disparoMat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
-        crosshair.active = true;
+        tiro.position.copy(inimigo.entidade.position);
+        tiro.position.y -= 1;
+        const vetorPos = inimigo.ultimaPosicaoInimigo; // Posição do alvo
+        const posInicial = inimigo.ultimaPosicaoEntidade;
 
-        tiro.position.copy(posicao);
-        tiro.position.y += 3;
-        // mudar isto aqui!
-        const vetDir = new THREE.Vector3();
-        vetDir.subVectors(scene.personagem.position, posicao);
-        tiro.userData.dir = vetDir;        
+        const direcao = new THREE.Vector3().subVectors(vetorPos, posInicial);
+        tiro.userData.dir = direcao;        
         tiro.eInimigo = true;
         scene.add(tiro);
         disparos.push(tiro);
@@ -254,7 +254,7 @@ export default function criarArmas(
                     inimigo.framesDesdeOUltimoEstado(frameAtual) >=
                     inimigo.duracaoEstados[inimigo.estadoAtual]
                 ) {
-                    criarDisparoCacodemon(inimigo.entidade.position);
+                    criarDisparoCacodemon(inimigo);
                 }
             }
         });
@@ -269,19 +269,29 @@ export default function criarArmas(
             const tiroBB = new THREE.Box3().setFromObject(tiro);
             let colidiu = false;
             const alvos = objetosColidiveis.concat(rampas);
+            if(tiro.eInimigo){
+                const personagemBB = new THREE.Box3().setFromObject(scene.personagem);
+                if(tiroBB.intersectsBox(personagemBB)){
+                    colidiu = true;
+                    takeDamage();
+                    break;
+                }
+            }
             for (let alvo of alvos) {
                 const alvoBB = new THREE.Box3().setFromObject(alvo);
                 if (tiroBB.intersectsBox(alvoBB)) {
                     colidiu = true;
                     break;
                 }
+
             }
             for (let inimigo of inimigos) {
                 if (!inimigo.bb || !inimigo.enemyObj) continue;
-                inimigo.bb.setFromObject(inimigo.enemyObj); // ou .entidade, dependendo do seu código
+                inimigo.bb.setFromObject(inimigo.enemyObj);
                 if (tiroBB.intersectsBox(inimigo.bb) && !tiro.eInimigo) {
                     colidiu = true;
                     inimigo.hp -= armas[armaAtual].dano;
+                    inimigo.alerta = true;
                     break;
                 }
             }

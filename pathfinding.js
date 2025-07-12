@@ -42,7 +42,7 @@ function caminhoEValido(entidade, distancia, vetorDirecao, vetorPos) {
 
     // Bounding box do boxMesh
     boxMesh.updateMatrixWorld(true);
-    console.log(boxMesh.position);
+    // console.log(boxMesh.position);
     const boxBB = new THREE.Box3().setFromObject(boxMesh);
 
     const colidiveis = entidade.scene.rampas.concat(
@@ -57,8 +57,8 @@ function caminhoEValido(entidade, distancia, vetorDirecao, vetorPos) {
         }
     }
    
-    console.log(centro.distanceTo(entidade.scene.personagem.position));
-    if (centro.distanceTo(entidade.scene.personagem.position) <= entidade.minDistRecuar) {
+    // console.log(centro.distanceTo(entidade.scene.personagem.position));
+    if (centro.distanceTo(entidade.scene.personagem.position) <= entidade.minDistRecuar/2) {
         return false;
     }
     

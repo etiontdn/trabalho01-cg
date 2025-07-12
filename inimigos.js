@@ -2,13 +2,12 @@ import * as THREE from "three";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { caminhoEValido } from "./pathfinding.js";
+import { takeDamage } from "./damage.js";
 import Entidade from "./entidade.js";
 
 const list_LostSouls = [];
 const list_Cacodemons = [];
 
-
-const raioDeVisao = 60;
 
 export class LostSoul extends Entidade {
     constructor(scene, spawn) {
@@ -18,10 +17,12 @@ export class LostSoul extends Entidade {
         this.speed = 10;
         this.altMinima = 3;
         this.distRecuo = 0;
+        this.minDistRecuar = 8;
         this.tamanho = new THREE.Vector3(3, 3, 3);
 
         this.maxHp = 20;
         this.hp = this.maxHp;
+        this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
         this.url = "./assets/skull.obj";
@@ -81,7 +82,11 @@ export class LostSoul extends Entidade {
                 this.atacar(frameAtual);
                 break;
             case "recuo":
-                this.recua(alvo);
+                if (this.distRecuo > 0) {
+                    this.recua(alvo);
+                } else {
+                    this.estadoAtual = "perseguicao";
+                }
                 break;
             case "morre":
                 if (this.fadeOut > 0) {
@@ -104,6 +109,12 @@ export class LostSoul extends Entidade {
             case "espera":
                 this.espera();
                 break;
+        }
+        if(this.entidade.position.distanceTo(alvo) <= 5){
+            if(frameAtual - this.ultimoDano >= 60){
+                takeDamage();
+                this.ultimoDano = frameAtual;
+            }
         }
     }
 
@@ -140,7 +151,7 @@ export class LostSoul extends Entidade {
         const inimigoPos = this.entidade.position.clone();
         const personagemPos = this.ultimaPosicaoInimigo;
 
-        if (inimigoPos.distanceTo(personagemPos) >= 20) {
+        if (inimigoPos.distanceTo(personagemPos) >= 40) {
             return false;
         }
 
@@ -280,6 +291,7 @@ export class Cacodemon extends Entidade {
         this.hp = this.maxHp;
         this.speed = 5;
         this.distRecuo = 0;
+        this.minDistRecuar = 10;
         this.altMinima = 4;
         this.fadeOut = 1.0; // opacidade usada na transição
         this.url = "./assets/cacodemon.glb";
@@ -385,29 +397,34 @@ export class Cacodemon extends Entidade {
     }
 
     checarPodeAtacarADistancia() {
-        console.log(
-            this.entidade.position,
-            this.scene.personagem.position,
-            this.entidade.position.distanceTo(this.scene.personagem.position)
-        );
+        // console.log(
+        //     this.entidade.position,
+        //     this.scene.personagem.position,
+        //     this.entidade.position.distanceTo(this.scene.personagem.position)
+        // );
         if (
             this.entidade.position.distanceTo(this.scene.personagem.position) <=
             40
         ) {
-            console.log("cacodemon pode atacar!");
+            // console.log("cacodemon pode atacar!");
             return true;
         }
         return false;
     }
 
     recua(alvo) {
+        const dummy = new THREE.Object3D();
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(alvo);
+
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04); 
         const dir = new THREE.Vector3()
             .subVectors(this.enemyObj.position, alvo)
             .normalize();
 
         dir.y = 0;
 
-        const step = this.speed * 0.4;
+        const step = this.speed * 0.01;
         const move = Math.min(step, this.distRecuo);
 
         this.enemyObj.position.add(dir.multiplyScalar(move));
@@ -521,11 +538,13 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
+            // inimigo.alerta = true;
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
 
         list_Cacodemons.forEach((inimigo) => {
+            // inimigo.alerta = true;
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });

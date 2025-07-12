@@ -5,7 +5,6 @@ import iniciarRenderer from "./renderer.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
-import { takeDamage } from "./damage.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
@@ -56,12 +55,6 @@ const updateDisparos = createArmas(
     rampas,
     todosInimigos
 );
-
-window.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() === "e") {
-        takeDamage();
-    }
-});
 
 window.addEventListener("resize", () => {
     onWindowResize(camera, renderer);

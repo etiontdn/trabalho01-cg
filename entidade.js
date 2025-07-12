@@ -44,7 +44,7 @@ class Entidade {
             perseguicao: 60,
             "ataque a distancia": 50,
             ataque: 200,
-            recuo: 60,
+            recuo: 80,
             morre: 15,
             espera: 120,
         };
@@ -117,6 +117,7 @@ class Entidade {
                     break;
                 case "recuo":
                     if (this.checarEstaPertoDemais()) {
+                        this.distRecuo = 15;
                         this.estadoAtual = "recuo";
                     } else {
                         this.estadoAtual = "perseguicao";
@@ -137,7 +138,7 @@ class Entidade {
     }
     // altera a propriedade alerta se o personagem esta perto o suficiente
     buscarPersonagem() {
-        console.log(this.ultimaPosicaoEntidade);
+        // console.log(this.ultimaPosicaoEntidade);
         this.ultimaPosicaoEntidade.copy(this.entidade.position);
         this.ultimaPosicaoInimigo.copy(
             this.scene.personagem
