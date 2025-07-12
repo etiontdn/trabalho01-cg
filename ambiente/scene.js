@@ -252,8 +252,8 @@ export default function (scene) {
         scene.add(altar);
 
         const suporte2 = new THREE.Mesh(
-            new THREE.CylinderGeometry(2, 2, 10, 32),
-            new THREE.MeshLambertMaterial({ color: 0x8b0000 })
+            new THREE.BoxGeometry(3, 10, 2),
+            new THREE.MeshLambertMaterial({ color: 0x800080 })
         );
         suporte2.position.set(-25, -10, 0);
         suporte2.castShadow = suporte2.receiveShadow = true;
