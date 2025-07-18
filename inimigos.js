@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
+import { MTLLoader } from '../build/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import { caminhoEValido } from "./pathfinding.js";
 import { takeDamage } from "./damage.js";
@@ -7,7 +8,6 @@ import Entidade from "./entidade.js";
 
 const list_LostSouls = [];
 const list_Cacodemons = [];
-
 
 export class LostSoul extends Entidade {
     constructor(scene, spawn) {
@@ -25,36 +25,23 @@ export class LostSoul extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
-        this.url = "./assets/skull.obj";
+        this.url = "./assets/skull/skull.mtl";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_LostSouls.push(this);
     }
 
-    createEnemy() {
-        // Cria uma esfera para representar o inimigo no local da entidade
-        // const geometry = new THREE.SphereGeometry(this.tamanho.x/2, 16, 16);
-        // const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        // const sphere = new THREE.Mesh(geometry, material);
-        // sphere.position.set(0, 0, 0);
-        // this.entidade.add(sphere);
-
-        const loader = new OBJLoader();
-
-        loader.load(this.url, (enemyMesh) => {
-            enemyMesh.traverse((c) => {
-                if (c.isMesh) {
-                    c.geometry.computeBoundingBox();
-                    c.geometry.center();
-                    if (c.material) {
-                        c.material.transparent = true;
-                        c.material.opacity = 1.0;
-                    }
-                }
-            });
-
+   createEnemy() {
+        const mtlLoader = new MTLLoader();
+        mtlLoader.load('./assets/skull/skull.mtl', (materials) => {
+            materials.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('./assets/skull.obj', (enemyMesh) => {
+            // agora o enemyMesh já vem com texturas aplicadas
             this.entidade.add(enemyMesh);
             this.enemyObj = this.entidade;
+            });
         });
     }
 
@@ -526,11 +513,11 @@ export class Cacodemon extends Entidade {
 } */
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
-    new LostSoul(scene, new THREE.Vector3(-170, 10, -180));
-    new LostSoul(scene, new THREE.Vector3(-160, 10, -170));
-    new LostSoul(scene, new THREE.Vector3(-140, 10, -160));
-    new LostSoul(scene, new THREE.Vector3(-120, 10, -170));
-    new LostSoul(scene, new THREE.Vector3(-100, 10, -180));
+    new LostSoul(scene, new THREE.Vector3(-170, -10, -180));
+    new LostSoul(scene, new THREE.Vector3(-160, -10, -170));
+    new LostSoul(scene, new THREE.Vector3(-140, -10, -160));
+    new LostSoul(scene, new THREE.Vector3(-120, -10, -170));
+    new LostSoul(scene, new THREE.Vector3(-100, -10, -180));
     
     new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));

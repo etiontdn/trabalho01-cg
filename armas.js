@@ -26,7 +26,7 @@ export default function criarArmas(
         1, // linhas
         1.7, // largura em unidades
         1.2, // altura em unidades
-        1 // dano da arma
+        2 // dano da arma
     );
 
     // lançador
