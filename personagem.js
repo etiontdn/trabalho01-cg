@@ -53,6 +53,8 @@ export default function createPersonagem(
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
 
+    let run = 1;
+
     function onKeyDown(e) {
         switch (e.code) {
             case "KeyW":
@@ -70,6 +72,10 @@ export default function createPersonagem(
             case "KeyD":
             case "ArrowRight":
                 move.right = true;
+                break;
+            case "ShiftLeft":
+            case "ShiftRight":
+                run = 2;
                 break;
             case "Space":
                 initPersonagem();
@@ -95,12 +101,16 @@ export default function createPersonagem(
             case "ArrowRight":
                 move.right = false;
                 break;
+            case "ShiftLeft":
+            case "ShiftRight":
+                run = 1;
+                break;
         }
     }
 
     function update() {
         const delta = clock.getDelta();
-        const speed = delta * 50;
+        const speed = delta * 50 * run;
 
 
         /* simplesmente para evitar a queda infinita: */
