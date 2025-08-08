@@ -8,9 +8,9 @@ import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
-import { PMREMGenerator } from "../build/three.module.js";
 
-let renderer = iniciarRenderer();
+const renderer = iniciarRenderer();
+
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = "absolute";
@@ -19,63 +19,72 @@ document.body.appendChild(labelRenderer.domElement);
 
 const camera = createCamera();
 
-// Cria personagem e controles
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem, setInimigos } =
-    createScene(new THREE.Scene()); // ✅ setPersonagem incluído
-let primeiroFrame = false;
-render();
-primeiroFrame = true;
-const { personagem, personagemControls, updateControl } = createPersonagem(
-    camera,
-    renderer,
-    objetosColidiveis,
-    rampas
-);
-scene.add(personagem);
-scene.personagem = personagem;
-// ✅ Passa o personagem para o scene.js
-setPersonagem(personagem);
+async function iniciarCena() {
+    const cenaBase = new THREE.Scene();
 
-const { updateEnemies, inimigos } = createEnemies(
-    scene,
-    objetosColidiveis,
-    rampas,
-    personagem
-);
+    const {
+        scene,
+        objetosColidiveis,
+        rampas,
+        updateScene,
+        setPersonagem,
+        setInimigos
+    } = await createScene(cenaBase);
 
-setInimigos(inimigos.lostSouls, inimigos.cacodemons);
+    const {
+        personagem,
+        personagemControls,
+        updateControl,
+        ativar
+    } = createPersonagem(camera, renderer, objetosColidiveis, rampas);
 
+    scene.add(personagem);
+    scene.personagem = personagem;
+    setPersonagem(personagem);
 
+    const { updateEnemies, inimigos } = createEnemies(
+        scene,
+        objetosColidiveis,
+        rampas,
+        personagem
+    );
 
-const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons];
-const updateDisparos = createArmas(
-    scene,
-    personagemControls,
-    objetosColidiveis,
-    rampas,
-    todosInimigos
-);
+    setInimigos(inimigos.lostSouls, inimigos.cacodemons);
 
-window.addEventListener("resize", () => {
-    onWindowResize(camera, renderer);
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-});
+    const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons];
 
-function render() {
-    requestAnimationFrame(render);
-    // NOTE: Apenas para teste de animação do crosshair
-    // if (renderer.info.render.frame % 120 == 0) {
-    //     crosshair.active = true;
-    // }
-    crosshair.animate(renderer);
+    const updateDisparos = createArmas(
+        scene,
+        personagemControls,
+        objetosColidiveis,
+        rampas,
+        todosInimigos
+    );
 
-    if (primeiroFrame) {
+    window.addEventListener("resize", () => {
+        onWindowResize(camera, renderer);
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Delay para ativar após renderizar pelo menos 1 frame
+    setTimeout(() => {
+        ativar();
+    }, 100);
+
+    function render() {
+        requestAnimationFrame(render);
+        crosshair.animate(renderer);
+
         updateControl();
         updateDisparos(renderer.info.render.frame);
         updateEnemies(renderer.info.render.frame);
         updateScene();
+
+        renderer.render(scene, camera);
+        labelRenderer.render(scene, camera);
     }
 
-    renderer.render(scene, camera); // Render scene
-    labelRenderer.render(scene, camera);
+    render();
 }
+
+iniciarCena();
