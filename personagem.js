@@ -14,17 +14,12 @@ export default function createPersonagem(
     const personagem = new THREE.Object3D();
     personagem.add(personagemObject);
 
+    
     const alturaPersonagem = 2;
     const startPos = new THREE.Vector3(0, 12, 0);
     const startQuat = personagemObject.quaternion.clone();
     personagem.position.copy(startPos);
     personagem.quaternion.copy(startQuat);
-
-    function initPersonagem() {
-        personagem.position.copy(startPos);
-        personagem.quaternion.copy(startQuat);
-        camera.rotation.x = 0;
-    }
 
     personagemObject.position.set(0, alturaPersonagem, 0);
     const corpoGeo = new THREE.CylinderGeometry(1, 1, alturaPersonagem, 8);
@@ -38,7 +33,7 @@ export default function createPersonagem(
     let velY = 0;
     const gravidade = -150;
 
-    const boxSize = new THREE.Vector3(2, alturaPersonagem, 2);
+    const boxSize = new THREE.Vector3(1.3, alturaPersonagem-0.1, 1.3);
     const personagemBox = new THREE.Box3();
     const posX = new THREE.Vector3();
     const posZ = new THREE.Vector3();
@@ -54,6 +49,33 @@ export default function createPersonagem(
     document.addEventListener("keyup", onKeyUp);
 
     let run = 1;
+
+    function initPersonagem() {
+        personagem.position.copy(startPos);
+        personagem.quaternion.copy(startQuat);
+        camera.rotation.x = 0;
+        personagem.vidaMax = 200;
+        personagem.vida = personagem.vidaMax;
+    }
+    
+    const healthBarElement = document.getElementById('health-bar');
+    
+    personagem.updateHealthBar = function () {
+        const porcentVida = (personagem.vida / personagem.vidaMax) * 100;
+        const vidaAtual = Math.max(0, porcentVida);
+        healthBarElement.style.width = `${vidaAtual}%`;
+        if (vidaAtual <= 25) {
+            healthBarElement.style.backgroundColor = '#dc3545';
+        } else if (vidaAtual <= 60) {
+            healthBarElement.style.backgroundColor = '#ffc107';
+        } else {
+            healthBarElement.style.backgroundColor = '#28a745';
+        }
+        if (vidaAtual <= 0) {
+            initPersonagem();
+            personagem.updateHealthBar();
+        }
+    };
 
     function onKeyDown(e) {
         switch (e.code) {
@@ -79,6 +101,7 @@ export default function createPersonagem(
                 break;
             case "Space":
                 initPersonagem();
+                personagem.updateHealthBar();
                 break;
         }
     }
@@ -115,7 +138,7 @@ export default function createPersonagem(
 
         /* simplesmente para evitar a queda infinita: */
         if (personagem.position.y < 0) {
-            personagem.position.copy(startPos);
+            personagem.position.y = 1;
         }
 
         const camQ = new THREE.Quaternion();
@@ -200,7 +223,7 @@ export default function createPersonagem(
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
             //* se topo do box ≃ altura dos pés, ignoramos
-            if (Math.abs(bb.max.y - bottomY) < 0.3) return false;
+            if (Math.abs(bb.max.y - bottomY) <= 0.5) return false;
             return true;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>
@@ -244,7 +267,8 @@ export default function createPersonagem(
         }
     }
 
-    initPersonagem();
+    // initPersonagem();
+    
     return {
         personagem, // Object3D
         corpo, // A MESH do personagem com bounding box real

@@ -97,6 +97,7 @@ class Area {
 
         for (let i = 0; i < degraus; i++) {
             let degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
+            this.parts.push(degrau);
             degrau.position.set(
                 0,
                 -this.altura / 2 +

@@ -13,9 +13,9 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(5, 4, 0.5);
-
+        this.damage = 15;
         this.speed = 10;
-        this.altMinima = 3;
+        this.altMinima = 1.5;
         this.distRecuo = 0;
         this.minDistRecuar = 8;
         this.tamanho = new THREE.Vector3(3, 3, 3);
@@ -25,7 +25,7 @@ export class LostSoul extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
-        this.url = "./assets/skull/skull.mtl";
+        this.url = "../0_assetsT3/objects/skull/skull.mtl";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_LostSouls.push(this);
@@ -33,11 +33,11 @@ export class LostSoul extends Entidade {
 
    createEnemy() {
         const mtlLoader = new MTLLoader();
-        mtlLoader.load('./assets/skull/skull.mtl', (materials) => {
+        mtlLoader.load(this.url, (materials) => {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.load('./assets/skull.obj', (enemyMesh) => {
+            objLoader.load('../0_assetsT3/objects/skull.obj', (enemyMesh) => {
             // agora o enemyMesh já vem com texturas aplicadas
             this.entidade.add(enemyMesh);
             this.enemyObj = this.entidade;
@@ -97,9 +97,12 @@ export class LostSoul extends Entidade {
                 this.espera();
                 break;
         }
+
         if(this.entidade.position.distanceTo(alvo) <= 5){
             if(frameAtual - this.ultimoDano >= 60){
                 takeDamage();
+                this.scene.personagem.vida -= this.damage;
+                this.scene.personagem.updateHealthBar();
                 this.ultimoDano = frameAtual;
             }
         }
@@ -109,12 +112,10 @@ export class LostSoul extends Entidade {
         const vetorPos = this.pathFinding.vetorPos;
         const posAtual = this.entidade.position;
 
-        // Calcula o vetor direção do ponto atual até o destino
         const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
         const distancia = direcao.length();
 
         if (distancia > 0.01) {
-            // Evita jitter quando já está no destino
             direcao.normalize();
             const deslocamento = Math.min(
                 this.speed / this.duracaoEstados["perseguicao"],
@@ -274,14 +275,17 @@ export class Cacodemon extends Entidade {
         super(scene, spawn);
         this.scale = new THREE.Vector3(0.01, 0.01, 0.01);
         this.tamanho = new THREE.Vector3(7, 7, 7);
+
+        this.damage = 8;
         this.maxHp = 50;
         this.hp = this.maxHp;
+
         this.speed = 5;
         this.distRecuo = 0;
         this.minDistRecuar = 10;
         this.altMinima = 4;
         this.fadeOut = 1.0; // opacidade usada na transição
-        this.url = "./assets/cacodemon.glb";
+        this.url = "../0_assetsT3/objects/cacodemon.glb";
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
@@ -513,11 +517,11 @@ export class Cacodemon extends Entidade {
 } */
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
-    new LostSoul(scene, new THREE.Vector3(-170, -10, -180));
-    new LostSoul(scene, new THREE.Vector3(-160, -10, -170));
-    new LostSoul(scene, new THREE.Vector3(-140, -10, -160));
-    new LostSoul(scene, new THREE.Vector3(-120, -10, -170));
-    new LostSoul(scene, new THREE.Vector3(-100, -10, -180));
+    new LostSoul(scene, new THREE.Vector3(-170, 7, -180));
+    new LostSoul(scene, new THREE.Vector3(-160, 7, -170));
+    new LostSoul(scene, new THREE.Vector3(-140, 7, -160));
+    new LostSoul(scene, new THREE.Vector3(-120, 7, -170));
+    new LostSoul(scene, new THREE.Vector3(-100, 7, -180));
     
     new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));

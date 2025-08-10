@@ -6,6 +6,7 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
+import createArea4 from "./ambiente/area4.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
 import { PMREMGenerator } from "../build/three.module.js";
@@ -21,8 +22,9 @@ const camera = createCamera();
 
 // Cria personagem e controles
 const { scene, objetosColidiveis, rampas, updateScene, setPersonagem, setInimigos } =
-    createScene(new THREE.Scene()); // ✅ setPersonagem incluído
+    createScene(new THREE.Scene());
 let primeiroFrame = false;
+createArea4(scene, objetosColidiveis, rampas);
 render();
 primeiroFrame = true;
 const { personagem, personagemControls, updateControl } = createPersonagem(
@@ -33,7 +35,6 @@ const { personagem, personagemControls, updateControl } = createPersonagem(
 );
 scene.add(personagem);
 scene.personagem = personagem;
-// ✅ Passa o personagem para o scene.js
 setPersonagem(personagem);
 
 const { updateEnemies, inimigos } = createEnemies(
@@ -44,8 +45,6 @@ const { updateEnemies, inimigos } = createEnemies(
 );
 
 setInimigos(inimigos.lostSouls, inimigos.cacodemons);
-
-
 
 const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons];
 const updateDisparos = createArmas(

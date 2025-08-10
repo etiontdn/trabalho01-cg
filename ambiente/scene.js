@@ -92,7 +92,7 @@ export default function (scene) {
         const pos1 = new THREE.Vector3(-160, altura / 2, -150);
         const pos2 = new THREE.Vector3(15, altura / 2, -150);
         const pos3 = new THREE.Vector3(155, altura / 2, -150);
-        const pos4 = new THREE.Vector3(0, altura / 2, 150);
+        // const pos4 = new THREE.Vector3(0, altura / 2, 150);
 
         // Área 1: contém a primeira chave
         const area1 = new Area(pos1, altura, 0x008080, scene);
@@ -301,7 +301,7 @@ export default function (scene) {
         ];
 
         // Cria todos os objetos
-         objetos_Area2.forEach(obj => criarObjeto(obj, scene, objetosColidiveis));
+        objetos_Area2.forEach(obj => criarObjeto(obj, scene, objetosColidiveis));
 
         // Áreas 3 e 4 (apenas cenário)
         const area3 = new Area(pos3, altura, 0xee82ee, scene);
@@ -312,20 +312,20 @@ export default function (scene) {
         objetosColidiveis.push(...area3.getParts());
         rampas.push(...area3.ramps);
 
-        const area4 = new Area(pos4, altura, 0x00ff00, scene);
-        area4.makePart({ x: -15, z: 0 }, { x: 135, z: 100 }, "direita");
-        area4.makePart({ x: 15, z: 0 }, { x: 135, z: 100 }, "esquerda");
-        area4.makePart({ x: 0, z: -30 }, { x: 30, z: 80 }, "fundo");
-        const escada = area4.criarEscada(
-            { x: 0, z: -50 },
-            { x: 30, z: 20 },
-            "fundo"
-        );
+        // const area4 = new Area(pos4, altura, 0x00ff00, scene);
+        // area4.makePart({ x: -15, z: 0 }, { x: 135, z: 100 }, "direita");
+        // area4.makePart({ x: 15, z: 0 }, { x: 135, z: 100 }, "esquerda");
+        // area4.makePart({ x: 0, z: -30 }, { x: 30, z: 80 }, "fundo");
+        // const escada = area4.criarEscada(
+        //     { x: 0, z: -50 },
+        //     { x: 30, z: 20 },
+        //     "fundo"
+        // );
         // inverte rotação da escada para ficar corretamente na frente do jogador
 
-        escada.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-        objetosColidiveis.push(...area4.getParts());
-        rampas.push(...area4.ramps);
+        // escada.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+        // objetosColidiveis.push(...area4.getParts());
+        // rampas.push(...area4.ramps);
     }
 
     // Cria limites invisíveis para evitar que o personagem caia fora do mapa
