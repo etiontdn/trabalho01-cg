@@ -1,3 +1,4 @@
+// main.js
 import createScene from "./ambiente/scene.js";
 import * as THREE from "three";
 import { onWindowResize } from "../libs/util/util.js";
@@ -21,20 +22,42 @@ document.body.appendChild(labelRenderer.domElement);
 
 const camera = createCamera();
 
+// --- NOVO: Cria o AudioListener e o anexa à câmera ---
+const audioListener = new THREE.AudioListener();
+camera.add(audioListener);
+
+// --- NOVO: Variável para controlar se o contexto de áudio foi retomado ---
+let audioContextResumed = false;
+
+// --- NOVO: Variável para controlar o estado da música de fundo ---
+let isMusicPlaying = true; // Começa ligada
+
+// --- NOVO: Adiciona um listener para retomar o contexto de áudio após a interação do usuário ---
+document.addEventListener('click', () => {
+    if (!audioContextResumed) {
+        if (audioListener.context.state === 'suspended') {
+            audioListener.context.resume().then(() => {
+                console.log('AudioContext resumed successfully!');
+                audioContextResumed = true; // Define como true para não tentar retomar novamente
+            });
+        }
+    }
+}, { once: true }); // O { once: true } garante que o evento seja removido após a primeira execução
+
+
 async function iniciarCena() {
     const cenaBase = new THREE.Scene();
 
+    // --- MODIFICADO: Passa o audioListener para createScene e obtém toggleAmbientSound ---
     const {
         scene,
         objetosColidiveis,
         rampas,
         updateScene,
         setPersonagem,
-        setInimigos
-    } = await createScene(cenaBase);
-
-    await createArea4(scene, objetosColidiveis, rampas);
-    await createArea3(scene, objetosColidiveis, rampas);
+        setInimigos,
+        toggleAmbientSound // NOVO: Obtenha a função toggleAmbientSound
+    } = await createScene(cenaBase, audioListener); // Passa o audioListener
 
     const {
         personagem,
@@ -69,6 +92,15 @@ async function iniciarCena() {
     window.addEventListener("resize", () => {
         onWindowResize(camera, renderer);
         labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- NOVO: Listener para a tecla 'Q' ---
+    document.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() === 'q') {
+            isMusicPlaying = !isMusicPlaying;
+            toggleAmbientSound(isMusicPlaying);
+            console.log(`Música de fundo: ${isMusicPlaying ? 'Ligada' : 'Desligada'}`);
+        }
     });
 
     // Delay para ativar após renderizar pelo menos 1 frame
