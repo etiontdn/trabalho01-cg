@@ -47,7 +47,7 @@ setInimigos(inimigos.lostSouls, inimigos.cacodemons);
 
 
 
-const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons, ...inimigos.soldados];
+const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons, ...inimigos.soldados, ...inimigos.painElementals];
 const updateDisparos = createArmas(
     scene,
     personagemControls,

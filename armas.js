@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { setDefaultMaterial } from "../../libs/util/util.js";
 import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
+import { Cacodemon } from "./inimigos.js";
 
 const armas = [];
 const disparos = [];
@@ -249,7 +250,7 @@ export default function criarArmas(
         }
 
         inimigos.forEach((inimigo) => {
-            if (inimigo.estadoAtual == "ataque a distancia") {
+            if (inimigo.estadoAtual == "ataque a distancia" && inimigo instanceof Cacodemon) {
                 if (
                     inimigo.framesDesdeOUltimoEstado(frameAtual) >=
                     inimigo.duracaoEstados[inimigo.estadoAtual]

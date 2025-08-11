@@ -5,6 +5,7 @@ function iniciarRenderer() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setClearColor(new THREE.Color("rgb(0,0,0)"));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
     document.getElementById("webgl-output").appendChild(renderer.domElement);
     return renderer;
 }

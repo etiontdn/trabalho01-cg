@@ -10,6 +10,7 @@ import Entidade from "./entidade.js";
 const list_LostSouls = [];
 const list_Cacodemons = [];
 const list_Soldados = [];
+const list_PainElementals = [];
 
 export class LostSoul extends Entidade {
     constructor(scene, spawn) {
@@ -264,6 +265,199 @@ export class LostSoul extends Entidade {
         dir.y = 0;
 
         const step = this.speed * 0.4;
+        const move = Math.min(step, this.distRecuo);
+
+        this.enemyObj.position.add(dir.multiplyScalar(move));
+        this.distRecuo -= move;
+    }
+}
+
+export class PainElemental extends Entidade {
+    constructor(scene, spawn, scale) {
+        super(scene, spawn);
+        this.scale = new THREE.Vector3(1.2, 1.2, 1.2);
+        this.tamanho = new THREE.Vector3(10, 10, 10);
+        this.maxHp = 100;
+        this.hp = this.maxHp;
+        this.speed = 5;
+        this.distRecuo = 0;
+        this.minDistRecuar = 10;
+        this.altMinima = 16;
+        this.fadeOut = 1.0; // opacidade usada na transição
+        this.url = "./assets/pain/painElemental.glb";
+        this.createEnemy();
+        this.frameAtual = 0;
+        this.ultimaInvocacao = 0;
+
+        this.lostSoulsInvocados = [];
+
+        this.duracaoEstados.espera = 20;
+
+        list_PainElementals.push(this);
+    }
+
+    createEnemy() {
+        const loader = new GLTFLoader();
+        loader.load(this.url, (gltf) => {
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    console.log("Metalness:", child.material.metalness);
+                    child.material.metalness = 0;
+                }
+            });
+            const enemy = gltf.scene;
+            enemy.lookAt(new THREE.Vector3(-1, 0, 0));
+            enemy.position.y -= 12;
+            enemy.scale.copy(this.scale);
+
+            this.entidade.add(enemy);
+            this.enemyObj = this.entidade;
+        });
+    }
+
+    animateEnemy(frameAtual, alvo) {
+        this.frameAtual = frameAtual;
+        if (!this.enemyObj) return;
+
+        if (this.bb && this.enemyObj) this.bb.setFromObject(this.entidade);
+
+        // Verifica morte e inicia fade-out
+        if (this.hp <= 0 && this.estadoAtual !== "morre") {
+            this.estadoAtual = "morre";
+            this.fadeOut = 1.0;
+        }
+
+        switch (this.estadoAtual) {
+            case "patrulha":
+                this.patrulha(this.entidade, this.speed);
+                break;
+            case "perseguicao":
+                this.perseguicao();
+                break;
+            case "ataque":
+                //this.atacar(alvo);
+                break;
+            case "ataque a distancia":
+                this.atacar(alvo);
+                break;
+            case "recuo":
+                this.recua(alvo);
+                break;
+            case "morre":
+                if (this.fadeOut > 0) {
+                    this.fadeOut -= 0.01;
+
+                    this.entidade.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            child.material.transparent = true;
+                            child.material.opacity = this.fadeOut;
+                        }
+                    });
+
+                    if (this.fadeOut <= 0) {
+                        this.scene.remove(this.entidade);
+                        const index = list_Cacodemons.indexOf(this);
+                        if (index !== -1) list_Cacodemons.splice(index, 1);
+                    }
+                }
+                break;
+        }
+    }
+
+    perseguicao() {
+        const vetorPos = this.pathFinding.vetorPos;
+        const posAtual = this.entidade.position;
+
+        // Calcula o vetor direção do ponto atual até o destino
+        const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
+        const distancia = direcao.length();
+
+        if (distancia > 0.01) {
+            // Evita jitter quando já está no destino
+            direcao.normalize();
+            const deslocamento = Math.min(
+                this.speed / this.duracaoEstados["perseguicao"],
+                distancia
+            );
+            this.entidade.position.add(direcao.multiplyScalar(deslocamento));
+        }
+        const dummy = new THREE.Object3D();
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(vetorPos);
+
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
+    }
+
+    patrulha(enemy, speed) {}
+
+    atacar() {
+        const vetorPos = this.pathFinding.vetorPos;
+        const dummy = new THREE.Object3D();
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(vetorPos);
+
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
+
+        // move o último lostsoul na direção do personagem:
+
+        const lostSoul = this.lostSoulsInvocados[this.lostSoulsInvocados.length - 1];
+        lostSoul.entidade.quaternion.copy(dummy.quaternion);
+        lostSoul.entidade.translateZ(1);
+    }
+
+    checarPodeAtacarADistancia() {
+        // console.log(
+        //     this.entidade.position,
+        //     this.scene.personagem.position,
+        //     this.entidade.position.distanceTo(this.scene.personagem.position)
+        // );
+        if (
+            this.entidade.position.distanceTo(this.scene.personagem.position) <=
+            80
+        ) {
+            // console.log("cacodemon pode atacar!");
+            // Invoca lost soul aqui:
+            if (this.lostSoulsInvocados.length < 5 && this.tempoUltimaInvocacao() >= 300) {
+                this.invocarLostSoul();
+                this.ultimaInvocacao = this.frameAtual;
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    tempoUltimaInvocacao() {
+        return this.frameAtual - this.ultimaInvocacao;
+    }
+
+    invocarLostSoul() {
+        const pos = this.entidade.position.clone();
+        pos.z -= 2;
+        const lostSoul = new LostSoul(this.scene, pos);
+        lostSoul.alerta = true;
+        const padraoLostSoul = lostSoul.checarPodeAtacar;
+        lostSoul.checarPodeAtacar = () => {
+            lostSoul.checarPodeAtacar = padraoLostSoul;
+            return true;
+        };
+
+        this.lostSoulsInvocados.push(lostSoul);
+    }
+
+    recua(alvo) {
+        const dummy = new THREE.Object3D();
+        dummy.position.copy(this.entidade.position);
+        dummy.lookAt(alvo);
+
+        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
+        const dir = new THREE.Vector3()
+            .subVectors(this.enemyObj.position, alvo)
+            .normalize();
+
+        dir.y = 0;
+
+        const step = this.speed * 0.01;
         const move = Math.min(step, this.distRecuo);
 
         this.enemyObj.position.add(dir.multiplyScalar(move));
@@ -816,7 +1010,9 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
-    new Soldado(scene, new THREE.Vector3(0, 2, -10));
+    //new Soldado(scene, new THREE.Vector3(0, 2, -10));
+
+    new PainElemental(scene, new THREE.Vector3(0, 10, -10));
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
@@ -832,6 +1028,12 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
         });
 
         list_Soldados.forEach((inimigo) => {
+            //  inimigo.alerta = true;
+            inimigo.animateEnemy(frameAtual, personagem.position);
+            inimigo.loopDeComportamento(frameAtual, personagem.position);
+        });
+
+        list_PainElementals.forEach((inimigo) => {
             inimigo.alerta = true;
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
@@ -844,6 +1046,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
             lostSouls: list_LostSouls,
             cacodemons: list_Cacodemons,
             soldados: list_Soldados,
+            painElementals: list_PainElementals,
         },
     };
 }
