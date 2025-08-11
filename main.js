@@ -59,6 +59,9 @@ async function iniciarCena() {
         toggleAmbientSound // NOVO: Obtenha a função toggleAmbientSound
     } = await createScene(cenaBase, audioListener); // Passa o audioListener
 
+    await createArea3(scene, objetosColidiveis, rampas);
+    await createArea4(scene, objetosColidiveis, rampas);
+
     const {
         personagem,
         personagemControls,
