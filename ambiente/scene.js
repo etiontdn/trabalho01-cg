@@ -4,7 +4,7 @@ import { criarChave } from "./chave.js";
 import Area from "./area.js";
 import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
-import createArea4 from "./area4.js";
+
 
 
 async function carregarTexturas() {
@@ -751,8 +751,7 @@ export default async function (scene, audioListener) {
     });
 
 
-    // Área 4
-createArea4(scene, objetosColidiveis, rampas, texturas.area4);
+
 
 
     }
