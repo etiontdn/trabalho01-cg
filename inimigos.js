@@ -639,7 +639,7 @@ export class Soldado extends Entidade {
         this.minDistRecuar = 8;
         this.tamanho = new THREE.Vector3(1.5, 3, 1.5);
 
-        this.maxHp = 20;
+        this.maxHp = 30;
         this.hp = this.maxHp;
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
@@ -660,6 +660,8 @@ export class Soldado extends Entidade {
 
         this.duracaoEstados["ataque a distancia"] = 80;
         this.duracaoEstados["espera"] = 10;
+        
+        this.posicaoInicial = spawn;
     }
 
     createEnemy() {
