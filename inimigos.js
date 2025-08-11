@@ -21,7 +21,7 @@ export class LostSoul extends Entidade {
         this.altMinima = 3;
         this.distRecuo = 0;
         this.minDistRecuar = 8;
-        this.tamanho = new THREE.Vector3(3, 3, 3);
+        this.tamanho = new THREE.Vector3(1.5, 1.5, 1.5);
 
         this.maxHp = 20;
         this.hp = this.maxHp;
@@ -275,14 +275,14 @@ export class LostSoul extends Entidade {
 export class PainElemental extends Entidade {
     constructor(scene, spawn, scale) {
         super(scene, spawn);
-        this.scale = new THREE.Vector3(1.2, 1.2, 1.2);
-        this.tamanho = new THREE.Vector3(10, 10, 10);
+        this.scale = new THREE.Vector3(0.7, 0.7, 0.7);
+        this.tamanho = new THREE.Vector3(20, 20, 10);
         this.maxHp = 100;
         this.hp = this.maxHp;
         this.speed = 5;
         this.distRecuo = 0;
         this.minDistRecuar = 10;
-        this.altMinima = 16;
+        this.altMinima = 12;
         this.fadeOut = 1.0; // opacidade usada na transição
         this.url = "./assets/pain/painElemental.glb";
         this.createEnemy();
@@ -444,7 +444,7 @@ export class PainElemental extends Entidade {
     invocarLostSoul() {
         const pos = this.entidade.position.clone();
         pos.z -= 2;
-        pos.y -= 3;
+        pos.y -= 7;
         const lostSoul = new LostSoul(this.scene, pos);
         lostSoul.alerta = true;
         lostSoul.reached = false;
@@ -1025,9 +1025,9 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
-    //new Soldado(scene, new THREE.Vector3(0, 2, -10));
+    new Soldado(scene, new THREE.Vector3(0, 2, -20));
 
-    new PainElemental(scene, new THREE.Vector3(0, 10, -10));
+    new PainElemental(scene, new THREE.Vector3(0, 16, -10));
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
