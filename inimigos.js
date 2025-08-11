@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { MTLLoader } from "../build/jsm/loaders/MTLLoader.js";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
-import { caminhoEValido } from "./pathfinding.js";
+import { caminhoEValido, encontrarCaminho } from "./pathfinding.js";
 import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import { takeDamage } from "./damage.js";
 import Entidade from "./entidade.js";
@@ -426,7 +426,7 @@ export class Soldado extends Entidade {
         super(scene, spawn);
         this.scale = new THREE.Vector3(1, 1, 1);
 
-        this.speed = 10;
+        this.speed = 5;
         this.altMinima = 2;
         this.distRecuo = 0;
         this.minDistRecuar = 8;
@@ -443,11 +443,16 @@ export class Soldado extends Entidade {
         this.clock = new THREE.Clock();
         this.animando = false;
         this.colisao;
+        this.naoVoa = true;
+        this.indoLado = false;
 
         this.url = "./assets/zombieman.png";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_Soldados.push(this);
+
+        this.duracaoEstados["ataque a distancia"] = 80;
+        this.duracaoEstados["espera"] = 10;
     }
 
     createEnemy() {
@@ -640,9 +645,9 @@ export class Soldado extends Entidade {
                 this.perseguicao();
                 break;
             case "ataque a distancia":
+                this.atacar(frameAtual);
                 break;
             case "ataque":
-                this.atacar(frameAtual);
                 break;
             case "recuo":
                 if (this.distRecuo > 0) {
@@ -664,10 +669,12 @@ export class Soldado extends Entidade {
     }
 
     perseguicao() {
+        this.indoLado = false;
         const vetorPos = this.pathFinding.vetorPos;
         const posAtual = this.entidade.position;
         // Calcula o vetor direção do ponto atual até o destino
         const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
+        direcao.y = 0;
         const distancia = direcao.length();
         if (distancia > 0.01) {
             // Evita jitter quando já está no destino
@@ -678,6 +685,7 @@ export class Soldado extends Entidade {
             );
             this.entidade.position.add(direcao.multiplyScalar(deslocamento));
         }
+
         const dummy = new THREE.Object3D();
         dummy.position.copy(this.entidade.position);
         dummy.lookAt(vetorPos);
@@ -689,10 +697,15 @@ export class Soldado extends Entidade {
         const dot = direcao.dot(direcaoPersonagem);
 
         // Calculate the cross product
-        const cross = new THREE.Vector3().crossVectors(direcao, direcaoPersonagem);
+        const cross = new THREE.Vector3().crossVectors(
+            direcao,
+            direcaoPersonagem
+        );
 
         // Get the angle from the dot product
-        let angle = Math.acos(dot / (direcao.length() * direcaoPersonagem.length()));
+        let angle = Math.acos(
+            dot / (direcao.length() * direcaoPersonagem.length())
+        );
 
         // Adjust the sign based on the cross product
         if (cross.y < 0) {
@@ -703,26 +716,19 @@ export class Soldado extends Entidade {
 
         if (!this.animando) {
             if (this.estadoAtual === "morre") {
-            }
-            else if (degAngle >= 22.5 && degAngle < 67.5) {
+            } else if (degAngle >= 22.5 && degAngle < 67.5) {
                 this.actions.runLD.playOnce();
-            }
-            else if (degAngle >= 67.5 && degAngle < 112.5) {
+            } else if (degAngle >= 67.5 && degAngle < 112.5) {
                 this.actions.runLeft.playOnce();
-            }
-            else if (degAngle >= 112.5 && degAngle < 157.5) {
+            } else if (degAngle >= 112.5 && degAngle < 157.5) {
                 this.actions.runLU.playOnce();
-            }
-            else if (Math.abs(degAngle) >= 157.5) {
+            } else if (Math.abs(degAngle) >= 157.5) {
                 this.actions.runUp.playOnce();
-            }
-            else if (degAngle <= -22.5 && degAngle > -67.5) {
+            } else if (degAngle <= -22.5 && degAngle > -67.5) {
                 this.actions.runRD.playOnce();
-            }
-            else if (degAngle <= -67.5 && degAngle > -112.5) {
+            } else if (degAngle <= -67.5 && degAngle > -112.5) {
                 this.actions.runRight.playOnce();
-            }
-            else if (degAngle <= -112.5 && degAngle > -157.5) {
+            } else if (degAngle <= -112.5 && degAngle > -157.5) {
                 this.actions.runRU.playOnce();
             } else {
                 this.actions.runDown.playOnce();
@@ -735,18 +741,53 @@ export class Soldado extends Entidade {
         return false;
     }
 
+    checarPodeAtacarADistancia() {
+        if (
+            this.entidade.position.distanceTo(this.scene.personagem.position) <=
+            20
+        ) {
+            // faz raycast até o personagem e checa se é possível
+            const raycaster = new THREE.Raycaster();
+            const origemRay = this.entidade.position.clone();
+            const direcaoPersonagem = new THREE.Vector3()
+                .subVectors(this.scene.personagem.position, origemRay)
+                .normalize();
+            raycaster.set(origemRay, direcaoPersonagem);
+            const colidiveis = this.scene.rampas.concat(
+                this.scene.objetosColidiveis
+            );
+            const intersects = raycaster.intersectObjects(colidiveis, true);
+
+            if (intersects.length > 0) {
+                // Se houver interseções, verifica se o personagem está na linha de visão
+                const pontoInterseccao = intersects[0].point;
+                if (
+                    pontoInterseccao.distanceTo(
+                        this.scene.personagem.position
+                    ) <= 20
+                ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     patrulha(enemy, speed) {}
 
-    atacar(frameAtual) {}
+    atacar(frameAtual) {
+        if (!this.animando) {
+            this.actions.ShootingDown.playOnce();
+            // implementar o dano
+            takeDamage();
+            this.animando = true;
+        }
+    }
 
     espera() {
-        const vetorPos = this.ultimaPosicaoInimigo;
-        const posInicial = this.ultimaPosicaoEntidade;
-
-        const dummy = new THREE.Object3D();
-        dummy.position.copy(posInicial);
-        dummy.lookAt(vetorPos);
-        this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
+        /*Implementar andadinha para o lado aqui acho*/
+        this.pathFinding = encontrarCaminho(this);
+        this.indoLado = true;
     }
 
     recua(alvo) {
@@ -775,7 +816,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
-    new Soldado(scene, new THREE.Vector3(5, 2, 5));
+    new Soldado(scene, new THREE.Vector3(0, 2, -10));
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {

@@ -52,7 +52,9 @@ class Entidade {
 
         this.alerta = false;
         this.ultimaPosicaoInimigo = new THREE.Vector3(0, 0, 0);
+        this.ultimaPosicaoInimigo.copy(this.scene.personagem.position);
         this.ultimaPosicaoEntidade = new THREE.Vector3(0, 0, 0);
+        this.ultimaPosicaoEntidade.copy(spawn);
         this.ultimoAtaque = 0;
 
         // === CRIAÇÃO DA BARRA DE VIDA ===

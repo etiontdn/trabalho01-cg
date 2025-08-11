@@ -76,6 +76,28 @@ function encontrarCaminho(entidade) {
         direcoes.push(THREE.MathUtils.degToRad(-ang));
     }
 
+    if (entidade.indoLado) {
+        console.log("indo pro lado");
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        direcoes.shift();
+        // decide mover para esquerda ou direita aleatoriamente
+        const chance50 = Math.random() < 0.5;
+        if (chance50) {
+            direcoes.shift();
+        }
+        console.log(direcoes);
+    }
+
     const vetorDireto = new THREE.Vector3();
     vetorDireto.subVectors(
         entidade.ultimaPosicaoInimigo,
@@ -110,6 +132,11 @@ function encontrarCaminho(entidade) {
         }
     }
 
+    if (entidade.naoVoa) {
+        vetorDireto.y = 0;
+        console.log("não voa");
+    }
+
     vetorDireto.normalize();
 
     let pontoDestino = entidade.entidade.position.clone();
@@ -139,4 +166,4 @@ function encontrarCaminho(entidade) {
 }
 
 export default encontrarCaminho;
-export {caminhoEValido};
+export {encontrarCaminho, caminhoEValido};
