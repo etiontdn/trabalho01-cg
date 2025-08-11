@@ -7,8 +7,6 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
-import createArea4 from "./ambiente/area4.js";
-import createArea3 from "./ambiente/area3.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
 
