@@ -7,6 +7,7 @@ import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 import createArea4 from "./ambiente/area4.js";
+import createArea3 from "./ambiente/area3.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
 
@@ -32,7 +33,8 @@ async function iniciarCena() {
         setInimigos
     } = await createScene(cenaBase);
 
-    createArea4(scene, objetosColidiveis, rampas);
+    await createArea4(scene, objetosColidiveis, rampas);
+    await createArea3(scene, objetosColidiveis, rampas);
 
     const {
         personagem,

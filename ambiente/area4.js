@@ -30,14 +30,13 @@ function createArea4(scene, objetosColidiveis, rampas) {
     const csgTeto = csgTetoSub1.subtract(csgTetoSub2);
     
     // ESCADARIA
-    const stepHeight = 0.5;
-    const maxHeight  = altArea;
-    const degraus    = Math.round(maxHeight / stepHeight);
-    const totalDepth = 20;
-    const stepDepth  = totalDepth / degraus;
-    const stepWidth  = 8;
-    const degrauGeo = new THREE.BoxGeometry(stepWidth, stepHeight, stepDepth);   
-    
+    // const stepHeight = 0.5;
+    // const maxHeight  = altArea;
+    // const degraus    = Math.round(maxHeight / stepHeight);
+    // const totalDepth = 20;
+    // const stepDepth  = totalDepth / degraus;
+    // const stepWidth  = 8;
+    // const degrauGeo = new THREE.BoxGeometry(stepWidth, stepHeight, stepDepth);   
     
     // PORTAL
     const distX = 5;
@@ -70,7 +69,7 @@ function createArea4(scene, objetosColidiveis, rampas) {
     area4.add(base);
     
     function criaPortal(num_andar, num_portal, dist = r - 2.5){
-        const escada = new THREE.Object3D();
+        // const escada = new THREE.Object3D();
         const portal = new THREE.Object3D();
         const estaca1 = new THREE.Mesh(estacaGeo, mat);
         const estaca2 = new THREE.Mesh(estacaGeo, mat);
@@ -121,7 +120,7 @@ function createArea4(scene, objetosColidiveis, rampas) {
     }
 
 
-    // AQUI É DEFINIDO O NUMERO DE ANDARES DO COLISEU
+    //! AQUI É DEFINIDO O NUMERO DE ANDARES DO COLISEU
     const numAndares = 5;
     for(let i = 0; i < numAndares; i++){
         const andar = new THREE.Object3D();

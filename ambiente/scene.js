@@ -244,7 +244,7 @@ export default async function (scene) {
         const altura = 4;
         const pos1 = new THREE.Vector3(-160, altura / 2, -150);
         const pos2 = new THREE.Vector3(15, altura / 2, -150);
-        const pos3 = new THREE.Vector3(155, altura / 2, -150);
+        // const pos3 = new THREE.Vector3(155, altura / 2, -150);
         // const pos4 = new THREE.Vector3(0, altura / 2, 150);
 
       
