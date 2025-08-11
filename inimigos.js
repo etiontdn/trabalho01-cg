@@ -28,22 +28,22 @@ export class LostSoul extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
-        this.url = "./assets/skull/skull.mtl";
+        this.url = "../0_assetsT3/objects/skull/skull.mtl";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_LostSouls.push(this);
     }
 
-    createEnemy() {
+   createEnemy() {
         const mtlLoader = new MTLLoader();
-        mtlLoader.load("./assets/skull/skull.mtl", (materials) => {
+        mtlLoader.load(this.url, (materials) => {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.load("./assets/skull.obj", (enemyMesh) => {
-                // agora o enemyMesh já vem com texturas aplicadas
-                this.entidade.add(enemyMesh);
-                this.enemyObj = this.entidade;
+            objLoader.load('../0_assetsT3/objects/skull.obj', (enemyMesh) => {
+            // agora o enemyMesh já vem com texturas aplicadas
+            this.entidade.add(enemyMesh);
+            this.enemyObj = this.entidade;
             });
         });
     }
@@ -291,7 +291,8 @@ export class PainElemental extends Entidade {
 
         this.lostSoulsInvocados = [];
 
-        this.duracaoEstados.espera = 20;
+        this.duracaoEstados.espera = 60;
+        this.duracaoEstados["ataque a distancia"] = 120;
 
         list_PainElementals.push(this);
     }
@@ -401,8 +402,17 @@ export class PainElemental extends Entidade {
         // move o último lostsoul na direção do personagem:
 
         const lostSoul = this.lostSoulsInvocados[this.lostSoulsInvocados.length - 1];
+
+        const direcaoPersonagem = new THREE.Vector3().subVectors(this.scene.personagem.position, lostSoul.entidade.position).normalize();
+
         lostSoul.entidade.quaternion.copy(dummy.quaternion);
-        lostSoul.entidade.translateZ(1);
+        if (!lostSoul.reached) {
+            lostSoul.entidade.position.add(direcaoPersonagem.multiplyScalar(1));
+        }
+
+        if (lostSoul.entidade.position.distanceTo(this.scene.personagem.position) <= 1) {
+            lostSoul.reached = true;
+        }
     }
 
     checarPodeAtacarADistancia() {
@@ -434,13 +444,15 @@ export class PainElemental extends Entidade {
     invocarLostSoul() {
         const pos = this.entidade.position.clone();
         pos.z -= 2;
+        pos.y -= 3;
         const lostSoul = new LostSoul(this.scene, pos);
         lostSoul.alerta = true;
-        const padraoLostSoul = lostSoul.checarPodeAtacar;
-        lostSoul.checarPodeAtacar = () => {
-            lostSoul.checarPodeAtacar = padraoLostSoul;
-            return true;
-        };
+        lostSoul.reached = false;
+        // const padraoLostSoul = lostSoul.checarPodeAtacar;
+        // lostSoul.checarPodeAtacar = () => {
+        //     lostSoul.checarPodeAtacar = padraoLostSoul;
+        //     return true;
+        // };
 
         this.lostSoulsInvocados.push(lostSoul);
     }
