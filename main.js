@@ -32,6 +32,8 @@ async function iniciarCena() {
         setInimigos
     } = await createScene(cenaBase);
 
+    createArea4(scene, objetosColidiveis, rampas);
+
     const {
         personagem,
         personagemControls,

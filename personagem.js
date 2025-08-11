@@ -220,7 +220,7 @@ export default function createPersonagem(
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
             //* se topo do box ≃ altura dos pés, ignoramos
-            if (Math.abs(bb.max.y - bottomY) < 0.3) return false;
+            if (Math.abs(bb.max.y - bottomY) <= 0.5) return false;
             return true;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>
