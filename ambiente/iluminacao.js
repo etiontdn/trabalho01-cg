@@ -41,8 +41,7 @@ class Iluminacao {
         luzDirecional.shadow.bias = -0.00005;
         luzDirecional.shadow.normalBias = -0.00005;
         luzDirecional.shadow.camera.position.set(-50,-50,-50)
-        const helper = new THREE.CameraHelper(luzDirecional.shadow.camera);
-        this.scene.add(helper);
+        
         this.scene.add(luzDirecional.target);
         this.scene.add(luzDirecional);
         return luzDirecional;

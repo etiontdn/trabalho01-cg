@@ -4,6 +4,130 @@ import Area from "./area.js";
 import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
 
+
+async function carregarTexturas() {
+    const loader = new THREE.TextureLoader();
+
+    function carregar(path, repeatX = 1, repeatY = 1) {
+        return new Promise((resolve, reject) => {
+            loader.load(
+                path,
+                (texture) => {
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set(repeatX, repeatY);
+                    resolve(texture);
+                },
+                undefined,
+                reject
+            );
+        });
+    }
+
+    return {
+        chao: await carregar("../assets/textures/intertravado.jpg", 50, 50),
+        sky: await carregar("assets/qwantani_mid_morning_puresky.jpg"),
+
+        area1: {
+            topo: {
+                map: await carregar("assets/gray-bricks1-albedo.png"),
+                aoMap: await carregar("assets/gray-bricks1-ao.png"),
+                normalMap: await carregar("assets/gray-bricks1-Normal-dx.png"),
+                roughnessMap: await carregar("assets/gray-bricks1-Roughness.png"),
+                displacementMap: await carregar("assets/gray-bricks1-Height.png"),
+                metalnessMap: await carregar("assets/gray-bricks1-Metallic.png"),
+            },
+            lateral: {
+                map: await carregar("assets/seaworn_stone_tiles_diff_4k.png"),
+                aoMap: await carregar("assets/seaworn_stone_tiles_ao_4k.png"),
+                normalMap: await carregar("assets/seaworn_stone_tiles_nor_gl_4k.png"),
+                roughnessMap: await carregar("assets/seaworn_stone_tiles_rough_4k.png"),
+                displacementMap: await carregar("assets/seaworn_stone_tiles_disp_4k.png"),
+                metalnessMap: await carregar("assets/seaworn_stone_tiles_arm_4k.png"),
+            },
+            escada: {
+                 map: await carregar("assets/gray-bricks1-albedo.png"),
+                aoMap: await carregar("assets/gray-bricks1-ao.png"),
+                normalMap: await carregar("assets/gray-bricks1-Normal-dx.png"),
+                roughnessMap: await carregar("assets/gray-bricks1-Roughness.png"),
+                displacementMap: await carregar("assets/gray-bricks1-Height.png"),
+                metalnessMap: await carregar("assets/gray-bricks1-Metallic.png"),
+            }
+        },
+
+        area2: {
+            topo: {
+                map: await carregar("assets/Metal_Plate_048_basecolor.jpg"),
+                aoMap: await carregar("assets/Metal_Plate_048_ambientOcclusion.jpg"),
+                normalMap: await carregar("assets/Metal_Plate_048_normal.jpg"),
+                roughnessMap: await carregar("assets/Metal_Plate_048_roughness.jpg"),
+                displacementMap: await carregar("assets/Metal_Plate_048_height.png"),
+                metalnessMap: await carregar("assets/Metal_Plate_048_metallic.jpg"),
+            },
+            lateral: {
+                map: await carregar("assets/rusty_metal_04_diff_4k.png"),
+                aoMap: await carregar("assets/rusty_metal_04_ao_4k.png"),
+                normalMap: await carregar("assets/rusty_metal_04_nor_gl_4k.png"),
+                roughnessMap: await carregar("assets/rusty_metal_04_rough_4k.png"),
+                displacementMap: await carregar("assets/rusty_metal_04_disp_4k.png"),
+                metalnessMap: await carregar("assets/rusty_metal_04_metal_4k.png"),
+            },
+        },
+        
+
+        objetos: {
+            textura1: {
+                map: await carregar("assets/Metal_Trimsheet_002_basecolor.jpg"),
+                normalMap: await carregar("assets/Metal_Trimsheet_002_normal.jpg"),
+                roughnessMap: await carregar("assets/Metal_Trimsheet_002_roughness.jpg"),
+                aoMap: await carregar("assets/Metal_Trimsheet_002_ambientOcclusion.jpg"),
+                displacementMap: await carregar("assets/Metal_Trimsheet_002_height.png"),
+                metalnessMap: await carregar("assets/Metal_Trimsheet_002_metallic.jpg"),
+            },
+            textura2: {
+                map: await carregar("assets/Metal_Corrugated_015_basecolor.jpg"),
+                normalMap: await carregar("assets/Metal_Corrugated_015_normal.jpg"),
+                roughnessMap: await carregar("assets/Metal_Corrugated_015_roughness.jpg"),
+                aoMap: await carregar("assets/Metal_Corrugated_015_ambientOcclusion.jpg"),
+                displacementMap: await carregar("assets/Metal_Corrugated_015_height.png"),
+                metalnessMap: await carregar("assets/Metal_Corrugated_015_metallic.jpg"),
+            }
+        },
+
+        paredes: {
+            albedo: await carregar("assets/industrial-walls_albedo.png", 10, 2),
+            normal: await carregar("assets/industrial-walls_normal-ogl.png", 10, 2),
+            height: await carregar("assets/industrial-walls_height.png", 10, 2),
+            ao: await carregar("assets/industrial-walls_ao.png", 10, 2),
+        },
+
+        coluna: {
+            map: await carregar("assets/Stone_Column_001_basecolor.jpg"),
+            normalMap: await carregar("assets/Stone_Column_001_normal.jpg"),
+            displacementMap: await carregar("assets/Stone_Column_001_height.jpg"),
+            roughnessMap: await carregar("assets/Stone_Column_001_roughness.jpg"),
+            aoMap: await carregar("assets/Stone_Column_001_ambientOcclusion.jpg"),
+        },
+
+        porta: {
+            map: await carregar("assets/worn_corrugated_iron_diff_4k.png"),
+            normalMap: await carregar("assets/worn_corrugated_iron_nor_gl_4k.png"),
+            roughnessMap: await carregar("assets/worn_corrugated_iron_rough_4k.png"),
+            aoMap: await carregar("assets/worn_corrugated_iron_ao_4k.png"),
+            metalnessMap: await carregar("assets/worn_corrugated_iron_diff_4k.png"),
+        },
+
+        plataforma: {
+            map: await carregar("assets/Metal_Corrugated_Galvanized_001_basecolor.jpg"),
+            normalMap: await carregar("assets/Metal_Corrugated_Galvanized_001_normal.jpg"),
+            roughnessMap: await carregar("assets/Metal_Corrugated_Galvanized_001_roughness.jpg"),
+            aoMap: await carregar("assets/Metal_Corrugated_Galvanized_001_ambientOcclusion.jpg"),
+            metalnessMap: await carregar("assets/Metal_Corrugated_Galvanized_001_metallic.jpg"),
+        },
+    };
+}
+
+
+
 // Variáveis globais
 let personagem = null;
 let LostSouls = [];
@@ -11,12 +135,11 @@ let lostSoulsAtivados = false;
 let Cacodemons = [];
 let CacodemonsAtivados = false;
 
-export default function (scene) {
-    // Listas de objetos interativos
+export default async function (scene) {
+    const texturas = await carregarTexturas(); // Aguarda texturas estarem prontas
     const objetosColidiveis = [];
     const rampas = [];
 
-    // Cena principal
     scene.objetosColidiveis = objetosColidiveis;
     scene.rampas = rampas;
 
@@ -24,23 +147,35 @@ export default function (scene) {
     iluminacao.adicionarIluminacaoAmbiente();
     iluminacao.adicionarIluminacaoDirecional();
 
+      // Chão
+   
+    const materialComTextura = new THREE.MeshLambertMaterial({ map: texturas.chao });
     const chao = new ParedeLimitante(
         { x: 0, y: -0.5, z: 0 },
         { x: 500, y: 1, z: 500 },
-        "lightgrey",
+        materialComTextura,
         scene,
         "chão"
     );
     rampas.push(chao);
+     
+    // Skybox ajetar, aicacoa n esta correta
+    const skyGeo = new THREE.SphereGeometry(500, 60, 40);
+    const skyMat = new THREE.MeshBasicMaterial({
+        map: texturas.sky,
+        side: THREE.BackSide,
+    });
+    const sky = new THREE.Mesh(skyGeo, skyMat);
+    scene.add(sky);
 
     // Estado das chaves
-    let chave1Coletada = false;
+    let chave1Coletada = true;
     let grupoChave1, chave1;
     let grupoChave2, chave2;
     let subirGrupoChave1 = false;
     let subirGrupoChave2 = false;
     const alturaFinal1 = 11;
-    const alturaFinal2 = 11;
+    const alturaFinal2 = 12;
 
     // Elementos interativos
     let plataforma, porta, altar;
@@ -62,29 +197,47 @@ export default function (scene) {
         Cacodemons = Cacodemon;
     }
     // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
-
-    // Cria as paredes externas do ambiente
+   
+       
+   
+       // Cria as paredes externas do ambiente
     function criarParedes() {
-        let mat = new THREE.MeshLambertMaterial({ color: 0x333333});
+    const tex = texturas.paredes;
 
-        const paredes = [
-            { nome: "esquerda", pos: [-255, 24, 0], tam: [10, 50, 500] },
-            { nome: "direita", pos: [255, 24, 0], tam: [10, 50, 500] },
-            { nome: "norte", pos: [0, 24, -255], tam: [500, 50, 10] },
-            { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] },
-        ];
+    const paredes = [
+        { nome: "esquerda", pos: [-255, 24, 0], tam: [10, 50, 500] },
+        { nome: "direita", pos: [255, 24, 0], tam: [10, 50, 500] },
+        { nome: "norte", pos: [0, 24, -255], tam: [500, 50, 10] },
+        { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] },
+    ];
 
-        for (let { nome, pos, tam } of paredes) {
-            const parede = new ParedeLimitante(
-                new THREE.Vector3(...pos),
-                new THREE.Vector3(...tam),
-                "grey",
-                scene,
-                `parede ${nome}`
-            );
-            objetosColidiveis.push(parede);
-        }
+    for (let { nome, pos, tam } of paredes) {
+        const geometry = new THREE.BoxGeometry(...tam);
+        geometry.setAttribute(
+            "uv2",
+            new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
+        );
+
+        const materialParede = new THREE.MeshStandardMaterial({
+            map: tex.albedo,
+            normalMap: tex.normal,
+            displacementMap: tex.height,
+            aoMap: tex.ao,
+            displacementScale: 0.5,
+            roughness: 0.9,
+            metalness: 0.0,
+        });
+
+        const mesh = new THREE.Mesh(geometry, materialParede);
+        mesh.position.set(...pos);
+        mesh.name = `parede ${nome}`;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        scene.add(mesh);
+        objetosColidiveis.push(mesh);
     }
+}
 
     // Cria as áreas do jogo e elementos interativos
     function criarAreas() {
@@ -94,8 +247,44 @@ export default function (scene) {
         const pos3 = new THREE.Vector3(155, altura / 2, -150);
         // const pos4 = new THREE.Vector3(0, altura / 2, 150);
 
+      
+
+        const texturasArea = {
+            topo: {
+                map: texturas.area1.topo.map,
+                aoMap: texturas.area1.topo.aoMap,
+                normalMap: texturas.area1.topo.normalMap,
+                roughnessMap: texturas.area1.topo.roughnessMap,
+                displacementMap: texturas.area1.topo.displacementMap,
+                metalnessMap: texturas.area1.topo.metalnessMap
+            },
+            lateral: {
+                map: texturas.area1.lateral.map,
+                aoMap: texturas.area1.lateral.aoMap,
+                normalMap: texturas.area1.lateral.normalMap,
+                roughnessMap: texturas.area1.lateral.roughnessMap,
+                displacementMap: texturas.area1.lateral.displacementMap,
+                metalnessMap: texturas.area1.lateral.metalnessMap // <--- ADICIONADO
+            },
+            escada: {
+                map: texturas.area1.escada.map,
+                aoMap: texturas.area1.escada.aoMap,
+                normalMap:texturas.area1.escada.normalMap,
+                roughnessMap:texturas.area1.escada.roughnessMap,
+                displacementMap: texturas.area1.escada.displacementMap,
+                metalnessMap: texturas.area1.escada.metalnessMap
+                
+            }
+        };       
+        
+        // ajuste de repetição padrão (sobrescrito por makePart)
+        [texturasArea.topo.map, texturasArea.lateral.map, texturasArea.escada.map].forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(1, 1); // valor inicial, substituído por tamanho / 10 no código
+        });
+
         // Área 1: contém a primeira chave
-        const area1 = new Area(pos1, altura, 0x008080, scene);
+        const area1 = new Area(new THREE.Vector3(-160, altura / 2, -150), altura, texturasArea, scene);
         area1.makePart({ x: -15, z: 0 }, { x: 10, z: 100 }, "direita");
         area1.makePart({ x: 15, z: 0 }, { x: 60, z: 100 }, "esquerda");
         area1.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
@@ -104,43 +293,74 @@ export default function (scene) {
         rampas.push(...area1.ramps);
 
         function criarFileiraColunas({
-            eixoFixo, // "x" ou "z"
-            valorFixo, // posição fixa no eixo escolhido
-            eixoVariavel, // "x" ou "z" (oposto ao eixo fixo)
-            inicio, // início da distribuição
-            fim, // fim da distribuição
-            quantidade, // número de colunas
-            alturaColuna = 20,
-            raio = 2,
-            cor = 0xffffff,
-        }) {
-            const fileira = new THREE.Object3D();
-            const colunaGeo = new THREE.CylinderGeometry(
-                raio,
-                raio,
-                alturaColuna,
-                16
-            );
-            const colunaMat = new THREE.MeshLambertMaterial({ color: cor });
-            
-
-            for (let i = 0; i < quantidade; i++) {
-                const t = quantidade === 1 ? 0.5 : i / (quantidade - 1); // evita divisão por zero
-                const variavel = inicio + t * (fim - inicio);
-
-                const coluna = new THREE.Mesh(colunaGeo, colunaMat);
-                const pos = { x: 0, y: alturaColuna / 2, z: 0 };
-                pos[eixoFixo] = valorFixo;
-                pos[eixoVariavel] = variavel;
-
-                coluna.position.set(pos.x, pos.y, pos.z);
-                coluna.castShadow = coluna.receiveShadow = true;
-                objetosColidiveis.push(coluna);
-                fileira.add(coluna);
+                eixoFixo,        // "x" ou "z"
+                valorFixo,       // posição fixa no eixo escolhido
+                eixoVariavel,    // "x" ou "z" (o oposto)
+                inicio,
+                fim,
+                quantidade,
+                alturaColuna = 20,
+                raio = 2,
+            }) {
+                const fileira = new THREE.Object3D();
+        
+                
+                const textura = texturas.coluna.map;
+                const mapaNormal = texturas.coluna.normalMap;
+                const mapaDeslocamento = texturas.coluna.displacementMap;
+                const mapaRoughness = texturas.coluna.roughnessMap;
+                const mapaAO = texturas.coluna.aoMap;
+        
+                // Ajustar repeat e wrap para todas as texturas
+                [textura, mapaNormal, mapaDeslocamento, mapaRoughness, mapaAO].forEach(tex => {
+                    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+                    tex.repeat.set(1, 1);
+                });
+        
+                // === Geometria ===
+                const colunaGeo = new THREE.CylinderGeometry(raio, raio, alturaColuna, 32, 32);
+                // Copiar UV para UV2 para o aoMap funcionar
+                colunaGeo.setAttribute('uv2', new THREE.BufferAttribute(colunaGeo.attributes.uv.array, 2));
+        
+                // === Material com todas as texturas ===
+                const colunaMat = new THREE.MeshStandardMaterial({
+                    map: textura,
+                    normalMap: mapaNormal,
+                    displacementMap: mapaDeslocamento,
+                    roughnessMap: mapaRoughness,
+                    aoMap: mapaAO,
+                    displacementScale: 0.4,  // ajuste para ver relevo
+                    displacementBias: 0,
+                    roughness: 0,
+                });
+        
+                for (let i = 0; i < quantidade; i++) {
+                    const t = quantidade === 1 ? 0.5 : i / (quantidade - 1);
+                    const variavel = inicio + t * (fim - inicio);
+        
+                    const coluna = new THREE.Mesh(colunaGeo, colunaMat);
+                    const pos = { x: 0, y: alturaColuna / 2, z: 0 };
+                    pos[eixoFixo] = valorFixo;
+                    pos[eixoVariavel] = variavel;
+        
+                    coluna.position.set(pos.x, pos.y, pos.z);
+                    coluna.castShadow = coluna.receiveShadow = true;
+        
+                    // === Bloco sobre a coluna ===
+                    const bloco = new THREE.Mesh(
+                        new THREE.BoxGeometry(5, 2, 5),
+                        new THREE.MeshStandardMaterial({ map: textura })
+                    );
+                    bloco.position.set(0, alturaColuna / 2 + 1, 0);
+                    bloco.castShadow = bloco.receiveShadow = true;
+                    coluna.add(bloco);
+        
+                    objetosColidiveis.push(coluna);
+                    fileira.add(coluna);
+                }
+        
+                return fileira;
             }
-
-            return fileira;
-        }
 
         // Agrupador das colunas da área 1
         const colunasArea1 = new THREE.Object3D();
@@ -218,30 +438,103 @@ export default function (scene) {
         scene.add(grupoChave1);
 
         // Área 2: plataforma, porta, altar e chave 2
-        const area2 = new Area(pos2, altura, 0xfa8072, scene);
+
+         const texturasArea2 = {
+            topo: {
+                map: texturas.area2.topo.map,
+                aoMap: texturas.area2.topo.aoMap,
+                normalMap: texturas.area2.topo.normalMap,
+                roughnessMap: texturas.area2.topo.roughnessMap,
+                displacementMap: texturas.area2.topo.displacementMap,
+                metalnessMap: texturas.area2.topo.metalnessMap
+            },
+            lateral: {
+                map: texturas.area2.lateral.map,
+                aoMap: texturas.area2.lateral.aoMap,
+                normalMap: texturas.area2.lateral.normalMap,
+                roughnessMap: texturas.area2.lateral.roughnessMap,
+                displacementMap: texturas.area2.lateral.displacementMap,
+                metalnessMap: texturas.area2.lateral.metalnessMap // <--- ADICIONADO
+            },
+          
+        };       
+        
+        // ajuste de repetição padrão (sobrescrito por makePart)
+        [texturasArea2.topo.map, texturasArea2.lateral.map].forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(1, 1); // valor inicial, substituído por tamanho / 10 no código
+        });
+
+        const area2 = new Area(new THREE.Vector3(15, altura / 2, -150), altura, texturasArea2, scene);
         area2.makePart({ x: -15, z: 0 }, { x: 60, z: 100 }, "direita");
         area2.makePart({ x: 15, z: 0 }, { x: 10, z: 100 }, "esquerda");
         area2.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
-        // TODO: Adicionar o elevador aqui, provavelmente!
+                
         objetosColidiveis.push(...area2.getParts());
 
-        plataforma = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 8.1, 18),
-            new THREE.MeshLambertMaterial({ color: 0x0000ff })
-        );
+        const loader = new THREE.TextureLoader();
+
+        // === Texturas da porta ===
+        const texPorta = {
+            map: texturas.porta.map,
+            normalMap: texturas.porta.normalMap,
+            roughnessMap: texturas.porta.roughnessMap,
+            aoMap: texturas.porta.aoMap,
+            metalnessMap:texturas.porta.metalnessMap, // <-- adicionado
+        };
+
+        // Ajustar UVs
+        Object.values(texPorta).forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(2, 1);
+        });
+
+        // Criar geometria da porta com uv2
+        const geoPorta = new THREE.BoxGeometry(30, 8, 0.2);
+        geoPorta.setAttribute("uv2", new THREE.BufferAttribute(geoPorta.attributes.uv.array, 2));
+
+        const matPorta = new THREE.MeshStandardMaterial({
+            ...texPorta,
+            roughness: 1,
+            metalness: 1,
+        });
+
+        porta = new THREE.Mesh(geoPorta, matPorta);
+        porta.position.set(15, -0.001, -100.2);
+        porta.castShadow = porta.receiveShadow = true;
+        objetosColidiveis.push(porta);
+        scene.add(porta);
+
+        // === Texturas da plataforma ===
+        const texPlat = {
+            map: texturas.plataforma.map,
+            normalMap: texturas.plataforma.normalMap,
+            roughnessMap: texturas.plataforma.roughnessMap,
+            aoMap:texturas.plataforma.aoMap,
+            metalnessMap: texturas.plataforma.metalnessMap, // <-- adicionado
+        };
+
+        // Ajustar UVs
+        Object.values(texPlat).forEach(tex => {
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(2, 2);
+        });
+
+        const geoPlat = new THREE.BoxGeometry(30, 8.1, 18);
+        geoPlat.setAttribute("uv2", new THREE.BufferAttribute(geoPlat.attributes.uv.array, 2));
+
+        const matPlat = new THREE.MeshStandardMaterial({
+            ...texPlat,
+            roughness: 0.9,
+            metalness: 0.3,
+        });
+
+        plataforma = new THREE.Mesh(geoPlat, matPlat);
         plataforma.position.set(15, 0, -111);
         plataforma.castShadow = plataforma.receiveShadow = true;
         objetosColidiveis.push(plataforma);
         scene.add(plataforma);
 
-        porta = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 8, 0.2),
-            new THREE.MeshLambertMaterial({ color: 0xffff00 })
-        );
-        porta.position.set(15, -0.001, -100.2);
-        porta.castShadow = porta.receiveShadow = true;
-        objetosColidiveis.push(porta);
-        scene.add(porta);
 
         altar = new THREE.Mesh(
             new THREE.BoxGeometry(2, 3.5, 2),
@@ -251,81 +544,164 @@ export default function (scene) {
         objetosColidiveis.push(altar);
         scene.add(altar);
 
-        const suporte2 = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 10, 2),
-            new THREE.MeshLambertMaterial({ color: 0x800080 })
-        );
-        suporte2.position.set(-25, -10, 0);
-        suporte2.castShadow = suporte2.receiveShadow = true;
+        
+    const textura1 = texturas.objetos.textura1.map;
+    const textura1Normal = texturas.objetos.textura1.normalMap;
+    const textura1Rough = texturas.objetos.textura1.roughnessMap;
+    const textura1AO = texturas.objetos.textura1.aoMap;
+    const textura1Disp = texturas.objetos.textura1.displacementMap;
+    const textura1Metal = texturas.objetos.textura1.metalnessMap; // <-- novo
 
+    // Aplica repeat em todas as texturas da textura1
+    [textura1, textura1Normal, textura1Rough, textura1AO, textura1Disp, textura1Metal].forEach(tex => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 10);
+    });
+
+    // Textura simples para os demais objetos (textura2 + mapas extras)
+    const textura2 = texturas.objetos.textura2.map;
+    const textura2Normal = texturas.objetos.textura2.normalMap;
+    const textura2Rough =texturas.objetos.textura2.roughnessMap;
+    const textura2AO = texturas.objetos.textura2.aoMap;
+    const textura2Disp = texturas.objetos.textura2.displacementMap;
+    const textura2Metal = texturas.objetos.textura2.metalnessMap;
+
+    // Aplica repeat nas texturas da textura2
+    [textura2, textura2Normal, textura2Rough, textura2AO, textura2Disp, textura2Metal].forEach(tex => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 1);
+    });
+
+    // Cria o suporte2 e o adiciona ao grupo que vai subir
+        // Cria o suporte2 com a textura2
+    const suporte2 = new THREE.Mesh(
+        new THREE.BoxGeometry(5, 5, 5),
+        new THREE.MeshStandardMaterial({
+            map: textura2,
+            normalMap: textura2Normal,
+            roughnessMap: textura2Rough,
+            aoMap: textura2AO,
+            displacementMap: textura2Disp,
+            metalnessMap: textura2Metal,
+
+            // Ajustes adicionais
+            displacementScale: 0,  // ajuste conforme necessário
+            roughness: 1,            // valor base de fallback, caso o mapa não cubra
+            metalness: 0.5,          // idem
+
+            // Você pode remover `color` se estiver usando `map`
+        })
+    );
+
+    // Ajusta a geometria para suportar displacementMap e aoMap
+    suporte2.geometry.attributes.uv2 = suporte2.geometry.attributes.uv; // necessário para aoMap e displacementMap
+
+    suporte2.position.set(-25, 4.5, 0);
+    suporte2.castShadow = true;
+    suporte2.receiveShadow = true;
+
+
+        // Cria a chave2 separadamente e a posiciona fixamente em y = 4
         chave2 = criarChave(0xffff00, 0.4);
-        chave2.position.set(-25, -3, 0);
+        chave2.position.set(area2.obj3D.position.x - 25, 7, area2.obj3D.position.z);
         chave2.rotation.x = Math.PI / 2;
         chave2.castShadow = true;
+        scene.add(chave2);
+        objetosColidiveis.push(chave2);
 
+        // Grupo que sobe apenas com o suporte2
         grupoChave2 = new THREE.Object3D();
         grupoChave2.add(suporte2);
-        grupoChave2.add(chave2);
         grupoChave2.position.copy(area2.obj3D.position);
         objetosColidiveis.push(grupoChave2);
         scene.add(grupoChave2);
 
-        // Função auxiliar para criar objetos 3D simples
-        function criarObjeto({ geoArgs, color, pos }, scene, listaColisao) {
-            const geometry = new THREE.BoxGeometry(...geoArgs);
-            const material = new THREE.MeshLambertMaterial({ color });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(...pos);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            listaColisao.push(mesh);
-            return mesh;
+    // Função para criar objetos com múltiplos mapas de textura
+    function criarObjetoComTexturas({ geoArgs, pos }, scene, listaColisao) {
+        const geometry = new THREE.BoxGeometry(...geoArgs);
+        geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2));
+
+        const material = new THREE.MeshStandardMaterial({
+            map: textura1,
+            normalMap: textura1Normal,
+            roughnessMap: textura1Rough,
+            aoMap: textura1AO,
+            displacementMap: textura1Disp,
+            metalnessMap: textura1Metal, // <-- adicionado
+            displacementScale: 0,
+            roughness: 1.0,
+            metalness: 1.0,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...pos);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+        listaColisao.push(mesh);
+        return mesh;
+    }
+
+    // Função para criar objetos simples com textura ou cor
+    function criarObjeto({ geoArgs, pos, textura = null, color = 0xffffff }, scene, listaColisao) {
+        const geometry = new THREE.BoxGeometry(...geoArgs);
+        
+        // Se textura2 estiver sendo usada, usa MeshStandard com os mapas
+        let material;
+        if (textura === textura2) {
+            geometry.setAttribute('uv2', new THREE.BufferAttribute(geometry.attributes.uv.array, 2));
+            material = new THREE.MeshStandardMaterial({
+                map: textura2,
+                normalMap: textura2Normal,
+                roughnessMap: textura2Rough,
+                aoMap: textura2AO,
+                displacementMap: textura2Disp,
+                metalnessMap: textura2Metal,
+                displacementScale: 0,
+                roughness: 1.0,
+                metalness: 0.5,
+            });
+        } else {
+            material = textura
+                ? new THREE.MeshLambertMaterial({ map: textura })
+                : new THREE.MeshLambertMaterial({ color });
         }
 
-        // Objetos decorativos
-        const objetos_Area2 = [
-            { geoArgs: [10, 70, 10], color: 0x800080, pos: [0, 20, -190] },
-            { geoArgs: [10, 50, 10], color: 0x800080, pos: [-30, 15, -180] },
-            { geoArgs: [10, 30, 10], color: 0x800080, pos: [30, 10, -180] },
-            { geoArgs: [5, 10, 5],   color: 0x800080, pos: [30, 8, -150] },
-            { geoArgs: [5, 15, 5],   color: 0x800080, pos: [-25, 8, -150] },
-            { geoArgs: [5, 13, 5],   color: 0x800080, pos: [-15, 8, -130] },
-            { geoArgs: [5, 20, 5],   color: 0x800080, pos: [20, 8, -130] },
-            { geoArgs: [5, 12, 5],   color: 0x800080, pos: [-40, 7, -120] },
-            { geoArgs: [5, 14, 5],   color: 0x800080, pos: [10, 7, -160] },
-            { geoArgs: [5, 8, 5],    color: 0x800080, pos: [-50, 7, -150] },
-            { geoArgs: [5, 8, 5],    color: 0x800080, pos: [-18, 7, -110] },
-            { geoArgs: [5, 17, 5],   color: 0x800080, pos: [2, 7, -140] },
-            { geoArgs: [5, 25, 5],   color: 0x800080, pos: [-40, 7, -135] },
-        ];
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...pos);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+        listaColisao.push(mesh);
+        return mesh;
+    }
 
-        // Cria todos os objetos
-        objetos_Area2.forEach(obj => criarObjeto(obj, scene, objetosColidiveis));
+    // Lista de objetos decorativos
+    const objetos_Area2 = [
+        { geoArgs: [10, 70, 10], pos: [0, 20, -190] },
+        { geoArgs: [10, 50, 10], pos: [-30, 15, -180] },
+        { geoArgs: [10, 30, 10], pos: [30, 10, -180] },
+        { geoArgs: [5, 5, 5],    pos: [30, 13, -150] },
+        { geoArgs: [5, 5, 5],    pos: [-25, 7, -150] },
+        { geoArgs: [5, 5, 5],    pos: [-15, 8, -130] },
+        { geoArgs: [5, 5, 5],    pos: [20, 7, -130] },
+        { geoArgs: [5, 5, 5],    pos: [-40, 7, -120] },
+        { geoArgs: [5, 5, 5],    pos: [10, 7, -160] },
+        { geoArgs: [5, 5, 5],    pos: [-50, 13, -150] },
+        { geoArgs: [5, 5, 5],    pos: [-18, 8, -110] },
+        { geoArgs: [5, 5, 5],    pos: [2, 8, -140] },
+        { geoArgs: [5, 5, 5],    pos: [-40, 9, -135] },
+    ];
 
-        // Áreas 3 e 4 (apenas cenário)
-        const area3 = new Area(pos3, altura, 0xee82ee, scene);
-        area3.makePart({ x: -15, z: 0 }, { x: 40, z: 100 }, "direita");
-        area3.makePart({ x: 15, z: 0 }, { x: 30, z: 100 }, "esquerda");
-        area3.makePart({ x: 0, z: 30 }, { x: 30, z: 80 }, "frente");
-        area3.criarEscada({ x: 0, z: 50 }, { x: 30, z: 20 }, "frente");
-        objetosColidiveis.push(...area3.getParts());
-        rampas.push(...area3.ramps);
+    // Criação dos objetos na cena
+    objetos_Area2.forEach((obj, i) => {
+        if (i < 3) {
+            criarObjetoComTexturas(obj, scene, objetosColidiveis);
+        } else {
+            criarObjeto({ ...obj, textura: textura2 }, scene, objetosColidiveis);
+        }
+    });
 
-        // const area4 = new Area(pos4, altura, 0x00ff00, scene);
-        // area4.makePart({ x: -15, z: 0 }, { x: 135, z: 100 }, "direita");
-        // area4.makePart({ x: 15, z: 0 }, { x: 135, z: 100 }, "esquerda");
-        // area4.makePart({ x: 0, z: -30 }, { x: 30, z: 80 }, "fundo");
-        // const escada = area4.criarEscada(
-        //     { x: 0, z: -50 },
-        //     { x: 30, z: 20 },
-        //     "fundo"
-        // );
-        // inverte rotação da escada para ficar corretamente na frente do jogador
-
-        // escada.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-        // objetosColidiveis.push(...area4.getParts());
-        // rampas.push(...area4.ramps);
     }
 
     // Cria limites invisíveis para evitar que o personagem caia fora do mapa

@@ -1,4 +1,3 @@
-// === createPersonagem.js (corrigido) ===
 import * as THREE from "three";
 import { PointerLockControls } from "../build/jsm/controls/PointerLockControls.js";
 
@@ -8,7 +7,6 @@ export default function createPersonagem(
     objetosColidiveis,
     rampas
 ) {
-    //! Criação do personagem
     const personagemControls = new PointerLockControls(camera, document.body);
     const personagemObject = personagemControls.getObject();
     const personagem = new THREE.Object3D();
@@ -16,10 +14,17 @@ export default function createPersonagem(
 
     
     const alturaPersonagem = 2;
-    const startPos = new THREE.Vector3(0, 12, 0);
+    const startPos = new THREE.Vector3(0, 2, 0); // ALTURA REDUZIDA
     const startQuat = personagemObject.quaternion.clone();
     personagem.position.copy(startPos);
     personagem.quaternion.copy(startQuat);
+    personagem.visible = false; // INICIALMENTE INVISÍVEL
+
+    function initPersonagem() {
+        personagem.position.copy(startPos);
+        personagem.quaternion.copy(startQuat);
+        camera.rotation.x = 0;
+    }
 
     personagemObject.position.set(0, alturaPersonagem, 0);
     const corpoGeo = new THREE.CylinderGeometry(1, 1, alturaPersonagem, 8);
@@ -32,8 +37,7 @@ export default function createPersonagem(
 
     let velY = 0;
     const gravidade = -150;
-
-    const boxSize = new THREE.Vector3(1.3, alturaPersonagem-0.1, 1.3);
+    const boxSize = new THREE.Vector3(2, alturaPersonagem + 1, 2);
     const personagemBox = new THREE.Box3();
     const posX = new THREE.Vector3();
     const posZ = new THREE.Vector3();
@@ -43,6 +47,13 @@ export default function createPersonagem(
     const forwardV = new THREE.Vector3(0, 0, -1);
     const rightV = new THREE.Vector3(1, 0, 0);
     const clock = new THREE.Clock();
+
+    let ativo = false;
+
+    function ativar() {
+        ativo = true;
+        personagem.visible = true; // TORNA VISÍVEL APÓS ATIVAÇÃO
+    }
 
     document.addEventListener("click", () => personagemControls.lock());
     document.addEventListener("keydown", onKeyDown);
@@ -132,11 +143,11 @@ export default function createPersonagem(
     }
 
     function update() {
+        if (!ativo) return;
+
         const delta = clock.getDelta();
         const speed = delta * 50 * run;
 
-
-        /* simplesmente para evitar a queda infinita: */
         if (personagem.position.y < 0) {
             personagem.position.y = 1;
         }
@@ -163,6 +174,7 @@ export default function createPersonagem(
                 ray.ray.direction.set(0, -1, 0);
                 return ray;
             }
+
             function onHitGoUp(allHits) {
                 let maiorYChao = 0;
                 for (let hits of allHits) {
@@ -173,8 +185,8 @@ export default function createPersonagem(
                         }
                     }
                 }
-                const distancia =
-                    worldPos.y - alturaPersonagem / 2 - maiorYChao;
+
+                const distancia = worldPos.y - alturaPersonagem / 2 - maiorYChao;
                 if (distancia <= alturaPersonagem / 2 && distancia > 0) {
                     personagem.position.y = maiorYChao + alturaPersonagem / 2;
                     velY = 0;
@@ -183,37 +195,22 @@ export default function createPersonagem(
                     personagem.position.y += velY * delta;
                 }
             }
+
             const rays = [
-                [0, 0],
-                [0, 1],
-                [1, 0],
-                [1, 1],
-                [-1, -1],
-                [-1, 0],
-                [0, -1],
+                [0, 0], [0, 1], [1, 0], [1, 1],
+                [-1, -1], [-1, 0], [0, -1],
             ];
-            const allHits = [];
-            for (const ray of rays) {
-                const rayObj = criarRaycastLimite(...ray);
-                const hits = rayObj.intersectObjects(
+            const allHits = rays.map((ray) =>
+                criarRaycastLimite(...ray).intersectObjects(
                     rampas.concat(objetosColidiveis)
-                );
-                allHits.push(hits);
-            }
+                )
+            );
             onHitGoUp(allHits);
         }
 
         testarRaycasts();
-        // altura dos pés (para o filtro)
+
         const bottomY = personagem.position.y - alturaPersonagem / 2;
-        //! Movimentação do personagem
-        /*
-         * se for para a direita, soma 1 em x
-         * se for para a esquerda, subtrai 1 em x
-         * se for para frente, subtrai 1 em z
-         * se for para trás, some 1 em z
-         * pq nossos controles estão invertidos em z
-         **/
         moveDir.set(0, 0, 0);
         if (move.forward) moveDir.add(forwardV);
         if (move.backward) moveDir.sub(forwardV);
@@ -223,7 +220,7 @@ export default function createPersonagem(
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
             //* se topo do box ≃ altura dos pés, ignoramos
-            if (Math.abs(bb.max.y - bottomY) <= 0.5) return false;
+            if (Math.abs(bb.max.y - bottomY) < 0.3) return false;
             return true;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>
@@ -237,42 +234,26 @@ export default function createPersonagem(
                 .applyEuler(personagem.rotation)
                 .multiplyScalar(speed);
 
-            posX.copy(personagem.position).add(
-                new THREE.Vector3(dirWorld.x, 0, 0)
-            );
+            posX.copy(personagem.position).add(new THREE.Vector3(dirWorld.x, 0.5, 0));
             personagemBox.setFromCenterAndSize(posX, boxSize);
-            if (
-                !obstacleBoxes.some((b) => {
-                    if (personagemBox.intersectsBox(b)) {
-                        return true;
-                    }
-                })
-            ) {
+            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
                 personagem.position.x = posX.x;
             }
 
-            posZ.copy(personagem.position).add(
-                new THREE.Vector3(0, 0, dirWorld.z)
-            );
+            posZ.copy(personagem.position).add(new THREE.Vector3(0, 0.5, dirWorld.z));
             personagemBox.setFromCenterAndSize(posZ, boxSize);
-            if (
-                !obstacleBoxes.some((b) => {
-                    if (personagemBox.intersectsBox(b)) {
-                        return true;
-                    }
-                })
-            ) {
+            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
                 personagem.position.z = posZ.z;
             }
         }
     }
 
-    // initPersonagem();
-    
+    initPersonagem();
     return {
-        personagem, // Object3D
-        corpo, // A MESH do personagem com bounding box real
+        personagem,
+        corpo,
         personagemControls,
         updateControl: update,
+        ativar,
     };
 }
