@@ -1,8 +1,10 @@
+// scene.js
 import * as THREE from "three";
 import { criarChave } from "./chave.js";
 import Area from "./area.js";
 import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
+import createArea4 from "./area4.js";
 
 
 async function carregarTexturas() {
@@ -123,20 +125,79 @@ async function carregarTexturas() {
             aoMap: await carregar("assets/Metal_Corrugated_Galvanized_001_ambientOcclusion.jpg"),
             metalnessMap: await carregar("assets/Metal_Corrugated_Galvanized_001_metallic.jpg"),
         },
+
+        area4: {
+            base: {
+                map: await carregar("assets/gray-bricks1-albedo.png"),
+                aoMap: await carregar("assets/gray-bricks1-ao.png"),
+                normalMap: await carregar("assets/gray-bricks1-Normal-dx.png"),
+                roughnessMap: await carregar("assets/gray-bricks1-Roughness.png"),
+                displacementMap: await carregar("assets/gray-bricks1-Height.png"),
+            },
+            portal: {
+                map: await carregar("assets/gray-bricks1-albedo.png"),
+                aoMap: await carregar("assets/gray-bricks1-ao.png"),
+                normalMap: await carregar("assets/gray-bricks1-Normal-dx.png"),
+                roughnessMap: await carregar("assets/gray-bricks1-Roughness.png"),
+                displacementMap: await carregar("assets/gray-bricks1-Height.png"),
+            },
+            teto: {
+                map: await carregar("assets/gray-bricks1-albedo.png"),
+                aoMap: await carregar("assets/gray-bricks1-ao.png"),
+                normalMap: await carregar("assets/gray-bricks1-Normal-dx.png"),
+                roughnessMap: await carregar("assets/gray-bricks1-Roughness.png"),
+                displacementMap: await carregar("assets/gray-bricks1-Height.png"),
+            }
+        }
+
+
+        
     };
 }
 
+async function carregarSons(audioListener) {
+    const audioLoader = new THREE.AudioLoader();
+
+    function carregar(path) {
+        return new Promise((resolve, reject) => {
+            audioLoader.load(
+                path,
+                (buffer) => {
+                    const sound = new THREE.Audio(audioListener);
+                    sound.setBuffer(buffer);
+                    resolve(sound);
+                },
+                undefined,
+                reject
+            );
+        });
+    }
+
+    return {
+        keyPickup: await carregar("../0_assetsT3/sounds/chave.wav"),
+        platformMove: await carregar("../0_assetsT3/sounds/plataformaMovendo.wav"),
+        doorOpen: await carregar("../0_assetsT3/sounds/doorOpening.wav"),
+        // --- NOVO: Adiciona o som ambiente ---
+        ambientSound: await carregar("../0_assetsT3/sounds/doom.mp3"),
+    };
+}
 
 
 // Variáveis globais
 let personagem = null;
 let LostSouls = [];
-let lostSoulsAtivados = false;
 let Cacodemons = [];
+let lostSoulsAtivados = false;
 let CacodemonsAtivados = false;
 
-export default async function (scene) {
-    const texturas = await carregarTexturas(); // Aguarda texturas estarem prontas
+// --- NOVO: Variável para controlar se o som ambiente já está a ser reproduzido ---
+let ambientSoundPlaying = false; // Declaração no escopo superior do módulo
+let ambientSoundInstance = null; // NOVO: Referência para a instância do som ambiente
+
+// --- MODIFICADO: Adiciona audioListener como parâmetro ---
+export default async function (scene, audioListener) {
+    const texturas = await carregarTexturas();
+    const sons = await carregarSons(audioListener);
     const objetosColidiveis = [];
     const rampas = [];
 
@@ -147,8 +208,7 @@ export default async function (scene) {
     iluminacao.adicionarIluminacaoAmbiente();
     iluminacao.adicionarIluminacaoDirecional();
 
-      // Chão
-   
+    // Chão
     const materialComTextura = new THREE.MeshLambertMaterial({ map: texturas.chao });
     const chao = new ParedeLimitante(
         { x: 0, y: -0.5, z: 0 },
@@ -159,17 +219,12 @@ export default async function (scene) {
     );
     rampas.push(chao);
      
-    // Skybox ajetar, aicacoa n esta correta
-    const skyGeo = new THREE.SphereGeometry(500, 60, 40);
-    const skyMat = new THREE.MeshBasicMaterial({
-        map: texturas.sky,
-        side: THREE.BackSide,
-    });
-    const sky = new THREE.Mesh(skyGeo, skyMat);
-    scene.add(sky);
+    // Skybox
+    texturas.sky.mapping = THREE.EquirectangularReflectionMapping;
+    scene.background = texturas.sky;
 
     // Estado das chaves
-    let chave1Coletada = true;
+    let chave1Coletada = false;
     let grupoChave1, chave1;
     let grupoChave2, chave2;
     let subirGrupoChave1 = false;
@@ -187,6 +242,10 @@ export default async function (scene) {
     let altar_ativo = false;
     let noChao = true;
 
+    // Sound state variables to prevent continuous playback
+    let platformSoundPlaying = false;
+    let doorSoundPlayed = false; // Note: This variable isn't used to prevent door sound re-triggering yet.
+
     // Função para injetar personagem
     function setPersonagem(p) {
         personagem = p;
@@ -198,46 +257,44 @@ export default async function (scene) {
     }
     // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
    
-       
-   
-       // Cria as paredes externas do ambiente
+    // Cria as paredes externas do ambiente
     function criarParedes() {
-    const tex = texturas.paredes;
+        const tex = texturas.paredes;
 
-    const paredes = [
-        { nome: "esquerda", pos: [-255, 24, 0], tam: [10, 50, 500] },
-        { nome: "direita", pos: [255, 24, 0], tam: [10, 50, 500] },
-        { nome: "norte", pos: [0, 24, -255], tam: [500, 50, 10] },
-        { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] },
-    ];
+        const paredes = [
+            { nome: "esquerda", pos: [-255, 24, 0], tam: [10, 50, 500] },
+            { nome: "direita", pos: [255, 24, 0], tam: [10, 50, 500] },
+            { nome: "norte", pos: [0, 24, -255], tam: [500, 50, 10] },
+            { nome: "sul", pos: [0, 24, 255], tam: [500, 50, 10] },
+        ];
 
-    for (let { nome, pos, tam } of paredes) {
-        const geometry = new THREE.BoxGeometry(...tam);
-        geometry.setAttribute(
-            "uv2",
-            new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
-        );
+        for (let { nome, pos, tam } of paredes) {
+            const geometry = new THREE.BoxGeometry(...tam);
+            geometry.setAttribute(
+                "uv2",
+                new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
+            );
 
-        const materialParede = new THREE.MeshStandardMaterial({
-            map: tex.albedo,
-            normalMap: tex.normal,
-            displacementMap: tex.height,
-            aoMap: tex.ao,
-            displacementScale: 0.5,
-            roughness: 0.9,
-            metalness: 0.0,
-        });
+            const materialParede = new THREE.MeshStandardMaterial({
+                map: tex.albedo,
+                normalMap: tex.normal,
+                displacementMap: tex.height,
+                aoMap: tex.ao,
+                displacementScale: 0.5,
+                roughness: 0.9,
+                metalness: 0.0,
+            });
 
-        const mesh = new THREE.Mesh(geometry, materialParede);
-        mesh.position.set(...pos);
-        mesh.name = `parede ${nome}`;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
+            const mesh = new THREE.Mesh(geometry, materialParede);
+            mesh.position.set(...pos);
+            mesh.name = `parede ${nome}`;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
 
-        scene.add(mesh);
-        objetosColidiveis.push(mesh);
+            scene.add(mesh);
+            objetosColidiveis.push(mesh);
+        }
     }
-}
 
     // Cria as áreas do jogo e elementos interativos
     function criarAreas() {
@@ -245,9 +302,7 @@ export default async function (scene) {
         const pos1 = new THREE.Vector3(-160, altura / 2, -150);
         const pos2 = new THREE.Vector3(15, altura / 2, -150);
         const pos3 = new THREE.Vector3(155, altura / 2, -150);
-        // const pos4 = new THREE.Vector3(0, altura / 2, 150);
-
-      
+        const pos4 = new THREE.Vector3(0, altura / 2, 150);
 
         const texturasArea = {
             topo: {
@@ -264,7 +319,7 @@ export default async function (scene) {
                 normalMap: texturas.area1.lateral.normalMap,
                 roughnessMap: texturas.area1.lateral.roughnessMap,
                 displacementMap: texturas.area1.lateral.displacementMap,
-                metalnessMap: texturas.area1.lateral.metalnessMap // <--- ADICIONADO
+                metalnessMap: texturas.area1.lateral.metalnessMap
             },
             escada: {
                 map: texturas.area1.escada.map,
@@ -273,7 +328,6 @@ export default async function (scene) {
                 roughnessMap:texturas.area1.escada.roughnessMap,
                 displacementMap: texturas.area1.escada.displacementMap,
                 metalnessMap: texturas.area1.escada.metalnessMap
-                
             }
         };       
         
@@ -293,9 +347,9 @@ export default async function (scene) {
         rampas.push(...area1.ramps);
 
         function criarFileiraColunas({
-                eixoFixo,        // "x" ou "z"
-                valorFixo,       // posição fixa no eixo escolhido
-                eixoVariavel,    // "x" ou "z" (o oposto)
+                eixoFixo,
+                valorFixo,
+                eixoVariavel,
                 inicio,
                 fim,
                 quantidade,
@@ -304,7 +358,6 @@ export default async function (scene) {
             }) {
                 const fileira = new THREE.Object3D();
         
-                
                 const textura = texturas.coluna.map;
                 const mapaNormal = texturas.coluna.normalMap;
                 const mapaDeslocamento = texturas.coluna.displacementMap;
@@ -329,7 +382,7 @@ export default async function (scene) {
                     displacementMap: mapaDeslocamento,
                     roughnessMap: mapaRoughness,
                     aoMap: mapaAO,
-                    displacementScale: 0.4,  // ajuste para ver relevo
+                    displacementScale: 0.4,
                     displacementBias: 0,
                     roughness: 0,
                 });
@@ -438,8 +491,7 @@ export default async function (scene) {
         scene.add(grupoChave1);
 
         // Área 2: plataforma, porta, altar e chave 2
-
-         const texturasArea2 = {
+        const texturasArea2 = {
             topo: {
                 map: texturas.area2.topo.map,
                 aoMap: texturas.area2.topo.aoMap,
@@ -454,15 +506,14 @@ export default async function (scene) {
                 normalMap: texturas.area2.lateral.normalMap,
                 roughnessMap: texturas.area2.lateral.roughnessMap,
                 displacementMap: texturas.area2.lateral.displacementMap,
-                metalnessMap: texturas.area2.lateral.metalnessMap // <--- ADICIONADO
+                metalnessMap: texturas.area2.lateral.metalnessMap
             },
-          
         };       
         
         // ajuste de repetição padrão (sobrescrito por makePart)
         [texturasArea2.topo.map, texturasArea2.lateral.map].forEach(tex => {
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(1, 1); // valor inicial, substituído por tamanho / 10 no código
+            tex.repeat.set(1, 1);
         });
 
         const area2 = new Area(new THREE.Vector3(15, altura / 2, -150), altura, texturasArea2, scene);
@@ -472,15 +523,13 @@ export default async function (scene) {
                 
         objetosColidiveis.push(...area2.getParts());
 
-        const loader = new THREE.TextureLoader();
-
         // === Texturas da porta ===
         const texPorta = {
             map: texturas.porta.map,
             normalMap: texturas.porta.normalMap,
             roughnessMap: texturas.porta.roughnessMap,
             aoMap: texturas.porta.aoMap,
-            metalnessMap:texturas.porta.metalnessMap, // <-- adicionado
+            metalnessMap:texturas.porta.metalnessMap,
         };
 
         // Ajustar UVs
@@ -511,7 +560,7 @@ export default async function (scene) {
             normalMap: texturas.plataforma.normalMap,
             roughnessMap: texturas.plataforma.roughnessMap,
             aoMap:texturas.plataforma.aoMap,
-            metalnessMap: texturas.plataforma.metalnessMap, // <-- adicionado
+            metalnessMap: texturas.plataforma.metalnessMap,
         };
 
         // Ajustar UVs
@@ -550,7 +599,7 @@ export default async function (scene) {
     const textura1Rough = texturas.objetos.textura1.roughnessMap;
     const textura1AO = texturas.objetos.textura1.aoMap;
     const textura1Disp = texturas.objetos.textura1.displacementMap;
-    const textura1Metal = texturas.objetos.textura1.metalnessMap; // <-- novo
+    const textura1Metal = texturas.objetos.textura1.metalnessMap;
 
     // Aplica repeat em todas as texturas da textura1
     [textura1, textura1Normal, textura1Rough, textura1AO, textura1Disp, textura1Metal].forEach(tex => {
@@ -573,7 +622,6 @@ export default async function (scene) {
     });
 
     // Cria o suporte2 e o adiciona ao grupo que vai subir
-        // Cria o suporte2 com a textura2
     const suporte2 = new THREE.Mesh(
         new THREE.BoxGeometry(5, 5, 5),
         new THREE.MeshStandardMaterial({
@@ -585,16 +633,14 @@ export default async function (scene) {
             metalnessMap: textura2Metal,
 
             // Ajustes adicionais
-            displacementScale: 0,  // ajuste conforme necessário
-            roughness: 1,            // valor base de fallback, caso o mapa não cubra
-            metalness: 0.5,          // idem
-
-            // Você pode remover `color` se estiver usando `map`
+            displacementScale: 0,
+            roughness: 1,
+            metalness: 0.5,
         })
     );
 
     // Ajusta a geometria para suportar displacementMap e aoMap
-    suporte2.geometry.attributes.uv2 = suporte2.geometry.attributes.uv; // necessário para aoMap e displacementMap
+    suporte2.geometry.attributes.uv2 = suporte2.geometry.attributes.uv;
 
     suporte2.position.set(-25, 4.5, 0);
     suporte2.castShadow = true;
@@ -627,7 +673,7 @@ export default async function (scene) {
             roughnessMap: textura1Rough,
             aoMap: textura1AO,
             displacementMap: textura1Disp,
-            metalnessMap: textura1Metal, // <-- adicionado
+            metalnessMap: textura1Metal,
             displacementScale: 0,
             roughness: 1.0,
             metalness: 1.0,
@@ -702,6 +748,11 @@ export default async function (scene) {
         }
     });
 
+
+    // Área 4
+createArea4(scene, objetosColidiveis, rampas, texturas.area4);
+
+
     }
 
     // Cria limites invisíveis para evitar que o personagem caia fora do mapa
@@ -727,9 +778,33 @@ export default async function (scene) {
         }
     }
 
+    // --- NOVO: Função para ligar/desligar o som ambiente ---
+    function toggleAmbientSound(playMusic) {
+        if (!ambientSoundInstance) { // Se a instância não existe, crie-a
+            ambientSoundInstance = sons.ambientSound;
+            ambientSoundInstance.setLoop(true);
+            ambientSoundInstance.setVolume(0.5);
+        }
+
+        if (playMusic && !ambientSoundPlaying) {
+            ambientSoundInstance.play();
+            ambientSoundPlaying = true;
+        } else if (!playMusic && ambientSoundPlaying) {
+            ambientSoundInstance.stop();
+            ambientSoundPlaying = false;
+        }
+    }
+
+    // --- NOVO: Inicia a reprodução do som ambiente assim que a cena é criada ---
+    // Isso deve ser chamado após o 'audioListener.context.resume()' em main.js
+    // para garantir que o contexto de áudio esteja ativo.
+    // Garante que o som comece a tocar automaticamente
+    toggleAmbientSound(true);
+
+
     // ------------------- EVENTOS E LÓGICA ------------------- //
 
-        // Evento: subir as chaves com tecla "K"
+    // Evento: subir as chaves com tecla "K"
     window.addEventListener("keydown", (event) => {
         if (event.key.toLowerCase() === "k") {
             subirGrupoChave1 = true;
@@ -765,13 +840,14 @@ export default async function (scene) {
         }
 
         // Coleta da chave 1
-        if (!chave1Coletada &&personagem &&grupoChave1.position.y >= alturaFinal1) {
+        if (!chave1Coletada && personagem && grupoChave1.position.y >= alturaFinal1) {
             const distancia = personagem.position.distanceTo(
                 chave1.getWorldPosition(new THREE.Vector3())
             );
             if (distancia < 7) {
                 chave1.visible = false;
                 chave1Coletada = true;
+                sons.keyPickup.play();
                 console.log("Chave 1 coletada!");
             }
         }
@@ -786,8 +862,10 @@ export default async function (scene) {
                 chave1.visible = true;
                 chave1.position.set(0, 3, 0);
                 altar_ativo = true;
-                portaaberta = true;
-                
+                if (!portaaberta) {
+                    portaaberta = true;
+                    sons.doorOpen.play();
+                }
             }
         }
 
@@ -795,95 +873,112 @@ export default async function (scene) {
                    porta.position.x = Math.max(porta.position.x - 0.3, -16);
                }
                
-               // Lógica da plataforma móvel
-        const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
-        const PosicaoSubida = -0.01;
-        const PosicaoDescida= -4;
-        const distanciaX_da_Plataforma = 15;
-        const distanciaZ_da_Plataforma = 14;
-        const velocidade_plataforma = 0.05;
-        const posicaoChao = 1;
-        const posicaoTopo = 5;
-        const dx = personagem.position.x - posPlataforma.x;
-        const dz = personagem.position.z - posPlataforma.z;
-        const distanciaPlataformaZ_Atual = Math.abs( dz);
-        const distanciaPlataformaX_Atual = Math.abs( dx);
-        const emCima = personagem.position.x > 0 && personagem.position.x < 30 && personagem.position.z > -119&& personagem.position.z < -105;
-            
-        function ajustarPlataforma(subindo, alvo) {
-           if (subindo) {
-               plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma , alvo);
-               if (plataforma.position.y === alvo) return false;
-           } else {
-               plataforma.position.y = Math.max(plataforma.position.y - velocidade_plataforma , alvo);
-               if (plataforma.position.y === alvo) return false;
-           }
-           return true;
-       }
-       
-       if (portaaberta && porta.position.x === -16) {
-        
-           // Atualiza estado noChao
-           if (personagem.position.y === posicaoChao && !emCima) noChao = true;
-           else if ((personagem.position.y === posicaoTopo ) && !emCima) noChao = false;
-           
-           if (noChao) {
-               // Descida quando no chão
-               if (((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma && distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma -5 )&& distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y > PosicaoDescida&& !emCima && !descida && !subida&& personagem.position.y == posicaoChao ) {
-                   descida2 = true;
-                   descida2 = ajustarPlataforma(false, PosicaoDescida);
-               } else if (distanciaPlataformaZ_Atual> distanciaZ_da_Plataforma && plataforma.position.y > PosicaoDescida && !emCima && descida2 && !descida && !subida) {
-                   descida2 = ajustarPlataforma(false, PosicaoDescida);
-               }
-       
-               // Subida com personagem em cima
-               if (emCima && plataforma.position.y <  PosicaoSubida ) {
-                
-                   subida = true;
-                   subida = ajustarPlataforma(true,  PosicaoSubida );
-               }
-       
-               // Subida e descida enquanto não em cima
-               if (!emCima && subida) {
-                subida = ajustarPlataforma(true,  PosicaoSubida );
-               }
-               if (!emCima && descida) {
-                descida = ajustarPlataforma(false, PosicaoDescida);
-               }
-           } else {
-               // Subida quando no ar
-               if ((distanciaPlataformaZ_Atual<= distanciaZ_da_Plataforma && distanciaPlataformaX_Atual <= distanciaX_da_Plataforma ) && plataforma.position.y <  PosicaoSubida  && !emCima && !descida && !subida && personagem.position.y == posicaoTopo) {
-                   subida2 = true;
-                   subida2 = ajustarPlataforma(true,  PosicaoSubida );
-               } else if (distanciaPlataformaZ_Atual > distanciaZ_da_Plataforma && plataforma.position.y <  PosicaoSubida  && !emCima && subida2 && !descida && !subida) {
-                   subida2 = ajustarPlataforma(true,  PosicaoSubida );
-               }
-       
-               // Descida com personagem em cima
-               if (emCima && plataforma.position.y > PosicaoDescida) {
-                   personagem.position.y -= velocidade_plataforma + 0.01;
-                   descida = true;
-                   descida = ajustarPlataforma(false, PosicaoDescida);
-               }
-       
-               // Subida e descida enquanto não em cima
-               if (!emCima && subida) {
-                   subida = ajustarPlataforma(true,  PosicaoSubida );
-               }
-               if (!emCima && descida) {
-                   descida = ajustarPlataforma(false, PosicaoDescida);
-               }
-           }
-       
-           // Correção final de subida/descida em caso de valores intermediários
-           if (personagem.position.y !== posicaoChao&& personagem.position.y !== posicaoTopo ) {
-               if (subida && !emCima) {
-                   subida = ajustarPlataforma(true,  PosicaoSubida );
-               } else if (descida && !emCima) {
-                   descida = ajustarPlataforma(false, PosicaoDescida);
-               }
-           }
-       }
+         // ------------------- LÓGICA DA PLATAFORMA -------------------
+const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
+const PosicaoSubida = -0.01;
+const PosicaoDescida = -4;
+const distanciaX_da_Plataforma = 15;
+const distanciaZ_da_Plataforma = 14;
+const velocidade_plataforma = 0.1;
+const posicaoChao = 1;
+const posicaoTopo = 5;
+
+const dx = personagem.position.x - posPlataforma.x;
+const dz = personagem.position.z - posPlataforma.z;
+const distanciaPlataformaZ_Atual = Math.abs(dz);
+const distanciaPlataformaX_Atual = Math.abs(dx);
+
+const emCima = personagem.position.x > 0 &&
+               personagem.position.x < 30 &&
+               personagem.position.z > -119 &&
+               personagem.position.z < -105;
+
+function ajustarPlataforma(subindo, alvo) {
+    const initialY = plataforma.position.y;
+
+    if (subindo) {
+        plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma, alvo);
+        if (plataforma.position.y === alvo) {
+            if (platformSoundPlaying) {
+                sons.platformMove.stop();
+                platformSoundPlaying = false;
+            }
+            return false; // terminou
+        }
+    } else {
+        plataforma.position.y = Math.max(plataforma.position.y - velocidade_plataforma, alvo);
+        if (plataforma.position.y === alvo) {
+            if (platformSoundPlaying) {
+                sons.platformMove.stop();
+                platformSoundPlaying = false;
+            }
+            return false; // terminou
+        }
+    }
+
+    if (plataforma.position.y !== initialY && !platformSoundPlaying) {
+        sons.platformMove.play();
+        platformSoundPlaying = true;
+    }
+    return true; // ainda em movimento
+}
+
+if (portaaberta && porta.position.x === -16) {
+
+    if (personagem.position.y === posicaoChao && !emCima) noChao = true;
+    else if ((personagem.position.y === posicaoTopo) && !emCima) noChao = false;
+
+    if (noChao) {
+        // Descida quando no chão
+        if (!descida2 && !subida &&
+            ((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
+              distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma - 5) &&
+              distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
+              plataforma.position.y > PosicaoDescida && !emCima &&
+              personagem.position.y == posicaoChao)) {
+            descida2 = true;
+        }
+        if (descida2) {
+            descida2 = ajustarPlataforma(false, PosicaoDescida);
+        }
+
+        // Subida com personagem em cima
+        if (!subida && plataforma.position.y < PosicaoSubida && emCima) {
+            subida = true;
+        }
+        if (subida) {
+            subida = ajustarPlataforma(true, PosicaoSubida);
+        }
+
+    } else {
+        // Subida quando no ar
+        if (!subida2 && !descida &&
+            (distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
+             distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
+             plataforma.position.y < PosicaoSubida && !emCima &&
+             personagem.position.y == posicaoTopo)) {
+            subida2 = true;
+        }
+        if (subida2) {
+            subida2 = ajustarPlataforma(true, PosicaoSubida);
+        }
+
+        // Descida com personagem em cima
+        if (!descida && plataforma.position.y > PosicaoDescida && emCima) {
+            personagem.position.y -= velocidade_plataforma + 0.01; // evita tremor
+            descida = true; // inicia descida
+        }
+        if (descida) {
+            // mantém ajuste de Y só enquanto está em cima
+            if (emCima) {
+                personagem.position.y -= velocidade_plataforma + 0.01;
+            }
+            descida = ajustarPlataforma(false, PosicaoDescida); // continua até o fim
+        }
+    }
+}
+
+
 
         const x = personagem.position.x;
         const z = personagem.position.z;
@@ -919,5 +1014,6 @@ export default async function (scene) {
         updateScene,
         setPersonagem,
         setInimigos,
+        toggleAmbientSound, // NOVO: Retorna a função para controle externo
     };
 }
