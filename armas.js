@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { setDefaultMaterial } from "../../libs/util/util.js";
 import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
-import { Cacodemon } from "./inimigos.js";
+import { Cacodemon, PainElemental } from "./inimigos.js";
 
 const armas = [];
 const disparos = [];
@@ -286,6 +286,16 @@ export default function criarArmas(
                 }
 
             }
+            const copiaInimigos = [...inimigos]
+            copiaInimigos.forEach((inimigo) => {
+                if (inimigo instanceof PainElemental) {
+                    for (let lostSoul of inimigo.lostSoulsInvocados) {
+                        if (!inimigos.includes(lostSoul)) {
+                            inimigos.push(lostSoul);
+                        }
+                    }
+                }
+            });
             for (let inimigo of inimigos) {
                 if (!inimigo.bb || !inimigo.enemyObj) continue;
                 inimigo.bb.setFromObject(inimigo.enemyObj);

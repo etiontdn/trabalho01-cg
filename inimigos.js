@@ -455,6 +455,7 @@ export class PainElemental extends Entidade {
         // };
 
         this.lostSoulsInvocados.push(lostSoul);
+        //list_LostSouls.push(lostSoul);
     }
 
     recua(alvo) {
@@ -1012,11 +1013,11 @@ export class Soldado extends Entidade {
 }
 
 export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
-    new LostSoul(scene, new THREE.Vector3(-170, -10, -180));
-    new LostSoul(scene, new THREE.Vector3(-160, -10, -170));
-    new LostSoul(scene, new THREE.Vector3(-140, -10, -160));
-    new LostSoul(scene, new THREE.Vector3(-120, -10, -170));
-    new LostSoul(scene, new THREE.Vector3(-100, -10, -180));
+    new LostSoul(scene, new THREE.Vector3(-170, 7, -180));
+    new LostSoul(scene, new THREE.Vector3(-160, 7, -170));
+    new LostSoul(scene, new THREE.Vector3(-140, 7, -160));
+    new LostSoul(scene, new THREE.Vector3(-120, 7, -170));
+    new LostSoul(scene, new THREE.Vector3(-100, 7, -180));
 
     new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
