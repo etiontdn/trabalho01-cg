@@ -126,4 +126,3 @@ function createArea3(scene, objetosColidiveis, rampas) {
 }
 
 export default createArea3;
-
