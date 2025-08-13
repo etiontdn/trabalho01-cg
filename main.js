@@ -7,8 +7,6 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
-import createArea3 from "./ambiente/area3.js";
-import createArea4 from "./ambiente/area4.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
 
@@ -22,33 +20,30 @@ document.body.appendChild(labelRenderer.domElement);
 
 const camera = createCamera();
 
-// --- NOVO: Cria o AudioListener e o anexa à câmera ---
 const audioListener = new THREE.AudioListener();
 camera.add(audioListener);
-
-// --- NOVO: Variável para controlar se o contexto de áudio foi retomado ---
-let audioContextResumed = false;
-
-// --- NOVO: Variável para controlar o estado da música de fundo ---
-let isMusicPlaying = true; // Começa ligada
-
-// --- NOVO: Adiciona um listener para retomar o contexto de áudio após a interação do usuário ---
-document.addEventListener('click', () => {
-    if (!audioContextResumed) {
-        if (audioListener.context.state === 'suspended') {
-            audioListener.context.resume().then(() => {
-                console.log('AudioContext resumed successfully!');
-                audioContextResumed = true; // Define como true para não tentar retomar novamente
-            });
-        }
-    }
-}, { once: true }); // O { once: true } garante que o evento seja removido após a primeira execução
-
 
 async function iniciarCena() {
     const cenaBase = new THREE.Scene();
 
-    // --- MODIFICADO: Passa o audioListener para createScene e obtém toggleAmbientSound ---
+    // Estado local para a música de fundo
+    let isMusicPlaying = true; 
+
+    // --- NOVO: Variável para controlar se o contexto de áudio foi retomado ---
+    let audioContextResumed = false;
+
+    // --- NOVO: Adiciona um listener para retomar o contexto de áudio após a interação do usuário ---
+    document.addEventListener('click', () => {
+        if (!audioContextResumed) {
+            if (audioListener.context.state === 'suspended') {
+                audioListener.context.resume().then(() => {
+                    console.log('AudioContext resumed successfully!');
+                    audioContextResumed = true; // Define como true para não tentar retomar novamente
+                });
+            }
+        }
+    }, { once: true }); // O { once: true } garante que o evento seja removido após a primeira execução
+
     const {
         scene,
         objetosColidiveis,
@@ -56,11 +51,11 @@ async function iniciarCena() {
         updateScene,
         setPersonagem,
         setInimigos,
-        toggleAmbientSound // NOVO: Obtenha a função toggleAmbientSound
-    } = await createScene(cenaBase, audioListener); // Passa o audioListener
+        toggleAmbientSound
+    } = await createScene(cenaBase, audioListener); 
 
-    await createArea4(scene, objetosColidiveis, rampas);
-    await createArea3(scene, objetosColidiveis, rampas);
+    // Garante que o som ambiente seja iniciado após a cena ser carregada
+    toggleAmbientSound(isMusicPlaying); 
 
     const {
         personagem,
@@ -97,7 +92,6 @@ async function iniciarCena() {
         labelRenderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // --- NOVO: Listener para a tecla 'Q' ---
     document.addEventListener('keydown', (event) => {
         if (event.key.toLowerCase() === 'q') {
             isMusicPlaying = !isMusicPlaying;
@@ -106,10 +100,12 @@ async function iniciarCena() {
         }
     });
 
-    // Delay para ativar após renderizar pelo menos 1 frame
+    // --- CORREÇÃO: Reintroduzindo o setTimeout para ativar os controles ---
+    // Isso dá um pequeno tempo para a cena se estabilizar antes do personagem começar a interagir.
     setTimeout(() => {
         ativar();
-    }, 100);
+        console.log("Controles do personagem ativados.");
+    }, 500); // Atraso de 500ms (0.5 segundos)
 
     function render() {
         requestAnimationFrame(render);

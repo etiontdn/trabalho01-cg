@@ -1,0 +1,18 @@
+newmtl Zeus_Sol:lambert7SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd -s_0.333333_0.333333_-mm_0.0202703_0.768018_germany010.jpg
+bump  -bm 0.1 -s_0.333333_0.333333_germany010b.jpg
+Ni 1.00
+newmtl aiStandardSurface1SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd -mm_0.0157658_1_oldgold_copy.jpg
+bump  -bm 0.01 -mm_0.407658_0.808559_oldgoldespecular.jpg
+Ni 1.00
+Ks 0.00 0.00 0.00
+map_Ks -mm_0.407658_0.808559_oldgoldespecular.jpg

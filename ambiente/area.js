@@ -1,3 +1,4 @@
+// area.js
 import * as THREE from "three";
 
 const castShadow = true;
@@ -15,19 +16,19 @@ const posAncora = (tamanho, ancora) => {
     return pos;
 };
 
+// Modificado para clonar apenas a textura principal e os mapas se existirem
 function ajustarRepeticao(tex, repeatX, repeatY) {
-    if (!tex) return;
-    [
-        'map', 'aoMap', 'normalMap', 'roughnessMap',
-        'displacementMap', 'opacityMap', 'metalnessMap'
-    ].forEach(prop => {
-        const textura = tex[prop];
-        if (textura && textura instanceof THREE.Texture) {
-            tex[prop] = textura.clone();
-            tex[prop].wrapS = tex[prop].wrapT = THREE.RepeatWrapping;
-            tex[prop].repeat.set(repeatX, repeatY);
+    const newTex = {};
+    for (const prop of ['map', 'aoMap', 'normalMap', 'roughnessMap', 'displacementMap', 'opacityMap', 'metalnessMap']) {
+        if (tex[prop] && tex[prop] instanceof THREE.Texture) {
+            newTex[prop] = tex[prop].clone();
+            newTex[prop].wrapS = newTex[prop].wrapT = THREE.RepeatWrapping;
+            newTex[prop].repeat.set(repeatX, repeatY);
+        } else {
+            newTex[prop] = tex[prop]; // Mantém valores que não são texturas (e.g., cor)
         }
-    });
+    }
+    return newTex;
 }
 
 class Area {
@@ -41,26 +42,13 @@ class Area {
         this.parts = [];
         this.ramps = [];
         this.texturas = texturas;
-        scene.add(this.obj3D);
-    }
 
-    makePart(pos, tamanho, ancora) {
-        const ancoraPosition = posAncora(tamanho, ancora);
-        const geo = new THREE.BoxGeometry(tamanho.x, this.altura, tamanho.z);
-        geo.setAttribute("uv2", new THREE.BufferAttribute(geo.attributes.uv.array, 2));
-
+        // Otimização: Criar materiais uma única vez no construtor
+        // Materiais para as partes da área
         const topoTex = this.texturas.topo || {};
         const lateralTex = this.texturas.lateral || {};
 
-        // Repetição personalizada
-        ajustarRepeticao(topoTex, tamanho.x / 10, tamanho.z / 10);
-
-        const lateralXTex = { ...lateralTex };
-        const lateralZTex = { ...lateralTex };
-        ajustarRepeticao(lateralXTex, tamanho.z / 10, this.altura / 10); // left & right
-        ajustarRepeticao(lateralZTex, tamanho.x / 10, this.altura / 10); // front & back
-
-        const materialTopo = new THREE.MeshStandardMaterial({
+        this.materialTopo = new THREE.MeshStandardMaterial({
             map: topoTex.map || null,
             aoMap: topoTex.aoMap || null,
             normalMap: topoTex.normalMap || null,
@@ -73,39 +61,64 @@ class Area {
             ...(topoTex.map ? {} : { color: 0x999999 }),
         });
 
-        const materialLateralX = new THREE.MeshStandardMaterial({
-            map: lateralXTex.map || null,
-            aoMap: lateralXTex.aoMap || null,
-            normalMap: lateralXTex.normalMap || null,
-            roughnessMap: lateralXTex.roughnessMap || null,
-            displacementMap: lateralXTex.displacementMap || null,
-            metalnessMap: lateralXTex.metalnessMap || null,
-            displacementScale: lateralXTex.displacementMap ? 0.0 : 0,
-            alphaMap: lateralXTex.opacityMap || null,
-            transparent: !!lateralXTex.opacityMap,
-            ...(lateralXTex.map ? {} : { color: 0x999999 }),
+        this.materialLateral = new THREE.MeshStandardMaterial({
+            map: lateralTex.map || null,
+            aoMap: lateralTex.aoMap || null,
+            normalMap: lateralTex.normalMap || null,
+            roughnessMap: lateralTex.roughnessMap || null,
+            displacementMap: lateralTex.displacementMap || null,
+            metalnessMap: lateralTex.metalnessMap || null,
+            displacementScale: lateralTex.displacementMap ? 0.0 : 0,
+            alphaMap: lateralTex.opacityMap || null,
+            transparent: !!lateralTex.opacityMap,
+            ...(lateralTex.map ? {} : { color: 0x999999 }),
         });
 
-        const materialLateralZ = new THREE.MeshStandardMaterial({
-            map: lateralZTex.map || null,
-            aoMap: lateralZTex.aoMap || null,
-            normalMap: lateralZTex.normalMap || null,
-            roughnessMap: lateralZTex.roughnessMap || null,
-            displacementMap: lateralZTex.displacementMap || null,
-            metalnessMap: lateralZTex.metalnessMap || null,
-            displacementScale: lateralZTex.displacementMap ? 0.0 : 0,
-            alphaMap: lateralZTex.opacityMap || null,
-            transparent: !!lateralZTex.opacityMap,
-            ...(lateralZTex.map ? {} : { color: 0x999999 }),
+        // Material para os degraus da escada
+        const escTex = this.texturas.escada || {};
+        this.materialEscada = new THREE.MeshStandardMaterial({
+            map: escTex.map || null,
+            aoMap: escTex.aoMap || null,
+            normalMap: escTex.normalMap || null,
+            roughnessMap: escTex.roughnessMap || null,
+            displacementMap: escTex.displacementMap || null,
+            metalnessMap: escTex.metalnessMap || null,
+            displacementScale: escTex.displacementMap ? 0.0 : 0,
+            alphaMap: escTex.opacityMap || null,
+            transparent: !!escTex.opacityMap,
+            ...(escTex.map ? {} : { color: 0x999999 }),
         });
+
+        scene.add(this.obj3D);
+    }
+
+    makePart(pos, tamanho, ancora) {
+        const ancoraPosition = posAncora(tamanho, ancora);
+        const geo = new THREE.BoxGeometry(tamanho.x, this.altura, tamanho.z);
+        geo.setAttribute("uv2", new THREE.BufferAttribute(geo.attributes.uv.array, 2));
+
+        // Clona e ajusta a repetição das texturas para esta parte específica
+        const topoTexAjustado = ajustarRepeticao(this.texturas.topo || {}, tamanho.x / 10, tamanho.z / 10);
+        const lateralXTexAjustado = ajustarRepeticao(this.texturas.lateral || {}, tamanho.z / 10, this.altura / 10);
+        const lateralZTexAjustado = ajustarRepeticao(this.texturas.lateral || {}, tamanho.x / 10, this.altura / 10);
+
+        // Clona os materiais para aplicar as texturas ajustadas, mantendo a base
+        const materialTopoInst = this.materialTopo.clone();
+        Object.assign(materialTopoInst, topoTexAjustado);
+
+        const materialLateralXInst = this.materialLateral.clone();
+        Object.assign(materialLateralXInst, lateralXTexAjustado);
+
+        const materialLateralZInst = this.materialLateral.clone();
+        Object.assign(materialLateralZInst, lateralZTexAjustado);
 
         const materiais = [
-            materialLateralX, // 0: right
-            materialLateralX, // 1: left
-            materialTopo,     // 2: top
-            materialLateralZ, // 3: bottom
-            materialLateralZ, // 4: front
-            materialLateralZ  // 5: back
+            materialLateralXInst, // 0: right
+            materialLateralXInst, // 1: left
+            materialTopoInst,     // 2: top
+            materialLateralZInst, // 3: bottom
+            materialLateralZInst, // 4: front
+            materialLateralZInst  // 5: back
         ];
 
         const mesh = new THREE.Mesh(geo, materiais);
@@ -133,60 +146,47 @@ class Area {
         return ramp;
     }
 
-   criarEscada(pos, tamanho, ancora) {
-    const escTex = this.texturas.escada || {};
+    criarEscada(pos, tamanho, ancora) {
+        // Clona e ajusta repetição de todos os mapas da textura da escada
+        const escTexAjustado = ajustarRepeticao(this.texturas.escada || {}, tamanho.x / 10, this.altura / 10);
 
-    // Clona e ajusta repetição de todos os mapas da textura da escada
-    ajustarRepeticao(escTex, tamanho.x / 10, this.altura / 10);
+        // Clona o material da escada e aplica as texturas ajustadas
+        const degrauMaterial = this.materialEscada.clone();
+        Object.assign(degrauMaterial, escTexAjustado);
 
-    // Cria material padrão com todos os mapas, igual para a área
-    const degrauMaterial = new THREE.MeshStandardMaterial({
-        map: escTex.map || null,
-        aoMap: escTex.aoMap || null,
-        normalMap: escTex.normalMap || null,
-        roughnessMap: escTex.roughnessMap || null,
-        displacementMap: escTex.displacementMap || null,
-        metalnessMap: escTex.metalnessMap || null,
-        displacementScale: escTex.displacementMap ? 0.0 : 0,
-        alphaMap: escTex.opacityMap || null,
-        transparent: !!escTex.opacityMap,
-        ...(escTex.map ? {} : { color: 0x999999 }),
-    });
-
-    const degraus = 8;
-    const degrauGeo = new THREE.BoxGeometry(
-        tamanho.x,
-        this.altura / degraus,
-        tamanho.z / degraus
-    );
-    degrauGeo.setAttribute("uv2", new THREE.BufferAttribute(degrauGeo.attributes.uv.array, 2));
-
-    const escada = new THREE.Object3D();
-    const ancoraPosition = posAncora(tamanho, ancora);
-    escada.position.set(
-        pos.x + ancoraPosition.x,
-        0,
-        pos.z + ancoraPosition.z
-    );
-
-    for (let i = 0; i < degraus; i++) {
-        const degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
-        degrau.position.set(
-            0,
-            -this.altura / 2 + i * (this.altura / degraus) + this.altura / degraus / 2,
-            -(-tamanho.z / 2 + (i * tamanho.z) / degraus + tamanho.z / degraus / 2)
+        const degraus = 8;
+        const degrauGeo = new THREE.BoxGeometry(
+            tamanho.x,
+            this.altura / degraus,
+            tamanho.z / degraus
         );
-        degrau.castShadow = castShadow;
-        degrau.receiveShadow = castShadow;
-        escada.add(degrau);
+        degrauGeo.setAttribute("uv2", new THREE.BufferAttribute(degrauGeo.attributes.uv.array, 2));
+
+        const escada = new THREE.Object3D();
+        const ancoraPosition = posAncora(tamanho, ancora);
+        escada.position.set(
+            pos.x + ancoraPosition.x,
+            0,
+            pos.z + ancoraPosition.z
+        );
+
+        for (let i = 0; i < degraus; i++) {
+            const degrau = new THREE.Mesh(degrauGeo, degrauMaterial);
+            degrau.position.set(
+                0,
+                -this.altura / 2 + i * (this.altura / degraus) + this.altura / degraus / 2,
+                -(-tamanho.z / 2 + (i * tamanho.z) / degraus + tamanho.z / degraus / 2)
+            );
+            degrau.castShadow = castShadow;
+            degrau.receiveShadow = castShadow;
+            escada.add(degrau);
+        }
+
+        escada.add(this.criarRampa(tamanho));
+        escada.visible = escadaVisivel;
+        this.obj3D.add(escada);
+        return escada;
     }
-
-    escada.add(this.criarRampa(tamanho));
-    escada.visible = escadaVisivel;
-    this.obj3D.add(escada);
-    return escada;
-}
-
 
     getParts() {
         return this.parts;
