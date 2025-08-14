@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import { SpriteMixer } from '../libs/sprites/SpriteMixer.js';
+import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
+import { Cacodemon } from "./inimigos.js";
 
 const armas = [];
 const disparos = [];
@@ -19,27 +20,27 @@ export default function criarArmas(
     //Metralhadora
     criarArmaSprite(
         "../0_assetsT3/objects/chaingun.png", // URL
-        0.1,    // cadência
-        0.1,    // frame duration
-        3,      // total de frames no spritesheet
-        3,      // colunas
-        1,      // linhas
-        1.7,    // largura em unidades
-        1.2,    // altura em unidades
-        2       // dano da arma
+        0.1, // cadência
+        0.1, // frame duration
+        3, // total de frames no spritesheet
+        3, // colunas
+        1, // linhas
+        1.7, // largura em unidades
+        1.2, // altura em unidades
+        2 // dano da arma
     );
 
     // Rocket Launcher
-        criarArmaSprite(
+    criarArmaSprite(
         "./assets/rocket.png", // URL
-        0.5,    // cadência
-        0.2,    // frame duration
-        3,      // total de frames no spritesheet
-        3,      // colunas
-        1,      // linhas
-        1,      // largura em unidades
-        1.2,    // altura em unidades
-        10      // dano da arma
+        0.5, // cadência
+        0.2, // frame duration
+        3, // total de frames no spritesheet
+        3, // colunas
+        1, // linhas
+        1, // largura em unidades
+        1.2, // altura em unidades
+        10 // dano da arma
     );
 
     // lançador
@@ -176,7 +177,7 @@ export default function criarArmas(
     }
 
     function criarDisparoCacodemon(inimigo) {
-        const disparoGeo = new THREE.SphereGeometry(1.5, 10, 10);
+        const disparoGeo = new THREE.SphereGeometry(1, 10, 10);
         const disparoMat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
@@ -186,7 +187,7 @@ export default function criarArmas(
         const posInicial = inimigo.ultimaPosicaoEntidade;
 
         const direcao = new THREE.Vector3().subVectors(vetorPos, posInicial);
-        tiro.userData.dir = direcao;        
+        tiro.userData.dir = direcao;
         tiro.eInimigo = true;
         scene.add(tiro);
         disparos.push(tiro);
@@ -211,7 +212,7 @@ export default function criarArmas(
     function animateSprites(sprite, delta) {
         const d = sprite.userData;
         if (!d.isAnimating) return;
-        
+
         d.elapsed += delta;
         while (d.elapsed >= d.cadencia) {
             d.elapsed -= d.frameDuration;
@@ -262,12 +263,13 @@ export default function criarArmas(
         }
 
         inimigos.forEach((inimigo) => {
-            if (inimigo.estadoAtual == "ataque a distancia") {
-                if (
-                    inimigo.framesDesdeOUltimoEstado(frameAtual) >=
-                    inimigo.duracaoEstados[inimigo.estadoAtual]
-                ) {
+            if (
+                inimigo.estadoAtual == "ataque a distancia" &&
+                inimigo instanceof Cacodemon
+            ) {
+                if (!inimigo.disparou) {
                     criarDisparoCacodemon(inimigo);
+                    inimigo.disparou = true;
                 }
             }
         });
@@ -282,9 +284,11 @@ export default function criarArmas(
             const tiroBB = new THREE.Box3().setFromObject(tiro);
             let colidiu = false;
             const alvos = objetosColidiveis.concat(rampas);
-            if(tiro.eInimigo){
-                const personagemBB = new THREE.Box3().setFromObject(scene.personagem);
-                if(tiroBB.intersectsBox(personagemBB)){
+            if (tiro.eInimigo) {
+                const personagemBB = new THREE.Box3().setFromObject(
+                    scene.personagem
+                );
+                if (tiroBB.intersectsBox(personagemBB)) {
                     colidiu = true;
                     takeDamage();
                     scene.personagem.vida -= 8;
@@ -298,7 +302,6 @@ export default function criarArmas(
                     colidiu = true;
                     break;
                 }
-
             }
             for (let inimigo of inimigos) {
                 if (!inimigo.bb || !inimigo.enemyObj) continue;

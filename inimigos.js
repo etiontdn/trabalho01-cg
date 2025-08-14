@@ -289,6 +289,7 @@ export class Cacodemon extends Entidade {
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
+        this.disparou = false;
 
         list_Cacodemons.push(this);
     }
@@ -397,7 +398,7 @@ export class Cacodemon extends Entidade {
             this.entidade.position.distanceTo(this.scene.personagem.position) <=
             40
         ) {
-            // console.log("cacodemon pode atacar!");
+            this.disparou = false;
             return true;
         }
         return false;
