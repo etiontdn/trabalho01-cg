@@ -34,16 +34,16 @@ export class LostSoul extends Entidade {
         list_LostSouls.push(this);
     }
 
-   createEnemy() {
+    createEnemy() {
         const mtlLoader = new MTLLoader();
         mtlLoader.load(this.url, (materials) => {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.load('../0_assetsT3/objects/skull.obj', (enemyMesh) => {
-            // agora o enemyMesh já vem com texturas aplicadas
-            this.entidade.add(enemyMesh);
-            this.enemyObj = this.entidade;
+            objLoader.load("../0_assetsT3/objects/skull.obj", (enemyMesh) => {
+                // agora o enemyMesh já vem com texturas aplicadas
+                this.entidade.add(enemyMesh);
+                this.enemyObj = this.entidade;
             });
         });
     }
@@ -401,16 +401,26 @@ export class PainElemental extends Entidade {
 
         // move o último lostsoul na direção do personagem:
 
-        const lostSoul = this.lostSoulsInvocados[this.lostSoulsInvocados.length - 1];
+        const lostSoul =
+            this.lostSoulsInvocados[this.lostSoulsInvocados.length - 1];
 
-        const direcaoPersonagem = new THREE.Vector3().subVectors(this.scene.personagem.position, lostSoul.entidade.position).normalize();
+        const direcaoPersonagem = new THREE.Vector3()
+            .subVectors(
+                this.scene.personagem.position,
+                lostSoul.entidade.position
+            )
+            .normalize();
 
         lostSoul.entidade.quaternion.copy(dummy.quaternion);
         if (!lostSoul.reached) {
             lostSoul.entidade.position.add(direcaoPersonagem.multiplyScalar(1));
         }
 
-        if (lostSoul.entidade.position.distanceTo(this.scene.personagem.position) <= 1) {
+        if (
+            lostSoul.entidade.position.distanceTo(
+                this.scene.personagem.position
+            ) <= 1
+        ) {
             lostSoul.reached = true;
         }
     }
@@ -427,7 +437,10 @@ export class PainElemental extends Entidade {
         ) {
             // console.log("cacodemon pode atacar!");
             // Invoca lost soul aqui:
-            if (this.lostSoulsInvocados.length < 5 && this.tempoUltimaInvocacao() >= 300) {
+            if (
+                this.lostSoulsInvocados.length < 5 &&
+                this.tempoUltimaInvocacao() >= 300
+            ) {
                 this.invocarLostSoul();
                 this.ultimaInvocacao = this.frameAtual;
                 return true;
@@ -648,6 +661,7 @@ export class Soldado extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
         this.morreu = false;
+        this.damage = 5;
 
         this.actions = {};
         this.spriteMixer = null;
@@ -664,7 +678,7 @@ export class Soldado extends Entidade {
 
         this.duracaoEstados["ataque a distancia"] = 80;
         this.duracaoEstados["espera"] = 10;
-        
+
         this.posicaoInicial = spawn;
     }
 
@@ -957,7 +971,7 @@ export class Soldado extends Entidade {
     checarPodeAtacarADistancia() {
         if (
             this.entidade.position.distanceTo(this.scene.personagem.position) <=
-            20
+            30
         ) {
             // faz raycast até o personagem e checa se é possível
             const raycaster = new THREE.Raycaster();
@@ -972,15 +986,15 @@ export class Soldado extends Entidade {
             const intersects = raycaster.intersectObjects(colidiveis, true);
 
             if (intersects.length > 0) {
-                // Se houver interseções, verifica se o personagem está na linha de visão
-                const pontoInterseccao = intersects[0].point;
-                if (
-                    pontoInterseccao.distanceTo(
-                        this.scene.personagem.position
-                    ) <= 20
-                ) {
+                // Se houver interseções, verifica se o objeto está antes do personagem
+                const distanciaInterseccao = intersects[0].distance;
+                if (distanciaInterseccao <= 30) {
+                    return false;
+                } else {
                     return true;
                 }
+            } else {
+                return true;
             }
         }
         return false;
@@ -993,6 +1007,8 @@ export class Soldado extends Entidade {
             this.actions.ShootingDown.playOnce();
             // implementar o dano
             takeDamage();
+            this.scene.personagem.vida -= this.damage;
+            this.scene.personagem.updateHealthBar();
             this.animando = true;
         }
     }
@@ -1030,7 +1046,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
 
     new Soldado(scene, new THREE.Vector3(0, 2, -20));
 
-    new PainElemental(scene, new THREE.Vector3(0, 16, -10));
+    //new PainElemental(scene, new THREE.Vector3(0, 16, -10));
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
