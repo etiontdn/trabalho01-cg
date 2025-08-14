@@ -105,7 +105,7 @@ async function iniciarCena() {
     setTimeout(() => {
         ativar();
         console.log("Controles do personagem ativados.");
-    }, 500); // Atraso de 500ms (0.5 segundos)
+    }, 1000); // Atraso de 500ms (0.5 segundos)
 
     function render() {
         requestAnimationFrame(render);

@@ -105,6 +105,13 @@ async function carregarTexturas() {
       ao: await carregar("assets/industrial-walls_ao.png", 10, 2),
     },
 
+     paredesArea4: {
+      albedo: await carregar("assets/modern-metal-wall_albedo.png", 10, 2),
+      normal: await carregar("assets/modern-metal-wall_normal-ogl.png", 10, 2),
+      height: await carregar("assets/modern-metal-wall_height.png", 10, 2),
+      ao: await carregar("assets/modern-metal-wall_ao.png", 10, 2),
+    },
+
     coluna: {
       map: await carregar("assets/Stone_Column_001_basecolor.jpg"),
       normalMap: await carregar("assets/Stone_Column_001_normal.jpg"),
@@ -260,6 +267,13 @@ let CacodemonsAtivados = false;
 
 let ambientSoundPlaying = false;
 let ambientSoundInstance = null;
+
+// === NOVAS VARIÁVEIS PARA PAREDES DA AREA4 ===
+let area4Walls = [];
+let area4Criada = false; // NOVO: para garantir que criamos só uma vez
+let paredesDescendo = false;
+let paredesBaixadas = false;
+let texturasArea4Guardadas = null; // NOVO: guardará as textura
 
 export default async function(scene, audioListener) {
   const texturas = await carregarTexturas();
@@ -974,9 +988,59 @@ export default async function(scene, audioListener) {
 
 
     // Área 4
-    createArea4(scene, objetosColidiveis, rampas, texturas.area4);
-    createArea3(scene, objetosColidiveis, rampas);
+    
+    
+    // Guardamos as texturas da area4 para uso posterior
+texturasArea4Guardadas = texturas.area4;
 
+// Criamos apenas as paredes agora
+criarParedesArea4();
+
+// Area3 pode ser criada normalmente
+createArea3(scene, objetosColidiveis, rampas);
+
+    // === NOVA FUNÇÃO ===
+    function criarParedesArea4() {
+      const tex = texturas.paredesArea4;
+      const materialParede = new THREE.MeshStandardMaterial({
+        map: tex.albedo,
+        normalMap: tex.normal,
+        displacementMap: tex.height,
+        aoMap: tex.ao,
+        displacementScale: 0.0,
+        roughness: 0.9,
+        metalness: 0.0,
+      });
+
+      const altura = 30;
+      const espessura =0 ;
+      const lado = (80 * 2) ; // raio=80, folga=10
+      const offset = lado / 2;
+
+      const posY = altura / 2;
+      const centroX = 0;
+      const centroZ = 120;
+
+      const paredes = [
+        { pos: [centroX - offset, posY, centroZ], tam: [espessura, altura, lado] },
+        { pos: [centroX + offset, posY, centroZ], tam: [espessura, altura, lado] },
+        { pos: [centroX, posY, centroZ - offset], tam: [lado, altura, espessura] },
+        { pos: [centroX, posY, centroZ + offset], tam: [lado, altura, espessura] },
+      ];
+
+      for (let { pos, tam } of paredes) {
+        const geo = new THREE.BoxGeometry(...tam);
+        geo.setAttribute("uv2", new THREE.BufferAttribute(geo.attributes.uv.array, 2));
+        const mesh = new THREE.Mesh(geo, materialParede);
+        mesh.position.set(...pos);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+        objetosColidiveis.push(mesh);
+        area4Walls.push(mesh); // guarda referência
+      }
+    }
+    
 
   }
 
@@ -1047,6 +1111,18 @@ export default async function(scene, audioListener) {
       subirGrupoChave2 = true;
     }
   });
+
+   // === NOVO EVENTO PARA TECLA G ===
+window.addEventListener("keydown", (event) => {
+  if (event.key.toLowerCase() === "b" && !paredesBaixadas) {
+    if (!area4Criada) {
+      createArea4(scene, objetosColidiveis, rampas, texturasArea4Guardadas);
+      area4Criada = true;
+    }
+    paredesDescendo = true;
+  }
+});
+
 
   // Atualização contínua da cena
   function updateScene() {
@@ -1231,6 +1307,21 @@ export default async function(scene, audioListener) {
       CacodemonsAtivados = true;
       for (const inimigo of Cacodemons) {
         inimigo.alerta = true;
+      }
+    }
+
+    // === ANIMAÇÃO DAS PAREDES DA AREA4 ===
+    if (paredesDescendo) {
+      let todasBaixadas = true;
+      for (let parede of area4Walls) {
+        if (parede.position.y > -16) { // altura final no chão
+          parede.position.y -= 0.5; // velocidade
+          todasBaixadas = false;
+        }
+      }
+      if (todasBaixadas) {
+        paredesDescendo = false;
+        paredesBaixadas = true;
       }
     }
     

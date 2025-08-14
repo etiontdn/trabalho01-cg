@@ -162,7 +162,7 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
         objetosColidiveis.push(teto);
     }
 
-    const numAndares = 3;
+    const numAndares = 2;
     for (let i = 0; i < numAndares; i++) {
         const andar = new THREE.Object3D();
         area4.add(andar);
