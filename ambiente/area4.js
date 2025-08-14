@@ -28,6 +28,7 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
 
     const matBase = createMaterial(textures.base, 50, 50);
     const matPortal = createMaterial(textures.portal, 1, 5);
+    const matAro = createMaterial(textures.aro, 1, 1);
     const matEstacas = createMaterial(textures.estaca, 1, 10);
     const matBlocoEstacas = createMaterial(textures.blocoEstaca, 1, 1);
     const matTetoTopo = createMaterial(textures.bottom, 5, 5);
@@ -127,7 +128,7 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
         [estaca1, estaca2, blocoEstaca1, blocoEstaca2, blocoPortal1, blocoPortal2]
             .forEach(mesh => mesh.geometry.setAttribute('uv2', new THREE.BufferAttribute(mesh.geometry.attributes.uv.array, 2)));
 
-        const aroPortal = CSG.toMesh(csgAro, new THREE.Matrix4(), matPortal);
+        const aroPortal = CSG.toMesh(csgAro, new THREE.Matrix4(), matAro);
         aroPortal.geometry.center();
         aroPortal.geometry.setAttribute('uv2', new THREE.BufferAttribute(aroPortal.geometry.attributes.uv.array, 2));
 

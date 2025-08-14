@@ -172,6 +172,14 @@ async function carregarTexturas() {
         displacementMap: await carregar("assets/middle-eastern-wall_height.png"),
 
       },
+       aro: {
+        map: await carregar("assets/rock_surface_diff_1k.jpg"),
+        aoMap: await carregar("assets/rock_surface_ao_1k.jpg"),
+        normalMap: await carregar("assets/rock_surface_nor_gl_1k.jpg"),
+        roughnessMap: await carregar("assets/rock_surface_rough_1k.jpg"),
+        displacementMap: await carregar("assets/rock_surface_disp_1k.jpg"),
+
+      },
 
       estaca: {
         map: await carregar("assets/rock_surface_diff_1k.jpg"),
