@@ -6,7 +6,7 @@ import {
 import Area from "./area.js";
 import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
-import createArea4 from "./area4.js";
+import createArea4, { updateAnimatedColumns } from "./area4.js"; // Importe a função aqui
 import createArea3 from "./area3.js";
 
 
@@ -179,6 +179,24 @@ async function carregarTexturas() {
         normalMap: await carregar("assets/rock_surface_nor_gl_1k.jpg"),
         roughnessMap: await carregar("assets/rock_surface_rough_1k.jpg"),
         displacementMap: await carregar("assets/rock_surface_disp_1k.jpg"),
+
+      },
+
+      pilares: {
+        map: await carregar("assets/Wood_Gate_Fortified_001_basecolor.jpg"),
+        aoMap: await carregar("assets/Wood_Gate_Fortified_001_ambientOcclusion.jpg"),
+        normalMap: await carregar("assets/Wood_Gate_Fortified_001_normal.jpg"),
+        roughnessMap: await carregar("assets/Wood_Gate_Fortified_001_roughness.jpg"),
+        displacementMap: await carregar("assets/Wood_Gate_Fortified_001_height.png"),
+
+      },
+
+       barricadas: {
+        map: await carregar("assets/Wood_Door_002_basecolor.jpg"),
+        aoMap: await carregar("assets/Wood_Door_002_ambientOcclusion.jpg"),
+        normalMap: await carregar("assets/Wood_Door_002_normal.jpg"),
+        roughnessMap: await carregar("assets/Wood_Door_002_roughness.jpg"),
+        displacementMap: await carregar("assets/Wood_Door_002_height.png"),
 
       },
 
@@ -402,7 +420,6 @@ export default async function(scene, audioListener) {
       tex.repeat.set(1, 1);
     });
 
-    // Área 1: contém a primeira chave
     const area1 = new Area(new THREE.Vector3(-160, altura / 2, -150), altura, texturasArea, scene);
     area1.makePart({
       x: -15,
@@ -1208,6 +1225,9 @@ export default async function(scene, audioListener) {
         inimigo.alerta = true;
       }
     }
+    
+    // Chame a função de atualização das colunas da Area4
+    updateAnimatedColumns();
 
   }
 
