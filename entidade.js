@@ -31,9 +31,11 @@ class Entidade {
             vetorDirecao: new THREE.Vector3(),
             vetorPos: new THREE.Vector3(),
         };
-
+        
+        this.damage = 0;
         this.maxHp = 0;
         this.hp = this.maxHp;
+
         this.speed = 0;
         this.tamanho = new THREE.Vector3(0, 0, 0);
         this.bb = new THREE.Box3();

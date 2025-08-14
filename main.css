@@ -81,3 +81,41 @@
   width: 100%;
   transition: width 0.1s linear;
 }
+
+#ui-container {
+    position: absolute;
+    top: 30px;
+    width: 100%;
+    display: flex;
+    /* justify-content: start; */
+    left: 30px;
+    z-index: 10;
+    color: white;
+    font-family: sans-serif;
+}
+
+#health-bar-container {
+    display: flex;
+    align-items: start;
+    gap: 15px;
+}
+
+
+#health-bar-background {
+    width: 300px;
+    height: 25px;
+    background-color: #444;
+    border: 2px solid #222;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+/* Estilo para a barra de vida que será atualizada */
+#health-bar {
+    height: 100%;
+    width: 100%; /* Começa com 100% da vida */
+    background-color: #28a745; /* Verde para vida cheia */
+    border-radius: 3px;
+    /* Adiciona uma transição suave ao mudar a largura */
+    transition: width 0.5s ease-out;
+}

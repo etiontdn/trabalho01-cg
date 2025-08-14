@@ -1,3 +1,4 @@
+// main.js
 import createScene from "./ambiente/scene.js";
 import * as THREE from "three";
 import { onWindowResize } from "../libs/util/util.js";
@@ -8,9 +9,9 @@ import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
-import { PMREMGenerator } from "../build/three.module.js";
 
-let renderer = iniciarRenderer();
+const renderer = iniciarRenderer();
+
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = "absolute";
@@ -19,63 +20,107 @@ document.body.appendChild(labelRenderer.domElement);
 
 const camera = createCamera();
 
-// Cria personagem e controles
-const { scene, objetosColidiveis, rampas, updateScene, setPersonagem, setInimigos } =
-    createScene(new THREE.Scene()); // ✅ setPersonagem incluído
-let primeiroFrame = false;
-render();
-primeiroFrame = true;
-const { personagem, personagemControls, updateControl } = createPersonagem(
-    camera,
-    renderer,
-    objetosColidiveis,
-    rampas
-);
-scene.add(personagem);
-scene.personagem = personagem;
-// ✅ Passa o personagem para o scene.js
-setPersonagem(personagem);
+const audioListener = new THREE.AudioListener();
+camera.add(audioListener);
 
-const { updateEnemies, inimigos } = createEnemies(
-    scene,
-    objetosColidiveis,
-    rampas,
-    personagem
-);
+async function iniciarCena() {
+    const cenaBase = new THREE.Scene();
 
-setInimigos(inimigos.lostSouls, inimigos.cacodemons);
+    // Estado local para a música de fundo
+    let isMusicPlaying = true; 
 
+    // --- NOVO: Variável para controlar se o contexto de áudio foi retomado ---
+    let audioContextResumed = false;
 
+    // --- NOVO: Adiciona um listener para retomar o contexto de áudio após a interação do usuário ---
+    document.addEventListener('click', () => {
+        if (!audioContextResumed) {
+            if (audioListener.context.state === 'suspended') {
+                audioListener.context.resume().then(() => {
+                    console.log('AudioContext resumed successfully!');
+                    audioContextResumed = true; // Define como true para não tentar retomar novamente
+                });
+            }
+        }
+    }, { once: true }); // O { once: true } garante que o evento seja removido após a primeira execução
 
-const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons, ...inimigos.soldados, ...inimigos.painElementals];
-const updateDisparos = createArmas(
-    scene,
-    personagemControls,
-    objetosColidiveis,
-    rampas,
-    todosInimigos
-);
+    const {
+        scene,
+        objetosColidiveis,
+        rampas,
+        updateScene,
+        setPersonagem,
+        setInimigos,
+        toggleAmbientSound
+    } = await createScene(cenaBase, audioListener); 
 
-window.addEventListener("resize", () => {
-    onWindowResize(camera, renderer);
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-});
+    // Garante que o som ambiente seja iniciado após a cena ser carregada
+    toggleAmbientSound(isMusicPlaying); 
 
-function render() {
-    requestAnimationFrame(render);
-    // NOTE: Apenas para teste de animação do crosshair
-    // if (renderer.info.render.frame % 120 == 0) {
-    //     crosshair.active = true;
-    // }
-    crosshair.animate(renderer);
+    const {
+        personagem,
+        personagemControls,
+        updateControl,
+        ativar
+    } = createPersonagem(camera, renderer, objetosColidiveis, rampas);
 
-    if (primeiroFrame) {
+    scene.add(personagem);
+    scene.personagem = personagem;
+    setPersonagem(personagem);
+
+    const { updateEnemies, inimigos } = createEnemies(
+        scene,
+        objetosColidiveis,
+        rampas,
+        personagem
+    );
+
+    setInimigos(inimigos.lostSouls, inimigos.cacodemons);
+
+    const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons, ...inimigos.painElementals, ...inimigos.soldados];
+
+    const updateDisparos = createArmas(
+        scene,
+        personagemControls,
+        objetosColidiveis,
+        rampas,
+        todosInimigos
+    );
+
+    window.addEventListener("resize", () => {
+        onWindowResize(camera, renderer);
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() === 'q') {
+            isMusicPlaying = !isMusicPlaying;
+            toggleAmbientSound(isMusicPlaying);
+            console.log(`Música de fundo: ${isMusicPlaying ? 'Ligada' : 'Desligada'}`);
+        }
+    });
+
+    // --- CORREÇÃO: Reintroduzindo o setTimeout para ativar os controles ---
+    // Isso dá um pequeno tempo para a cena se estabilizar antes do personagem começar a interagir.
+    setTimeout(() => {
+        ativar();
+        console.log("Controles do personagem ativados.");
+    }, 1000); // Atraso de 500ms (0.5 segundos)
+
+    function render() {
+        requestAnimationFrame(render);
+        crosshair.animate(renderer);
+
         updateControl();
         updateDisparos(renderer.info.render.frame);
         updateEnemies(renderer.info.render.frame);
         updateScene();
+
+        renderer.render(scene, camera);
+        labelRenderer.render(scene, camera);
     }
 
-    renderer.render(scene, camera); // Render scene
-    labelRenderer.render(scene, camera);
+    render();
 }
+
+iniciarCena();

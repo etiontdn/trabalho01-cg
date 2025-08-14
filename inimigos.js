@@ -16,9 +16,9 @@ export class LostSoul extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(5, 4, 0.5);
-
+        this.damage = 15;
         this.speed = 10;
-        this.altMinima = 3;
+        this.altMinima = 1.5;
         this.distRecuo = 0;
         this.minDistRecuar = 8;
         this.tamanho = new THREE.Vector3(1.5, 1.5, 1.5);
@@ -103,6 +103,8 @@ export class LostSoul extends Entidade {
         if (this.entidade.position.distanceTo(alvo) <= 5) {
             if (frameAtual - this.ultimoDano >= 60) {
                 takeDamage();
+                this.scene.personagem.vida -= this.damage;
+                this.scene.personagem.updateHealthBar();
                 this.ultimoDano = frameAtual;
             }
         }
@@ -112,12 +114,10 @@ export class LostSoul extends Entidade {
         const vetorPos = this.pathFinding.vetorPos;
         const posAtual = this.entidade.position;
 
-        // Calcula o vetor direção do ponto atual até o destino
         const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
         const distancia = direcao.length();
 
         if (distancia > 0.01) {
-            // Evita jitter quando já está no destino
             direcao.normalize();
             const deslocamento = Math.min(
                 this.speed / this.duracaoEstados["perseguicao"],
@@ -483,17 +483,21 @@ export class Cacodemon extends Entidade {
         super(scene, spawn);
         this.scale = new THREE.Vector3(0.01, 0.01, 0.01);
         this.tamanho = new THREE.Vector3(7, 7, 7);
+
+        this.damage = 8;
         this.maxHp = 50;
         this.hp = this.maxHp;
+
         this.speed = 5;
         this.distRecuo = 0;
         this.minDistRecuar = 10;
         this.altMinima = 4;
         this.fadeOut = 1.0; // opacidade usada na transição
-        this.url = "./assets/cacodemon.glb";
+        this.url = "../0_assetsT3/objects/cacodemon.glb";
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
+        this.disparou = false;
 
         list_Cacodemons.push(this);
     }
@@ -602,7 +606,7 @@ export class Cacodemon extends Entidade {
             this.entidade.position.distanceTo(this.scene.personagem.position) <=
             40
         ) {
-            // console.log("cacodemon pode atacar!");
+            this.disparou = false;
             return true;
         }
         return false;
@@ -1020,7 +1024,6 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new LostSoul(scene, new THREE.Vector3(-140, 7, -160));
     new LostSoul(scene, new THREE.Vector3(-120, 7, -170));
     new LostSoul(scene, new THREE.Vector3(-100, 7, -180));
-
     new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
