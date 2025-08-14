@@ -988,7 +988,7 @@ export class Soldado extends Entidade {
             if (intersects.length > 0) {
                 // Se houver interseções, verifica se o objeto está antes do personagem
                 const distanciaInterseccao = intersects[0].distance;
-                if (distanciaInterseccao <= 30) {
+                if (distanciaInterseccao <= this.entidade.position.distanceTo(this.scene.personagem.position)) {
                     return false;
                 } else {
                     return true;
