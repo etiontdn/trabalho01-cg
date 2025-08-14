@@ -1044,9 +1044,19 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
-    new Soldado(scene, new THREE.Vector3(0, 2, -20));
+    // new Soldado(scene, new THREE.Vector3(0, 2, -20));
+    // TODO: implementar função de retornar a posição inicial do soldado
+    new Soldado(scene, new THREE.Vector3(120, 2, -100));
+    new Soldado(scene, new THREE.Vector3(120, 2, -125));
+    new Soldado(scene, new THREE.Vector3(120, 2, -150));
+    new Soldado(scene, new THREE.Vector3(120, 2, -175));
+    new Soldado(scene, new THREE.Vector3(180, 2, -100));
+    new Soldado(scene, new THREE.Vector3(180, 2, -125));
+    new Soldado(scene, new THREE.Vector3(180, 2, -150));
+    new Soldado(scene, new THREE.Vector3(180, 2, -175));
 
-    //new PainElemental(scene, new THREE.Vector3(0, 16, -10));
+    const boss= new PainElemental(scene, new THREE.Vector3(0, 16, 120));
+    boss.entidade.rotation.y = Math.PI;
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
@@ -1068,7 +1078,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
         });
 
         list_PainElementals.forEach((inimigo) => {
-            inimigo.alerta = true;
+            //   inimigo.alerta = true;
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
