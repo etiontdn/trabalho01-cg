@@ -165,7 +165,7 @@ export default function createPersonagem(
         const speed = delta * 50 * run;
 
         if (personagem.position.y < 0) {
-            personagem.position.y = 1;
+            personagem.position.y = alturaPersonagem / 2;
         }
 
         const camQ = new THREE.Quaternion();
@@ -264,7 +264,8 @@ export default function createPersonagem(
         }
     }
 
-    initPersonagem();
+    // initPersonagem();
+
     return {
         personagem,
         corpo,

@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { SpriteMixer } from "../libs/sprites/SpriteMixer.js";
 import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
 import { Cacodemon, PainElemental } from "./inimigos.js";
@@ -19,7 +18,6 @@ export default function criarArmas(
     const listener = new THREE.AudioListener();
     personagemControls.getObject().add(listener);
 
-    const mixer = new SpriteMixer();
     const armaMat = new THREE.MeshPhongMaterial({ color: "grey" });
 
     // Metralhadora
