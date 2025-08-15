@@ -7,6 +7,8 @@ import { Cacodemon, PainElemental } from "./inimigos.js";
 const armas = [];
 const disparos = [];
 
+const audioLoader = new THREE.AudioLoader();
+
 export default function criarArmas(
     scene,
     personagemControls,
@@ -14,39 +16,48 @@ export default function criarArmas(
     rampas,
     inimigos
 ) {
+    const listener = new THREE.AudioListener();
+    personagemControls.getObject().add(listener);
+
     const mixer = new SpriteMixer();
     const armaMat = new THREE.MeshPhongMaterial({ color: "grey" });
 
-    //Metralhadora
+    // Metralhadora
     criarArmaSprite(
-        "../0_assetsT3/objects/chaingun.png", // URL
-        0.1, // cadência
-        0.1, // frame duration
-        3, // total de frames no spritesheet
-        3, // colunas
-        1, // linhas
-        1.7, // largura em unidades
-        1.2, // altura em unidades
-        2 // dano da arma
+        "../0_assetsT3/objects/chaingun.png",
+        0.1,
+        0.1,
+        3,
+        3,
+        1,
+        1.7,
+        1.2,
+        2,
+        "../0_assetsT3/sounds/chaingunFiring.wav",
+        listener,
+        5 // Exemplo: velocidade normal (1.0) para a metralhadora
     );
 
     // Rocket Launcher
     criarArmaSprite(
-        "./assets/rocket.png", // URL
-        0.5, // cadência
-        0.2, // frame duration
-        3, // total de frames no spritesheet
-        3, // colunas
-        1, // linhas
-        1, // largura em unidades
-        1.2, // altura em unidades
-        10 // dano da arma
+        "./assets/rocket.png",
+        0.5,
+        0.2,
+        3,
+        3,
+        1,
+        1,
+        1.2,
+        10,
+        "../0_assetsT3/sounds/rocketFiring.wav",
+        listener,
+        3 // Exemplo: velocidade normal (1.0) para o lança-foguetes
     );
 
-    // lançador
-    criarArma({ raio: 0.23, comprimento: 2 }, 0.5, 10);
+    // Lançador (Sem som)
+    criarArma({ raio: 0.23, comprimento: 2 }, 0.5, 10, undefined, listener);
 
-    // Shotgun
+    // Shotgun (Sem som, adicione um soundUrl e um playbackRate se quiser som)
     const armaGeo = new THREE.CylinderGeometry(0.15, 0.15, 4);
     let arma2 = new THREE.Object3D();
     let arma2_1 = new THREE.Mesh(armaGeo, armaMat);
@@ -63,9 +74,20 @@ export default function criarArmas(
     armas.push(arma2);
     arma2.cadencia = 0.75;
     arma2.dano = 7;
+    // Exemplo: se quisesse som para a shotgun
+    // const shotgunSoundUrl = '../0_assetsT3/sounds/shotgun_shoot.wav';
+    // const shotgunPlaybackRate = 1.2; // Exemplo: um pouco mais rápido
+    // if (shotgunSoundUrl) {
+    //     arma2.sound = new THREE.Audio(listener);
+    //     audioLoader.load(shotgunSoundUrl, function(buffer) {
+    //         arma2.sound.setBuffer(buffer);
+    //         arma2.sound.setVolume(0.5);
+    //         arma2.sound.setPlaybackRate(shotgunPlaybackRate); // Define a velocidade de reprodução
+    //     });
+    // }
 
-    // Arma?
-    criarArma({ raio: 0.15, comprimento: 2 }, 0.5, 3);
+    // Arma genérica (Sem som)
+    criarArma({ raio: 0.15, comprimento: 2 }, 0.5, 3, undefined, listener);
 
     let armaAtual = 0;
     let calcDelta = 0;
@@ -100,18 +122,21 @@ export default function criarArmas(
 
     const clock = new THREE.Clock();
 
-    let frameAtual = 0; // contador de frames para controlar troca de arma
+    let frameAtual = 0;
 
     function criarArmaSprite(
         spriteUrl,
         cadencia,
-        fd, // frame duration
+        fd,
         totalFrames,
         cols,
         rows,
         largura,
         altura,
-        dano
+        dano,
+        soundUrl,
+        audioListener,
+        playbackRate = 1.0 // Novo parâmetro com valor padrão
     ) {
         const texture = new THREE.TextureLoader().load(spriteUrl);
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -139,9 +164,25 @@ export default function criarArmas(
         personagemControls.getObject().add(sprite);
         sprite.dano = dano;
         armas.push(sprite);
+
+        if (soundUrl) {
+            sprite.sound = new THREE.Audio(audioListener);
+            audioLoader.load(soundUrl, function(buffer) {
+                sprite.sound.setBuffer(buffer);
+                sprite.sound.setVolume(0.5);
+                sprite.sound.setPlaybackRate(playbackRate); // Define a velocidade de reprodução aqui
+            });
+        }
     }
 
-    function criarArma(tamanho, cadencia, dano) {
+    function criarArma(
+        tamanho,
+        cadencia,
+        dano,
+        soundUrl,
+        audioListener,
+        playbackRate = 1.0 // Novo parâmetro com valor padrão
+    ) {
         const armaGeo = new THREE.CylinderGeometry(
             tamanho.raio,
             tamanho.raio,
@@ -155,6 +196,15 @@ export default function criarArmas(
         arma.cadencia = cadencia;
         arma.dano = dano;
         armas.push(arma);
+
+        if (soundUrl) {
+            arma.sound = new THREE.Audio(audioListener);
+            audioLoader.load(soundUrl, function(buffer) {
+                arma.sound.setBuffer(buffer);
+                arma.sound.setVolume(0.5);
+                arma.sound.setPlaybackRate(playbackRate); // Define a velocidade de reprodução aqui
+            });
+        }
     }
 
     function criarDisparo(visivel = true) {
@@ -174,6 +224,10 @@ export default function criarArmas(
 
         scene.add(tiro);
         disparos.push(tiro);
+
+        if (armas[armaAtual].sound && !armas[armaAtual].sound.isPlaying) {
+            armas[armaAtual].sound.play();
+        }
     }
 
     function criarDisparoCacodemon(inimigo) {
@@ -182,8 +236,7 @@ export default function criarArmas(
         const tiro = new THREE.Mesh(disparoGeo, disparoMat);
 
         tiro.position.copy(inimigo.entidade.position);
-        // tiro.position.y -= 1;
-        const vetorPos = inimigo.ultimaPosicaoInimigo; // Posição do alvo
+        const vetorPos = inimigo.ultimaPosicaoInimigo;
         const posInicial = inimigo.ultimaPosicaoEntidade;
 
         const direcao = new THREE.Vector3().subVectors(vetorPos, posInicial);
@@ -191,6 +244,10 @@ export default function criarArmas(
         tiro.eInimigo = true;
         scene.add(tiro);
         disparos.push(tiro);
+
+        if (inimigo.attackSound && !inimigo.attackSound.isPlaying) {
+            inimigo.attackSound.play();
+        }
     }
 
     function updateArmas(frameAtual) {
