@@ -12,7 +12,6 @@ export default function createPersonagem(
     const personagem = new THREE.Object3D();
     personagem.add(personagemObject);
 
-    
     const alturaPersonagem = 2;
     const startPos = new THREE.Vector3(0, 2, 0); // ALTURA REDUZIDA
     const startQuat = personagemObject.quaternion.clone();
@@ -20,11 +19,55 @@ export default function createPersonagem(
     personagem.quaternion.copy(startQuat);
     personagem.visible = false; // INICIALMENTE INVISÍVEL
 
+    // Audio setup
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    const sound = new THREE.Audio(listener);
+    const audioLoader = new THREE.AudioLoader();
+    let currentHealth = 0; // To track health changes
+
+    // -- MODIFICAÇÃO AQUI: ATUALIZA O CAMINHO DO ÁUDIO --
+    audioLoader.load('../0_assetsT3/sounds/playerInjured.wav', function(buffer) { // Assuming your sound file is named hit_sound.mp3
+        sound.setBuffer(buffer);
+        sound.setLoop(false);
+        sound.setVolume(0.5); // Adjust volume as needed
+    });
+
     function initPersonagem() {
         personagem.position.copy(startPos);
         personagem.quaternion.copy(startQuat);
         camera.rotation.x = 0;
+        personagem.vidaMax = 200;
+        personagem.vida = personagem.vidaMax;
+        currentHealth = personagem.vidaMax; // Initialize currentHealth
     }
+
+    const healthBarElement = document.getElementById('health-bar');
+
+    personagem.updateHealthBar = function () {
+        const porcentVida = (personagem.vida / personagem.vidaMax) * 100;
+        const vidaAtual = Math.max(0, porcentVida);
+
+        // Play sound if health decreased
+        if (vidaAtual < currentHealth && !sound.isPlaying) {
+            sound.play();
+        }
+        currentHealth = vidaAtual; // Update current health
+
+        healthBarElement.style.width = `${vidaAtual}%`;
+        if (vidaAtual <= 25) {
+            healthBarElement.style.backgroundColor = '#dc3545';
+        } else if (vidaAtual <= 60) {
+            healthBarElement.style.backgroundColor = '#ffc107';
+        } else {
+            healthBarElement.style.backgroundColor = '#28a745';
+        }
+        if (vidaAtual <= 0) {
+            initPersonagem();
+            personagem.updateHealthBar();
+        }
+    };
 
     personagemObject.position.set(0, alturaPersonagem, 0);
     const corpoGeo = new THREE.CylinderGeometry(1, 1, alturaPersonagem, 8);
@@ -60,33 +103,6 @@ export default function createPersonagem(
     document.addEventListener("keyup", onKeyUp);
 
     let run = 1;
-
-    function initPersonagem() {
-        personagem.position.copy(startPos);
-        personagem.quaternion.copy(startQuat);
-        camera.rotation.x = 0;
-        personagem.vidaMax = 200;
-        personagem.vida = personagem.vidaMax;
-    }
-    
-    const healthBarElement = document.getElementById('health-bar');
-    
-    personagem.updateHealthBar = function () {
-        const porcentVida = (personagem.vida / personagem.vidaMax) * 100;
-        const vidaAtual = Math.max(0, porcentVida);
-        healthBarElement.style.width = `${vidaAtual}%`;
-        if (vidaAtual <= 25) {
-            healthBarElement.style.backgroundColor = '#dc3545';
-        } else if (vidaAtual <= 60) {
-            healthBarElement.style.backgroundColor = '#ffc107';
-        } else {
-            healthBarElement.style.backgroundColor = '#28a745';
-        }
-        if (vidaAtual <= 0) {
-            initPersonagem();
-            personagem.updateHealthBar();
-        }
-    };
 
     function onKeyDown(e) {
         switch (e.code) {
