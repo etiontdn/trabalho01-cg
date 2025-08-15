@@ -649,6 +649,50 @@ export class Soldado extends Entidade {
     constructor(scene, spawn) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(1, 1, 1);
+        this.spawn = spawn;
+
+        this.areaPermitida = new THREE.Box3(
+            new THREE.Vector3(85, 0, -200),
+            new THREE.Vector3(215, 5, -100)
+        );
+        this.voltando = false;
+
+        // const boxHelper = new THREE.Box3Helper(this.areaPermitida, 0x00ff00);
+        // scene.add(boxHelper);
+
+        const audioListener = new THREE.AudioListener();
+        const audioLoader = new THREE.AudioLoader();
+        this.entidade.add(audioListener);
+
+        this.somAtaque = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/soldier/soldierAttack.wav",
+            (buffer) => {
+                this.somAtaque.setBuffer(buffer);
+                this.somAtaque.setVolume(0.5);
+                this.somAtaque.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somInjured = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/soldier/injured.wav",
+            (buffer) => {
+                this.somInjured.setBuffer(buffer);
+                this.somInjured.setVolume(0.5);
+                this.somInjured.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somSight = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/soldier/soldierSight.wav",
+            (buffer) => {
+                this.somSight.setBuffer(buffer);
+                this.somSight.setVolume(0.5);
+                this.somSight.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
 
         this.speed = 5;
         this.altMinima = 2;
@@ -658,6 +702,7 @@ export class Soldado extends Entidade {
 
         this.maxHp = 30;
         this.hp = this.maxHp;
+        this.ultimoHp = this.hp;
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
         this.morreu = false;
@@ -860,6 +905,11 @@ export class Soldado extends Entidade {
             this.bb = null;
         }
 
+        if (this.ultimoHp != this.hp) {
+            if (!this.somInjured.isPlaying) this.somInjured.play();
+            this.ultimoHp = this.hp;
+        }
+
         if (this.spriteMixer) {
             this.spriteMixer.update(delta);
         }
@@ -900,7 +950,21 @@ export class Soldado extends Entidade {
         const vetorPos = this.pathFinding.vetorPos;
         const posAtual = this.entidade.position;
         // Calcula o vetor direção do ponto atual até o destino
-        const direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
+        let direcao;
+
+        if (!this.areaPermitida.containsPoint(vetorPos)) {
+            direcao = new THREE.Vector3().subVectors(this.spawn, posAtual);
+            this.voltando = true;
+        } else if (this.voltando) {
+            direcao = new THREE.Vector3().subVectors(this.spawn, posAtual);
+            if (this.spawn.distanceTo(posAtual) < 5) {
+                this.voltando = false;
+                this.alerta = false;
+                this.estadoAtual = "patrulha";
+            }
+        } else {
+            direcao = new THREE.Vector3().subVectors(vetorPos, posAtual);
+        }
         direcao.y = 0;
         const distancia = direcao.length();
         if (distancia > 0.01) {
@@ -988,7 +1052,12 @@ export class Soldado extends Entidade {
             if (intersects.length > 0) {
                 // Se houver interseções, verifica se o objeto está antes do personagem
                 const distanciaInterseccao = intersects[0].distance;
-                if (distanciaInterseccao <= this.entidade.position.distanceTo(this.scene.personagem.position)) {
+                if (
+                    distanciaInterseccao <=
+                    this.entidade.position.distanceTo(
+                        this.scene.personagem.position
+                    )
+                ) {
                     return false;
                 } else {
                     return true;
@@ -1000,12 +1069,21 @@ export class Soldado extends Entidade {
         return false;
     }
 
-    patrulha(enemy, speed) {}
+    patrulha(enemy, speed) {
+        if (
+            this.areaPermitida.containsPoint(this.ultimaPosicaoInimigo) &&
+            !this.alerta
+        ) {
+            this.alerta = true;
+            this.somSight.play();
+        }
+    }
 
     atacar(frameAtual) {
         if (!this.animando) {
             this.actions.ShootingDown.playOnce();
             // implementar o dano
+            this.somAtaque.play();
             takeDamage();
             this.scene.personagem.vida -= this.damage;
             this.scene.personagem.updateHealthBar();
@@ -1055,7 +1133,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Soldado(scene, new THREE.Vector3(180, 2, -150));
     new Soldado(scene, new THREE.Vector3(180, 2, -175));
 
-    const boss= new PainElemental(scene, new THREE.Vector3(0, 16, 120));
+    const boss = new PainElemental(scene, new THREE.Vector3(0, 16, 120));
     boss.entidade.rotation.y = Math.PI;
 
     function updateEnemies(frameAtual) {
