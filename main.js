@@ -7,7 +7,6 @@ import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
-import createArea3 from "./ambiente/area3.js";
 import createArea4 from "./ambiente/area4.js";
 import { createEnemies } from "./inimigos.js";
 import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
@@ -60,7 +59,6 @@ async function iniciarCena() {
     } = await createScene(cenaBase, audioListener); // Passa o audioListener
 
     await createArea4(scene, objetosColidiveis, rampas);
-    await createArea3(scene, objetosColidiveis, rampas);
 
     const {
         personagem,

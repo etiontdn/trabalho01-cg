@@ -19,12 +19,6 @@ export default function createPersonagem(
     personagem.quaternion.copy(startQuat);
     personagem.visible = false; // INICIALMENTE INVISÍVEL
 
-    function initPersonagem() {
-        personagem.position.copy(startPos);
-        personagem.quaternion.copy(startQuat);
-        camera.rotation.x = 0;
-    }
-
     personagemObject.position.set(0, alturaPersonagem, 0);
     const corpoGeo = new THREE.CylinderGeometry(1, 1, alturaPersonagem, 8);
     const corpoMat = new THREE.MeshBasicMaterial({ visible: false });
@@ -58,6 +52,35 @@ export default function createPersonagem(
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
 
+    let run = 1;
+
+    function initPersonagem() {
+        personagem.position.copy(startPos);
+        personagem.quaternion.copy(startQuat);
+        camera.rotation.x = 0;
+        personagem.vidaMax = 200;
+        personagem.vida = personagem.vidaMax;
+    }
+    
+    const healthBarElement = document.getElementById('health-bar');
+    
+    personagem.updateHealthBar = function () {
+        const porcentVida = (personagem.vida / personagem.vidaMax) * 100;
+        const vidaAtual = Math.max(0, porcentVida);
+        healthBarElement.style.width = `${vidaAtual}%`;
+        if (vidaAtual <= 25) {
+            healthBarElement.style.backgroundColor = '#dc3545';
+        } else if (vidaAtual <= 60) {
+            healthBarElement.style.backgroundColor = '#ffc107';
+        } else {
+            healthBarElement.style.backgroundColor = '#28a745';
+        }
+        if (vidaAtual <= 0) {
+            initPersonagem();
+            personagem.updateHealthBar();
+        }
+    };
+
     function onKeyDown(e) {
         switch (e.code) {
             case "KeyW":
@@ -78,6 +101,7 @@ export default function createPersonagem(
                 break;
             case "Space":
                 initPersonagem();
+                personagem.updateHealthBar();
                 break;
         }
     }
@@ -110,7 +134,7 @@ export default function createPersonagem(
         const speed = delta * 50;
 
         if (personagem.position.y < 0) {
-            personagem.position.copy(startPos);
+            personagem.position.y = alturaPersonagem / 2;
         }
 
         const camQ = new THREE.Quaternion();
@@ -180,7 +204,7 @@ export default function createPersonagem(
 
         const lateralObjs = objetosColidiveis.filter((obj) => {
             const bb = new THREE.Box3().setFromObject(obj);
-            return Math.abs(bb.max.y - bottomY) >= 0.3;
+            return Math.abs(bb.max.y - bottomY) >= 0.5;
         });
         const obstacleBoxes = lateralObjs.map((obj) =>
             new THREE.Box3().setFromObject(obj)
@@ -207,7 +231,7 @@ export default function createPersonagem(
         }
     }
 
-    initPersonagem();
+    // initPersonagem();
 
     return {
         personagem,

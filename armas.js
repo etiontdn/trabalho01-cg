@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { SpriteMixer } from '../libs/sprites/SpriteMixer.js';
 import crosshair from "./crosshair.js";
 import { takeDamage } from "./damage.js";
 
@@ -13,7 +12,6 @@ export default function criarArmas(
     rampas,
     inimigos
 ) {
-    const mixer = new SpriteMixer();
     const armaMat = new THREE.MeshPhongMaterial({ color: "grey" });
 
     //Metralhadora

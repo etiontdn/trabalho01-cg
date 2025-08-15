@@ -4,7 +4,7 @@ import { criarChave } from "./chave.js";
 import Area from "./area.js";
 import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
-
+import createArea3 from "./area3.js";
 
 
 async function carregarTexturas() {
@@ -126,6 +126,61 @@ async function carregarTexturas() {
             metalnessMap: await carregar("assets/Metal_Corrugated_Galvanized_001_metallic.jpg"),
         },
 
+        area3:{
+            caixas: await carregar("../assets/textures/crate.jpg"),
+            paredes: {
+
+                // TESTE 3
+                map: await carregar("assets/area3ParedeTeste3_diff_1k.png"),
+                aoMap: await carregar("assets/area3ParedeTeste3_ao_1k.png"),
+                normalMap: await carregar("assets/area3ParedeTeste3_nor_1k.png"),
+                roughnessMap: await carregar("assets/area3ParedeTeste3_rough_1k.png"),
+                displacementMap: await carregar("assets/area3ParedeTeste3_disp_1k.png"),
+                bumpMap: await carregar("assets/area3ParedeTeste3_bump_1k.png"),
+                specularMap: await carregar("assets/area3ParedeTeste3_spec_1k.png"),
+            },
+
+            corrimao1: {
+                map: await carregar("assets/area3ParedeTeste1_diff_1k.png", 7),
+                aoMap: await carregar("assets/area3ParedeTeste1_ao_1k.png", 7),
+                normalMap: await carregar("assets/area3ParedeTeste1_nor_1k.png", 7),
+                roughnessMap: await carregar("assets/area3ParedeTeste1_rough_1k.png", 7),
+                displacementMap: await carregar("assets/area3ParedeTeste1_disp_1k.png", 7),
+            },
+            
+            corrimao2: {
+                map: await carregar("assets/area3ParedeTeste1_diff_1k.png", 20),
+                aoMap: await carregar("assets/area3ParedeTeste1_ao_1k.png", 20),
+                normalMap: await carregar("assets/area3ParedeTeste1_nor_1k.png", 20),
+                roughnessMap: await carregar("assets/area3ParedeTeste1_rough_1k.png", 20),
+                displacementMap: await carregar("assets/area3ParedeTeste1_disp_1k.png", 20),
+            },
+            
+            chao: {
+                map: await carregar("assets/area3_chao_diff.png", 5, 5),
+                aoMap: await carregar("assets/area3_chao_ao.png", 5, 5),
+                normalMap: await carregar("assets/area3_chao_nor_gl.png", 5, 5),
+                roughnessMap: await carregar("assets/area3_chao_rough.png", 5, 5),
+                displacementMap: await carregar("assets/area3_chao_disp.png", 5, 5),
+            },
+
+            escadas: {
+                map: await carregar("assets/AA_metal_diff.png", 20, 20),
+                normalMap: await carregar("assets/AA_metal_nor.png", 20, 20),
+                roughnessMap: await carregar("assets/AA_metal_rough.png", 20, 20),
+                displacementMap: await carregar("assets/AA_metal_disp.png", 20, 20),
+                metalnessMap: await carregar("assets/AA_metal_metal.png", 20, 20),
+            },
+
+            areasAltas:{
+                map: await carregar("assets/plastered_wall_04_diff_1k.png"),
+                normalMap: await carregar("assets/plastered_wall_04_nor_1k.png"),
+                roughnessMap: await carregar("assets/plastered_wall_04_rough_1k.png"),
+                displacementMap: await carregar("assets/plastered_wall_04_disp_1k.png"),
+                aoMap: await carregar("assets/plastered_wall_04_ao_1k.png"),
+            },
+        },
+
         area4: {
             base: {
                 map: await carregar("assets/gray-bricks1-albedo.png"),
@@ -225,12 +280,15 @@ export default async function (scene, audioListener) {
 
     // Estado das chaves
     let chave1Coletada = false;
+    let chave2Coletada = false;
     let grupoChave1, chave1;
     let grupoChave2, chave2;
     let subirGrupoChave1 = false;
     let subirGrupoChave2 = false;
     const alturaFinal1 = 11;
     const alturaFinal2 = 12;
+
+    let updateArea3;
 
     // Elementos interativos
     let plataforma, porta, altar;
@@ -648,8 +706,8 @@ export default async function (scene, audioListener) {
     suporte2.castShadow = true;
     suporte2.receiveShadow = true;
 
-
-        // Cria a chave2 separadamente e a posiciona fixamente em y = 4
+    
+    // Cria a chave2 separadamente e a posiciona fixamente em y = 4
         chave2 = criarChave(0xffff00, 0.4);
         chave2.position.set(area2.obj3D.position.x - 25, 7, area2.obj3D.position.z);
         chave2.rotation.x = Math.PI / 2;
@@ -663,6 +721,10 @@ export default async function (scene, audioListener) {
         grupoChave2.position.copy(area2.obj3D.position);
         objetosColidiveis.push(grupoChave2);
         scene.add(grupoChave2);
+
+    // ---------------------   AREA 3   --------------------- //
+    updateArea3 = createArea3(scene, chave2, objetosColidiveis, rampas, texturas.area3);
+    
 
     // Função para criar objetos com múltiplos mapas de textura
     function criarObjetoComTexturas({ geoArgs, pos }, scene, listaColisao) {
@@ -750,10 +812,6 @@ export default async function (scene, audioListener) {
         }
     });
 
-
-
-
-
     }
 
     // Cria limites invisíveis para evitar que o personagem caia fora do mapa
@@ -802,7 +860,7 @@ export default async function (scene, audioListener) {
     // Garante que o som comece a tocar automaticamente
     toggleAmbientSound(true);
 
-
+    
     // ------------------- EVENTOS E LÓGICA ------------------- //
 
     // Evento: subir as chaves com tecla "K"
@@ -850,6 +908,19 @@ export default async function (scene, audioListener) {
                 chave1Coletada = true;
                 sons.keyPickup.play();
                 console.log("Chave 1 coletada!");
+            }
+        }
+        
+        // Coleta da chave 1
+        if (!chave2Coletada && personagem) {
+            const distancia = personagem.position.distanceTo(
+                chave2.getWorldPosition(new THREE.Vector3())
+            );
+            if (distancia < 4.5) {
+                chave2.visible = false;
+                chave2Coletada = true;
+                sons.keyPickup.play();
+                console.log("Chave 2 coletada!");
             }
         }
 
@@ -999,6 +1070,8 @@ if (portaaberta && porta.position.x === -16) {
                 inimigo.alerta = true;
             }
         }
+
+        updateArea3(chave2Coletada);
        
     }
 
