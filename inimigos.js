@@ -25,6 +25,7 @@ export class LostSoul extends Entidade {
 
         this.maxHp = 20;
         this.hp = this.maxHp;
+        this.ultimoHp = this.hp;
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
@@ -32,6 +33,32 @@ export class LostSoul extends Entidade {
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_LostSouls.push(this);
+
+        // SONS
+
+        const audioListener = new THREE.AudioListener();
+        const audioLoader = new THREE.AudioLoader();
+        this.entidade.add(audioListener);
+
+        this.somAtaque = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/lostSoul/lost_soul_attack.wav",
+            (buffer) => {
+                this.somAtaque.setBuffer(buffer);
+                this.somAtaque.setVolume(0.5);
+                this.somAtaque.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somInjured = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/lostSoul/injured.wav",
+            (buffer) => {
+                this.somInjured.setBuffer(buffer);
+                this.somInjured.setVolume(0.5);
+                this.somInjured.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
     }
 
     createEnemy() {
@@ -57,6 +84,11 @@ export class LostSoul extends Entidade {
         if (this.hp <= 0 && this.estadoAtual !== "morre") {
             this.estadoAtual = "morre";
             this.fadeOut = 1.0;
+        }
+
+        if (this.hp != this.ultimoHp) {
+            if (!this.somInjured.isPlaying) this.somInjured.play();
+            this.ultimoHp = this.hp;
         }
 
         switch (this.estadoAtual) {
@@ -211,15 +243,11 @@ export class LostSoul extends Entidade {
         dummy.lookAt(vetorPos);
         this.entidade.quaternion.slerp(dummy.quaternion, 0.04); // Slerp para uma rotação suave
 
-        // Lógica de atraso do ataque (opcional, dependendo do que você quer que 100 frames representem)
-        // Se 100 frames é para uma animação de "preparar ataque" antes de mover, mantenha.
-        // Se a ideia é que ele comece a se mover imediatamente, remova esta condição.
         if (this.framesDesdeOUltimoEstado(frameAtual) <= 150) {
-            // Durante esses 100 frames, o monstro pode estar apenas animando
-            // ou se preparando, sem se mover. Se quiser que ele se mova DESDE o início,
-            // remova este 'if' e o 'return'.
             return;
         }
+
+        if (!this.somAtaque.isPlaying) this.somAtaque.play();
 
         // Normaliza a direção para obter um vetor unitário
         direcao.normalize();
@@ -279,6 +307,8 @@ export class PainElemental extends Entidade {
         this.tamanho = new THREE.Vector3(20, 20, 10);
         this.maxHp = 100;
         this.hp = this.maxHp;
+        this.ultimoHp = this.hp;
+        this.ultimoAlerta = false;
         this.speed = 5;
         this.distRecuo = 0;
         this.minDistRecuar = 10;
@@ -295,6 +325,40 @@ export class PainElemental extends Entidade {
         this.duracaoEstados["ataque a distancia"] = 120;
 
         list_PainElementals.push(this);
+
+
+        // SONS
+        const audioListener = new THREE.AudioListener();
+        const audioLoader = new THREE.AudioLoader();
+        this.somAtaque = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/painElemental/painAttack.wav",
+            (buffer) => {
+                this.somAtaque.setBuffer(buffer);
+                this.somAtaque.setVolume(0.5);
+                this.somAtaque.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somInjured = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/painElemental/injured.wav",
+            (buffer) => {
+                this.somInjured.setBuffer(buffer);
+                this.somInjured.setVolume(0.5);
+                this.somInjured.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somAlerta = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/painElemental/painSight.wav",
+            (buffer) => {
+                this.somAlerta.setBuffer(buffer);
+                this.somAlerta.setVolume(0.5);
+                this.somAlerta.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
     }
 
     createEnemy() {
@@ -327,6 +391,18 @@ export class PainElemental extends Entidade {
             this.estadoAtual = "morre";
             this.fadeOut = 1.0;
         }
+
+        if (this.hp != this.ultimoHp) {
+            if (!this.somInjured.isPlaying) this.somInjured.play();
+            this.ultimoHp = this.hp;
+        }
+
+        if (this.alerta && !this.ultimoAlerta) {
+            if (!this.somAlerta.isPlaying) this.somAlerta.play();
+            this.ultimoAlerta = true;
+        }
+
+        this.ultimoAlerta = this.alerta;
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -443,6 +519,7 @@ export class PainElemental extends Entidade {
             ) {
                 this.invocarLostSoul();
                 this.ultimaInvocacao = this.frameAtual;
+                if (!this.somAtaque.isPlaying) this.somAtaque.play();
                 return true;
             }
             return false;
@@ -495,12 +572,13 @@ export class Cacodemon extends Entidade {
     constructor(scene, spawn, scale) {
         super(scene, spawn);
         this.scale = new THREE.Vector3(0.01, 0.01, 0.01);
-        this.tamanho = new THREE.Vector3(7, 7, 7);
+        this.tamanho = new THREE.Vector3(5, 5, 5);
 
         this.damage = 8;
         this.maxHp = 50;
         this.hp = this.maxHp;
-
+        this.ultimoHp = this.maxHp;
+        this.ultimoAlerta = false;
         this.speed = 5;
         this.distRecuo = 0;
         this.minDistRecuar = 10;
@@ -513,6 +591,59 @@ export class Cacodemon extends Entidade {
         this.disparou = false;
 
         list_Cacodemons.push(this);
+
+        // SONS
+        const audioListener = new THREE.AudioListener();
+        const audioLoader = new THREE.AudioLoader();
+        this.somAtaque = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/cacoDemon/cacodemonAttack.wav",
+            (buffer) => {
+                this.somAtaque.setBuffer(buffer);
+                this.somAtaque.setVolume(0.5);
+                this.somAtaque.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somInjured = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/cacoDemon/cacodemonInjured.wav",
+            (buffer) => {
+                this.somInjured.setBuffer(buffer);
+                this.somInjured.setVolume(0.5);
+                this.somInjured.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somMorte = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/cacoDemon/cacodemonDeath.wav",
+            (buffer) => {
+                this.somMorte.setBuffer(buffer);
+                this.somMorte.setVolume(0.5);
+                this.somMorte.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somPerto = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/cacoDemon/cacoDemonNearby.wav",
+            (buffer) => {
+                this.somPerto.setBuffer(buffer);
+                this.somPerto.setVolume(0.5);
+                this.somPerto.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
+
+        this.somAlerta = new THREE.Audio(audioListener);
+        audioLoader.load(
+            "../0_assetsT3/sounds/cacoDemon/cacoDemonSight.wav",
+            (buffer) => {
+                this.somAlerta.setBuffer(buffer);
+                this.somAlerta.setVolume(0.5);
+                this.somAlerta.setPlaybackRate(1.0); // Define a velocidade de reprodução aqui
+            }
+        );
     }
 
     createEnemy() {
@@ -535,7 +666,20 @@ export class Cacodemon extends Entidade {
         if (this.hp <= 0 && this.estadoAtual !== "morre") {
             this.estadoAtual = "morre";
             this.fadeOut = 1.0;
+            if (!this.somMorte.isPlaying) this.somMorte.play();
         }
+
+        if (this.hp != this.ultimoHp) {
+            if (!this.somInjured.isPlaying && !this.somMorte.isPlaying) this.somInjured.play();
+            this.ultimoHp = this.hp;
+        }
+
+        if (this.alerta && !this.ultimoAlerta) {
+            if (!this.somAlerta.isPlaying) this.somAlerta.play();
+            this.ultimoAlerta = true;
+        }
+
+        this.ultimoAlerta = this.alerta;
 
         switch (this.estadoAtual) {
             case "patrulha":
@@ -620,6 +764,7 @@ export class Cacodemon extends Entidade {
             40
         ) {
             this.disparou = false;
+            if (!this.somAtaque.isPlaying) this.somAtaque.play();
             return true;
         }
         return false;
@@ -642,6 +787,8 @@ export class Cacodemon extends Entidade {
 
         this.enemyObj.position.add(dir.multiplyScalar(move));
         this.distRecuo -= move;
+
+        if (!this.somPerto.isPlaying) this.somPerto.play();
     }
 }
 
@@ -706,7 +853,7 @@ export class Soldado extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
         this.morreu = false;
-        this.damage = 5;
+        this.damage = 2;
 
         this.actions = {};
         this.spriteMixer = null;

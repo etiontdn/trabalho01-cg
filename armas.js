@@ -336,7 +336,11 @@ export default function criarArmas(
         for (let i = 0; i < disparos.length; i++) {
             const tiro = disparos[i];
             const dir = tiro.userData.dir.clone().normalize();
-            tiro.position.addScaledVector(dir, speed * delta);
+            if (tiro.eInimigo) {
+                tiro.position.addScaledVector(dir, (speed/3) * delta);
+            } else {
+                tiro.position.addScaledVector(dir, speed * delta);
+            }
 
             const tiroBB = new THREE.Box3().setFromObject(tiro);
             let colidiu = false;
@@ -346,10 +350,13 @@ export default function criarArmas(
                     scene.personagem
                 );
                 if (tiroBB.intersectsBox(personagemBB)) {
-                    colidiu = true;
-                    takeDamage();
-                    scene.personagem.vida -= 8;
-                    scene.personagem.updateHealthBar();
+                    if (!tiro.colidiu) {
+                        takeDamage();
+                        tiro.colidiu = true;
+                        colidiu = true;
+                        scene.personagem.vida -= 8;
+                        scene.personagem.updateHealthBar();
+                    }
                     break;
                 }
             }
