@@ -321,8 +321,11 @@ let LostSouls = [];
 let Cacodemons = [];
 let Soldados = [];
 let PainElementals = [];
+let CacodemonsArea4 = []; 
 let lostSoulsAtivados = false;
 let CacodemonsAtivados = false;
+let CacodemonsArea4Ativados = false;
+let PainElementalsAtivados = false;
 
 let ambientSoundPlaying = false;
 let ambientSoundInstance = null;
@@ -407,11 +410,12 @@ export default async function(scene, audioListener) {
     personagem = p;
   }
 
-  function setInimigos(LostSoul, Cacodemon, SoldadosArr, PainElementalsArr) {
+  function setInimigos(LostSoul, Cacodemon, SoldadosArr, PainElemental, cacodemonsArea4) {
     LostSouls = LostSoul;
     Cacodemons = Cacodemon;
     Soldados = SoldadosArr;
-    PainElementals = PainElementals;
+    PainElementals = PainElemental;
+    CacodemonsArea4 = cacodemonsArea4;
   }
   // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
 
@@ -1479,6 +1483,22 @@ let contSoldMortos;
         inimigo.alerta = true;
       }
     }
+
+      if (!CacodemonsArea4Ativados && (x >= -80 && x <= 80 && z >= 40 && z <= 200)) {
+    CacodemonsArea4Ativados = true; // Correto: defina a flag como true
+    console.log("Cacodemons da Área 4 Ativados!"); // Opcional: log para depuração
+    for (const inimigo of CacodemonsArea4) {
+        inimigo.alerta = true; // Assumindo que 'alerta' significa definir seu estado para perseguir
+    }
+}
+
+   if (!PainElementalsAtivados && (x >= -80 && x <= 80 && z >= 40 && z <= 200)) {
+    PainElementalsAtivados = true; // Correto: defina a flag como true
+    console.log("Cacodemons da Área 4 Ativados!"); // Opcional: log para depuração
+    for (const inimigo of PainElementals) {
+        inimigo.alerta = true; // Assumindo que 'alerta' significa definir seu estado para perseguir
+    }
+}
 
     // === ANIMAÇÃO DAS PAREDES DA AREA4 ===
     if (paredesDescendo) {

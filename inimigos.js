@@ -11,6 +11,7 @@ const list_LostSouls = [];
 const list_Cacodemons = [];
 const list_Soldados = [];
 const list_PainElementals = [];
+const list_Cacodemons_Area4 = []; // Declarada e pronta para uso
 
 export class LostSoul extends Entidade {
     constructor(scene, spawn) {
@@ -433,8 +434,7 @@ export class PainElemental extends Entidade {
 
                     if (this.fadeOut <= 0) {
                         this.scene.remove(this.entidade);
-                        console.log("Pain elemental morre")
-                        const index = list_PainElementals.indexOf(this);
+                        const index = list_PainElementals.indexOf(this); // CORRIGIDO: Era list_Cacodemons, agora é list_PainElementals
                         if (index !== -1) list_PainElementals.splice(index, 1);
                     }
                 }
@@ -569,7 +569,7 @@ export class PainElemental extends Entidade {
 }
 
 export class Cacodemon extends Entidade {
-    constructor(scene, spawn, scale) {
+    constructor(scene, spawn, scale, enemyList = list_Cacodemons) { // Adicionado enemyList com valor padrão
         super(scene, spawn);
         this.scale = new THREE.Vector3(0.01, 0.01, 0.01);
         this.tamanho = new THREE.Vector3(5, 5, 5);
@@ -590,7 +590,8 @@ export class Cacodemon extends Entidade {
         this.duracaoEstados.espera = 20;
         this.disparou = false;
 
-        list_Cacodemons.push(this);
+        this.enemyList = enemyList; // Armazena a referência da lista
+        this.enemyList.push(this); // Adiciona o Cacodemon à lista correta
 
         // SONS
         const audioListener = new THREE.AudioListener();
@@ -710,8 +711,8 @@ export class Cacodemon extends Entidade {
 
                     if (this.fadeOut <= 0) {
                         this.scene.remove(this.entidade);
-                        const index = list_Cacodemons.indexOf(this);
-                        if (index !== -1) list_Cacodemons.splice(index, 1);
+                        const index = this.enemyList.indexOf(this); // Usa this.enemyList para remover da lista correta
+                        if (index !== -1) this.enemyList.splice(index, 1);
                     }
                 }
                 break;
@@ -1288,9 +1289,11 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new LostSoul(scene, new THREE.Vector3(-140, 7, -160));
     new LostSoul(scene, new THREE.Vector3(-120, 7, -170));
     new LostSoul(scene, new THREE.Vector3(-100, 7, -180));
-    new Cacodemon(scene, new THREE.Vector3(0, 60, -190));
-    new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
-    new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
+
+    // Cacodemons da lista geral
+    new Cacodemon(scene, new THREE.Vector3(0, 60, -190), null, list_Cacodemons);
+    new Cacodemon(scene, new THREE.Vector3(30, 30, -180), null, list_Cacodemons);
+    new Cacodemon(scene, new THREE.Vector3(-30, 45, -180), null, list_Cacodemons);
 
     // TODO: implementar função de retornar a posição inicial do soldado
     new Soldado(scene, new THREE.Vector3(120, 2, -110));
@@ -1304,6 +1307,13 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
 
     const boss = new PainElemental(scene, new THREE.Vector3(0, 16, 120));
     boss.entidade.rotation.y = Math.PI;
+
+    // Cacodemons da Área 4
+    new Cacodemon(scene, new THREE.Vector3(20, 5, 120), null, list_Cacodemons_Area4);
+    new Cacodemon(scene, new THREE.Vector3(0, 5, 140), null, list_Cacodemons_Area4);
+    new Cacodemon(scene, new THREE.Vector3(0, 5, 110), null, list_Cacodemons_Area4);
+    new Cacodemon(scene, new THREE.Vector3(-20, 5, 120), null, list_Cacodemons_Area4);
+    
 
     function updateEnemies(frameAtual) {
         list_LostSouls.forEach((inimigo) => {
@@ -1329,6 +1339,12 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
             inimigo.animateEnemy(frameAtual, personagem.position);
             inimigo.loopDeComportamento(frameAtual, personagem.position);
         });
+
+        list_Cacodemons_Area4.forEach((inimigo) => { // Loop para Cacodemons da Área 4
+            // inimigo.alerta = true;
+            inimigo.animateEnemy(frameAtual, personagem.position);
+            inimigo.loopDeComportamento(frameAtual, personagem.position);
+        });
     }
 
     return {
@@ -1338,6 +1354,7 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
             cacodemons: list_Cacodemons,
             soldados: list_Soldados,
             painElementals: list_PainElementals,
+            cacodemonsArea4: list_Cacodemons_Area4,
         },
     };
 }

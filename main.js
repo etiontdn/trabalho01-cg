@@ -27,7 +27,7 @@ async function iniciarCena() {
     const cenaBase = new THREE.Scene();
 
     // Estado local para a música de fundo
-    let isMusicPlaying = true; 
+    let isMusicPlaying = true;
 
     // --- NOVO: Variável para controlar se o contexto de áudio foi retomado ---
     let audioContextResumed = false;
@@ -52,10 +52,10 @@ async function iniciarCena() {
         setPersonagem,
         setInimigos,
         toggleAmbientSound
-    } = await createScene(cenaBase, audioListener); 
+    } = await createScene(cenaBase, audioListener);
 
     // Garante que o som ambiente seja iniciado após a cena ser carregada
-    toggleAmbientSound(isMusicPlaying); 
+    toggleAmbientSound(isMusicPlaying);
 
     const {
         personagem,
@@ -75,8 +75,17 @@ async function iniciarCena() {
         personagem
     );
 
-    setInimigos(inimigos.lostSouls, inimigos.cacodemons, inimigos.soldados, inimigos.painElementals);
-    const todosInimigos = [...inimigos.lostSouls, ...inimigos.cacodemons, ...inimigos.soldados, ...inimigos.painElementals];
+    // -- ALTERAÇÃO AQUI: Inclua inimigos.cacodemonsArea4 na chamada setInimigos --
+    setInimigos(inimigos.lostSouls, inimigos.cacodemons, inimigos.soldados, inimigos.painElementals, inimigos.cacodemonsArea4);
+
+    // -- ALTERAÇÃO AQUI: Inclua inimigos.cacodemonsArea4 em todosInimigos --
+    const todosInimigos = [
+        ...inimigos.lostSouls,
+        ...inimigos.cacodemons,
+        ...inimigos.soldados,
+        ...inimigos.painElementals,
+        ...inimigos.cacodemonsArea4 // Adicionado
+    ];
 
     const updateDisparos = createArmas(
         scene,
