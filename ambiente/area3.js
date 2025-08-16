@@ -452,6 +452,8 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas,
         const tmpWorldPos = new THREE.Vector3();
         function updateArea3(chave2Coletada, chave3Coletada, soldados_mortos) {
 
+            // console.log(chave2.getWorldPosition(new THREE.Vector3).x);
+
             //--------------- MUDANÇA ILUMINAÇÃO --------------//
             if(scene.personagem.position.x >= ilumMinX && scene.personagem.position.x <= ilumMaxX &&
                scene.personagem.position.z >= ilumMinZ && scene.personagem.position.z <= ilumMaxZ) {
@@ -517,6 +519,8 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas,
                     portaoEsqComEncaixe.position.x += overshoot;
                     portaoDirComEncaixe.position.x -= overshoot;
                 }
+                if(chave2.position.x < 129.82493950216877)
+                    chave2.position.x = 129.82493950216877;
             }
         }
 

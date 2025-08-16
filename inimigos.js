@@ -117,8 +117,20 @@ export class LostSoul extends Entidade {
 
                     this.entidade.traverse((child) => {
                         if (child.isMesh && child.material) {
-                            child.material.transparent = true;
-                            child.material.opacity = this.fadeOut;
+                            const aplicarOpacidade = (material) => {
+                                if (!material.transparent) {
+                                    material.transparent = true;
+                                }
+                                material.opacity = this.fadeOut;
+
+                                material.needsUpdate = true;
+                            };
+
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(aplicarOpacidade);
+                            } else {
+                                aplicarOpacidade(child.material);
+                            }
                         }
                     });
 
@@ -128,9 +140,6 @@ export class LostSoul extends Entidade {
                         if (index !== -1) list_LostSouls.splice(index, 1);
                     }
                 }
-                break;
-            case "espera":
-                this.espera();
                 break;
         }
         if (this.entidade.position.distanceTo(alvo) <= 5) {
@@ -314,7 +323,7 @@ export class PainElemental extends Entidade {
         this.distRecuo = 0;
         this.minDistRecuar = 10;
         this.altMinima = 12;
-        this.fadeOut = 1.0; // opacidade usada na transição
+        this.fadeOut = 1.0;
         this.url = "./assets/pain/painElemental.glb";
         this.createEnemy();
         this.frameAtual = 0;
@@ -326,7 +335,6 @@ export class PainElemental extends Entidade {
         this.duracaoEstados["ataque a distancia"] = 120;
 
         list_PainElementals.push(this);
-
 
         // SONS
         const audioListener = new THREE.AudioListener();
