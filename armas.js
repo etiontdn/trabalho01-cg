@@ -318,6 +318,16 @@ function criarDisparo() {
     }
 
     function updateDisparos() {
+        const copiaInimigos = [...inimigos]; 
+    copiaInimigos.forEach((inimigo) => {
+        if (inimigo instanceof PainElemental && inimigo.lostSoulsInvocados) {
+            for (let lostSoul of inimigo.lostSoulsInvocados) {
+                if (!inimigos.includes(lostSoul)) {
+                    inimigos.push(lostSoul);
+                }
+            }
+        }
+    });
         const delta = clock.getDelta();
 
         updateArmas(frameAtual);
