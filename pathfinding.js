@@ -77,7 +77,7 @@ function encontrarCaminho(entidade) {
     }
 
     if (entidade.indoLado) {
-        console.log("indo pro lado");
+        // console.log("indo pro lado");
         direcoes.shift();
         direcoes.shift();
         direcoes.shift();
@@ -95,7 +95,7 @@ function encontrarCaminho(entidade) {
         if (chance50) {
             direcoes.shift();
         }
-        console.log(direcoes);
+        // console.log(direcoes);
     }
 
     const vetorDireto = new THREE.Vector3();
@@ -134,7 +134,7 @@ function encontrarCaminho(entidade) {
 
     if (entidade.naoVoa) {
         vetorDireto.y = 0;
-        console.log("não voa");
+        // console.log("não voa");
     }
 
     vetorDireto.normalize();

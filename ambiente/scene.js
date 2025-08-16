@@ -311,6 +311,8 @@ async function carregarSons(audioListener) {
 let personagem = null;
 let LostSouls = [];
 let Cacodemons = [];
+let Soldados = [];
+let PainElementals = [];
 let lostSoulsAtivados = false;
 let CacodemonsAtivados = false;
 
@@ -368,8 +370,10 @@ export default async function(scene, audioListener) {
     chavesUI.init();
     let grupoChave1, chave1;
     let grupoChave2, chave2;
+    let chave3;
     let subirGrupoChave1 = false;
     let subirGrupoChave2 = false;
+    let subirGrupoChave3 = false;
     const alturaFinal1 = 11;
     const alturaFinal2 = 12;
 
@@ -394,9 +398,11 @@ export default async function(scene, audioListener) {
     personagem = p;
   }
 
-  function setInimigos(LostSoul, Cacodemon) {
+  function setInimigos(LostSoul, Cacodemon, SoldadosArr, PainElementalsArr) {
     LostSouls = LostSoul;
     Cacodemons = Cacodemon;
+    Soldados = SoldadosArr;
+    PainElementals = PainElementals;
   }
   // ------------------- CRIAÇÃO DO AMBIENTE ------------------- //
 
@@ -939,8 +945,9 @@ export default async function(scene, audioListener) {
     scene.add(grupoChave2);
 
     // ---------------------   AREA 3   --------------------- //
-    updateArea3 = createArea3(scene, chave2, objetosColidiveis, rampas, texturas.area3);
-    
+    chave3 = criarChave(0x0000ff, 0.4);
+    updateArea3 = createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas.area3);
+
     // Função para criar objetos com múltiplos mapas de textura
     function criarObjetoComTexturas({
       geoArgs,
@@ -1194,6 +1201,7 @@ criarParedesArea4();
     if (event.key.toLowerCase() === "k") {
       subirGrupoChave1 = true;
       subirGrupoChave2 = true;
+      subirGrupoChave3 = true;
     }
   });
 
@@ -1203,6 +1211,9 @@ criarParedesArea4();
       chave1Coletada = true;
       chave2Coletada = true;
       chave3Coletada = true;
+      chave1.visible = false;
+      chave2.visible = false;
+      chave3.visible = false;
       chavesUI.adicionarChave1();
       chavesUI.adicionarChave2();
       chavesUI.adicionarChave3();
@@ -1227,6 +1238,8 @@ window.addEventListener("keydown", (event) => {
     chave1.rotation.x += 0.02;
     chave2.rotation.y += 0.02;
     chave2.rotation.x += 0.02;
+    chave3.rotation.y += 0.02;
+    chave3.rotation.x += 0.02;
 
     if (LostSouls.length == 0) {
       subirGrupoChave1 = true;
@@ -1234,6 +1247,15 @@ window.addEventListener("keydown", (event) => {
 
     if (Cacodemons.length == 0) {
       subirGrupoChave2 = true;
+    }
+
+    if(!chave3Coletada && Soldados.length > 0){
+      Soldados.forEach(soldado => {
+        // console.log(soldado.estadoAtual);
+        if(soldado.estadoAtual !== 'morre')
+          return;
+        subirGrupoChave3 = true;
+      });
     }
 
     // Elevação dos grupos com chaves
@@ -1260,6 +1282,36 @@ window.addEventListener("keydown", (event) => {
         chavesUI.adicionarChave1();
         sons.keyPickup.play();
         console.log("Chave 1 coletada!");
+      }
+    }
+
+    // Coleta da chave 2
+    if (!chave2Coletada && personagem) {
+      const distancia = personagem.position.distanceTo(
+        chave2.getWorldPosition(new THREE.Vector3())
+      );
+      if (distancia < 3.5) {
+        chave2.visible = false;
+        chave2Coletada = true;
+        // TODO: colocar aqui ui chave 2 coletada
+        chavesUI.adicionarChave2();
+        sons.keyPickup.play();
+        console.log("Chave 2 coletada!");
+      }
+    }
+
+    // Coleta da chave 3
+    if (!chave3Coletada && personagem) {
+      const distancia = personagem.position.distanceTo(
+        chave3.getWorldPosition(new THREE.Vector3())
+      );
+      if (distancia < 3) {
+        chave3.visible = false;
+        chave3Coletada = true;
+        // TODO: colocar aqui ui chave 3 coletada
+        chavesUI.adicionarChave3();
+        sons.keyPickup.play();
+        console.log("Chave 3 coletada!");
       }
     }
 
@@ -1415,8 +1467,8 @@ window.addEventListener("keydown", (event) => {
       }
     }
 
-        updateArea3(chave2Coletada);
-       
+    // ---------------------   AREA 3   --------------------- //
+    updateArea3(chave2Coletada, chave3Coletada, subirGrupoChave3);
 
     const x = personagem.position.x;
     const z = personagem.position.z;
