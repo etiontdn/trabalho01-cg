@@ -8,6 +8,7 @@ import ParedeLimitante from "./parede.js";
 import Iluminacao from "./iluminacao.js";
 import createArea4, { updateAnimatedColumns } from "./area4.js"; // Importe a função aqui
 import createArea3 from "./area3.js";
+import chavesUI from "../chavesUI.js";
 
 async function carregarTexturas() {
   const loader = new THREE.TextureLoader();
@@ -360,6 +361,8 @@ export default async function(scene, audioListener) {
     // Estado das chaves
     let chave1Coletada = false;
     let chave2Coletada = false;
+    let chave3Coletada = false;
+    chavesUI.init();
     let grupoChave1, chave1;
     let grupoChave2, chave2;
     let subirGrupoChave1 = false;
@@ -1160,7 +1163,19 @@ criarParedesArea4();
     }
   });
 
-   // === NOVO EVENTO PARA TECLA G ===
+  // Evento: coletar todas as chaves com tecla "C"
+  window.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "c") {
+      chave1Coletada = true;
+      chave2Coletada = true;
+      chave3Coletada = true;
+      chavesUI.adicionarChave1();
+      chavesUI.adicionarChave2();
+      chavesUI.adicionarChave3();
+    }
+  });
+
+   // === NOVO EVENTO PARA TECLA B ===
 window.addEventListener("keydown", (event) => {
   if (event.key.toLowerCase() === "b" && !paredesBaixadas) {
     if (!area4Criada) {
@@ -1207,6 +1222,8 @@ window.addEventListener("keydown", (event) => {
       if (distancia < 7) {
         chave1.visible = false;
         chave1Coletada = true;
+        // TODO: colocar aqui ui chave 1 coletada
+        chavesUI.adicionarChave1();
         sons.keyPickup.play();
         console.log("Chave 1 coletada!");
       }
@@ -1263,6 +1280,7 @@ window.addEventListener("keydown", (event) => {
             if (distancia < 7) {
                 chave1.visible = false;
                 chave1Coletada = true;
+                chavesUI.adicionarChave1();
                 sons.keyPickup.play();
                 console.log("Chave 1 coletada!");
             }
@@ -1276,6 +1294,7 @@ window.addEventListener("keydown", (event) => {
             if (distancia < 4.5) {
                 chave2.visible = false;
                 chave2Coletada = true;
+                chavesUI.adicionarChave2();
                 sons.keyPickup.play();
                 console.log("Chave 2 coletada!");
             }

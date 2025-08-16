@@ -85,7 +85,8 @@
 #ui-container {
     position: absolute;
     top: 30px;
-    width: 100%;
+    width: calc(100% - 60px);
+    height: 90%;
     display: flex;
     /* justify-content: start; */
     left: 30px;
@@ -118,4 +119,39 @@
     border-radius: 3px;
     /* Adiciona uma transição suave ao mudar a largura */
     transition: width 0.5s ease-out;
+}
+
+
+/* estilo do UI de chaves */
+
+#chaves-container {
+  position:absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+}
+
+#chaves-container > div {
+  width: 64px;
+  height: 64px;
+  
+  background-color: rgba(72, 72, 72, 0.8);
+  border-radius: 10px;
+}
+
+
+#chave-1 {
+  background-image: url('./assets/chaves/chave-1.svg');
+  background-size: cover;
+}
+
+#chave-2 {
+  background-image: url('./assets/chaves/chave-2.svg');
+  background-size: cover;
+}
+
+#chave-3 {
+  background-image: url('./assets/chaves/chave-3.svg');
+  background-size: cover;
 }
