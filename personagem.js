@@ -17,6 +17,7 @@ export default function createPersonagem(
     const startQuat = personagemObject.quaternion.clone();
     personagem.position.copy(startPos);
     personagem.quaternion.copy(startQuat);
+    personagem.godMode = false;
     personagem.visible = false; // INICIALMENTE INVISÍVEL
 
     // Audio setup
@@ -47,7 +48,7 @@ export default function createPersonagem(
 
     personagem.updateHealthBar = function () {
         const porcentVida = (personagem.vida / personagem.vidaMax) * 100;
-        const vidaAtual = Math.max(0, porcentVida);
+        let vidaAtual = Math.max(0, porcentVida);
 
         // Play sound if health decreased
         if (vidaAtual < currentHealth && !sound.isPlaying) {
@@ -55,8 +56,14 @@ export default function createPersonagem(
         }
         currentHealth = vidaAtual; // Update current health
 
+        if(personagem.godMode){
+            vidaAtual = 100;
+        }
+        
         healthBarElement.style.width = `${vidaAtual}%`;
-        if (vidaAtual <= 25) {
+        if(personagem.godMode)
+            healthBarElement.style.backgroundColor = '#1cd9c3ff';
+        else if (vidaAtual <= 25) {
             healthBarElement.style.backgroundColor = '#dc3545';
         } else if (vidaAtual <= 60) {
             healthBarElement.style.backgroundColor = '#ffc107';
@@ -128,6 +135,10 @@ export default function createPersonagem(
                 break;
             case "Space":
                 initPersonagem();
+                personagem.updateHealthBar();
+                break;
+            case "KeyG":
+                personagem.godMode = !personagem.godMode;
                 personagem.updateHealthBar();
                 break;
         }
@@ -264,7 +275,7 @@ export default function createPersonagem(
         }
     }
 
-    // initPersonagem();
+    initPersonagem();
 
     return {
         personagem,

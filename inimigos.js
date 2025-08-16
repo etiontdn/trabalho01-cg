@@ -366,7 +366,7 @@ export class PainElemental extends Entidade {
         loader.load(this.url, (gltf) => {
             gltf.scene.traverse((child) => {
                 if (child.isMesh) {
-                    console.log("Metalness:", child.material.metalness);
+                    // console.log("Metalness:", child.material.metalness);
                     child.material.metalness = 0;
                 }
             });
@@ -545,7 +545,6 @@ export class PainElemental extends Entidade {
         // };
 
         this.lostSoulsInvocados.push(lostSoul);
-        //list_LostSouls.push(lostSoul);
     }
 
     recua(alvo) {
