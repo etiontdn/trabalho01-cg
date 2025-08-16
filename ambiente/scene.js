@@ -335,8 +335,20 @@ let area4Walls = [];
 let area4Criada = false; // NOVO: para garantir que criamos só uma vez
 let paredesDescendo = false;
 let paredesBaixadas = false;
-let texturasArea4Guardadas = null; // NOVO: guardará as textura
+let paredesSubindo = false; // Variável para controlar subida
+let paredesVisiveis = true; // Variável para controlar visibilidade
+const PAREDE_ALTURA_INICIAL_Y = 24; // Posição Y inicial das paredes (metade da altura 48/2)
+const PAREDE_ALTURA_MINIMA_Y = -16; // Posição Y quando as paredes estão "abaixadas"
+let texturasArea4Guardadas = null; // guardará as textura
 let altarArea4;
+
+// === NOVAS VARIÁVEIS PARA PAREDES DO CENÁRIO ===
+let paredesCenario = []; // Lista para armazenar as referências das paredes do cenário
+let paredesCenarioOriginalY; // Para armazenar a posição Y original das paredes do cenário
+let paredesCenarioDescendo = false;
+let paredesCenarioBaixadas = false;
+let paredesCenarioSubindo = false;
+let paredesCenarioInvisiveis = false; // Nova variável para controlar a invisibilidade
 
 export default async function(scene, audioListener) {
   const texturas = await carregarTexturas();
@@ -434,7 +446,7 @@ export default async function(scene, audioListener) {
       metalness: 0.0,
     });
 
-    const paredes = [{
+    const paredesData = [{
       nome: "esquerda",
       pos: [-255, 24, 0],
       tam: [10, 50, 500]
@@ -452,11 +464,14 @@ export default async function(scene, audioListener) {
       tam: [500, 50, 10]
     }, ];
 
+    paredesCenario = []; // Limpa a lista antes de preencher
+    paredesCenarioOriginalY = paredesData[0].pos[1]; // Assume que todas têm a mesma altura inicial
+
     for (let {
         nome,
         pos,
         tam
-      } of paredes) {
+      } of paredesData) {
       const geometry = new THREE.BoxGeometry(...tam);
       geometry.setAttribute(
         "uv2",
@@ -471,6 +486,7 @@ export default async function(scene, audioListener) {
 
       scene.add(mesh);
       objetosColidiveis.push(mesh);
+      paredesCenario.push(mesh); // Adiciona à lista de paredes do cenário
     }
   }
 
@@ -1518,6 +1534,37 @@ let contSoldMortos;
     // Chame a função de atualização das colunas da Area4
     updateAnimatedColumns();
 
+    // === LÓGICA PARA PAREDES DO CENÁRIO PRINCIPAL ===
+    if (PainElementals.length === 0 && CacodemonsArea4.length === 0 && !paredesCenarioDescendo && !paredesCenarioBaixadas) {
+      paredesCenarioDescendo = true;
+      console.log("Paredes do cenário começando a descer.");
+    }
+
+    if (paredesCenarioDescendo) {
+      let todasParedesAbaixadas = true;
+      for (let parede of paredesCenario) {
+        if (parede.position.y > paredesCenarioOriginalY - 50) { // Desce 50 unidades
+          parede.position.y -= 0.5; // Velocidade de descida
+          todasParedesAbaixadas = false;
+        } else {
+          // Atingiu a posição de descida, garante que está invisível
+          parede.visible = false;
+          paredesCenarioInvisiveis = true; // Mantém a flag de invisibilidade
+        }
+      }
+      if (todasParedesAbaixadas) {
+        paredesCenarioDescendo = false;
+        paredesCenarioBaixadas = true; // Indica que elas já desceram
+
+        // NOVO: Faz as paredes retornarem instantaneamente para a posição original, mantendo-se invisíveis
+        for (let parede of paredesCenario) {
+            parede.position.y = paredesCenarioOriginalY; // Volta instantaneamente para a altura original
+            parede.visible = false; // Garante que permaneçam invisíveis
+        }
+        
+        console.log("Paredes do cenário abaixadas e instantaneamente retornadas à posição original (invisíveis).");
+      }
+    }
   }
 
   // Execução das funções de setup
