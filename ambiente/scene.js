@@ -9,15 +9,21 @@ import Iluminacao from "./iluminacao.js";
 import createArea4, { updateAnimatedColumns } from "./area4.js"; // Importe a função aqui
 import createArea3 from "./area3.js";
 import chavesUI from "../chavesUI.js";
+import carregamentoUI from "../carregamentoUI.js";
 
 async function carregarTexturas() {
   const loader = new THREE.TextureLoader();
+  carregamentoUI.init();
+
+  //total texturas + sons = 153;
 
   function carregar(path, repeatX = 1, repeatY = 1) {
     return new Promise((resolve, reject) => {
       loader.load(
         path,
         (texture) => {
+          carregamentoUI.setProgresso(carregamentoUI.progresso + 1/153);
+
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           texture.repeat.set(repeatX, repeatY);
           resolve(texture);
@@ -288,6 +294,8 @@ async function carregarSons(audioListener) {
       audioLoader.load(
         path,
         (buffer) => {
+          carregamentoUI.setProgresso(carregamentoUI.progresso += 1/153)
+
           const sound = new THREE.Audio(audioListener);
           sound.setBuffer(buffer);
           resolve(sound);
@@ -1186,6 +1194,8 @@ criarParedesArea4();
 
   toggleAmbientSound(true);
 
+  carregamentoUI.finaliza();
+
 
   // ------------------- EVENTOS E LÓGICA ------------------- //
 
@@ -1217,6 +1227,12 @@ window.addEventListener("keydown", (event) => {
       area4Criada = true;
     }
     paredesDescendo = true;
+  }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key.toLowerCase() === " " && carregamentoUI.finalizado) {
+    carregamentoUI.remove();
   }
 });
 

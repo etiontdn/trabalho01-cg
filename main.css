@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
 .crosshair {
     --size: 64px;
     --individual-size: calc(0.3125 * var(--size));
@@ -48,38 +49,38 @@
 }
 
 #damage-overlay {
-  position: fixed;
-  inset: 0;                    /* cobre toda a viewport */
-  pointer-events: none;        /* não bloqueia cliques */
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
-  background: radial-gradient(
-    circle at center,
-    transparent 70%,
-    rgba(255, 0, 0, 0.8) 100%
-  );
+    position: fixed;
+    inset: 0; /* cobre toda a viewport */
+    pointer-events: none; /* não bloqueia cliques */
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+    background: radial-gradient(
+        circle at center,
+        transparent 70%,
+        rgba(255, 0, 0, 0.8) 100%
+    );
 }
 
 #damage-overlay.active {
-  opacity: 1;
+    opacity: 1;
 }
 
 .health-bar-container {
-  width: 60px;
-  height: 6px;
-  background: rgba(0,0,0,0.6);
-  border: 1px solid #222;
-  border-radius: 3px;
-  overflow: hidden;
-  transform: translateX(-30px) translateY(-6px); /* centraliza horizontal e empurra pra cima */
+    width: 60px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #222;
+    border-radius: 3px;
+    overflow: hidden;
+    transform: translateX(-30px) translateY(-6px); /* centraliza horizontal e empurra pra cima */
 }
 
 .health-bar-fill {
-  height: 100%;
-  background: red;
-  width: 100%;
-  transition: width 0.1s linear;
+    height: 100%;
+    background: red;
+    width: 100%;
+    transition: width 0.1s linear;
 }
 
 #ui-container {
@@ -101,7 +102,6 @@
     gap: 15px;
 }
 
-
 #health-bar-background {
     width: 300px;
     height: 25px;
@@ -121,37 +121,106 @@
     transition: width 0.5s ease-out;
 }
 
-
 /* estilo do UI de chaves */
 
 #chaves-container {
-  position:absolute;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  gap: 12px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    gap: 12px;
 }
 
 #chaves-container > div {
-  width: 64px;
-  height: 64px;
-  
-  background-color: rgba(72, 72, 72, 0.8);
-  border-radius: 10px;
+    width: 64px;
+    height: 64px;
+
+    background-color: rgba(72, 72, 72, 0.8);
+    border-radius: 10px;
 }
 
-
 #chave-1 {
-  background-image: url('./assets/chaves/chave-1.svg');
-  background-size: cover;
+    background-image: url("./assets/chaves/chave-1.svg");
+    background-size: cover;
 }
 
 #chave-2 {
-  background-image: url('./assets/chaves/chave-2.svg');
-  background-size: cover;
+    background-image: url("./assets/chaves/chave-2.svg");
+    background-size: cover;
 }
 
 #chave-3 {
-  background-image: url('./assets/chaves/chave-3.svg');
-  background-size: cover;
+    background-image: url("./assets/chaves/chave-3.svg");
+    background-size: cover;
+}
+
+/* Tela de Carregamento */
+
+#tela-de-carregamento {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 1) url("./assets/tela-carregamento/fundo.png");
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    opacity: 1;
+
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+@keyframes flutter {
+    0% {
+        transform: translateY(0);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+    50% {
+        transform: translateY(-10px);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+    }
+    100% {
+        transform: translateY(0);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+}
+
+#logo {
+    width: 500px;
+    margin-bottom: 20px;
+    animation: flutter 5s ease-in-out infinite;
+}
+
+#barra-de-carregamento {
+    width: 300px;
+    height: 20px;
+    background: #444;
+    border: 1px solid #222;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#fundo-barra {
+    width: 100%;
+    height: 100%;
+    background: #222;
+}
+
+#frente-barra {
+    height: 100%;
+    background: #28a745;
+    transition: width 0.5s ease-out;
+    width: 0;
+}
+
+#espaco-para-iniciar {
+    font-family: Orbitron, monospace, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 36px;
+    color: white;
 }
