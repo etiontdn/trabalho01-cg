@@ -4,7 +4,7 @@ import {MTLLoader} from '../../build/jsm/loaders/MTLLoader.js';
 import { CSG } from '../../libs/other/CSGMesh.js';
 import { getMaxSize } from "../../libs/util/util.js";
 
-function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas) {
+function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas, sons, audioListener)  {
     const radialSegments = 128;
     const profArea3 = 100;
 
@@ -530,7 +530,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         const rAtivacao = 10;
         const areaAtivacao = new THREE.Object3D();
         area3.add(areaAtivacao);
-        const velocidade = 140;
+        const velocidade = 350;
 
         areaAtivacao.position.set(paredesSul1.position.x + Math.abs(paredesSul2.position.x - paredesSul1.position.x) / 2,
                                     paredesSul1.position.y / 2,
@@ -579,6 +579,11 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
                     portaoAnimating = true;
                     moveProgress = 0;
                     chave2.visible = true;
+                    // --- Adicione esta linha para tocar o som quando o portão começar a abrir ---
+                    if (sons && sons.doorOpen) {
+                        sons.doorOpen.play();
+                    }
+                    // -------------------------------------------------------------------------
                 }
             }
 

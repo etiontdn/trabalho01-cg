@@ -954,7 +954,7 @@ export default async function(scene, audioListener) {
 
     // ---------------------   AREA 3   --------------------- //
     chave3 = criarChave(0x0000ff, 0.4);
-    updateArea3 = createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas.area3);
+    updateArea3 = createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas.area3, sons, audioListener);
 
     // Função para criar objetos com múltiplos mapas de textura
     function criarObjetoComTexturas({
@@ -1206,15 +1206,7 @@ criarParedesArea4();
 
   // ------------------- EVENTOS E LÓGICA ------------------- //
 
-  // Evento: subir as chaves com tecla "K"
-  window.addEventListener("keydown", (event) => {
-    if (event.key.toLowerCase() === "k") {
-      subirGrupoChave1 = true;
-      subirGrupoChave2 = true;
-    }
-  });
-
-  // Evento: coletar todas as chaves com tecla "C"
+ // Evento: coletar todas as chaves com tecla "C"
   window.addEventListener("keydown", (event) => {
     if (event.key.toLowerCase() === "c") {
       chave1Coletada = true;
@@ -1229,16 +1221,6 @@ criarParedesArea4();
     }
   });
 
-   // === NOVO EVENTO PARA TECLA B ===
-window.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() === "b" && !paredesBaixadas) {
-    if (!area4Criada) {
-      createArea4(scene, objetosColidiveis, rampas, texturasArea4Guardadas);
-      area4Criada = true;
-    }
-    paredesDescendo = true;
-  }
-});
 
 window.addEventListener("keydown", (event) => {
   if (event.key.toLowerCase() === " " && carregamentoUI.finalizado) {
@@ -1346,6 +1328,23 @@ let contSoldMortos;
           portaaberta = true;
           sons.doorOpen.play();
         }
+      }
+    }
+
+        if (chave3Coletada && !paredesBaixadas) {
+       const distanciaAltar = personagem.position.distanceTo(
+        altarArea4.getWorldPosition(new THREE.Vector3())
+      );
+      if (distanciaAltar < 10) {
+        altarArea4.add(chave3);
+        chave3.visible = true;
+        chave3.position.set(0, 2.5, 0);
+        
+       if (!area4Criada) {
+          createArea4(scene, objetosColidiveis, rampas, texturasArea4Guardadas);
+          area4Criada = true;
+        }
+        paredesDescendo = true;
       }
     }
 
