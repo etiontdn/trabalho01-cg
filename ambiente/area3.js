@@ -547,11 +547,11 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         const tmpWorldPos = new THREE.Vector3();
         function updateArea3(chave2Coletada, chave3Coletada, soldados_mortos) {
 
-            // if(!chave2Coletada)
-            //     return;
+            if(!chave2Coletada)
+                return;
 
-            // if(chave3Alreadyanimate)
-            //     return;
+            if(chave3Alreadyanimate)
+                return;
 
             const delta = clock.getDelta();
             const speed = velocidade * delta;

@@ -1247,6 +1247,7 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
+let contSoldMortos; 
 
   // Atualização contínua da cena
   function updateScene() {
@@ -1266,11 +1267,12 @@ window.addEventListener("keydown", (event) => {
     }
 
     if(!chave3Coletada && Soldados.length > 0){
+      contSoldMortos = 0;
       Soldados.forEach(soldado => {
-        // console.log(soldado.estadoAtual);
         if(soldado.estadoAtual !== 'morre')
-          return;
-        subirGrupoChave3 = true;
+          contSoldMortos++;
+        if(contSoldMortos == Soldados.length)
+          subirGrupoChave3 = true;
       });
     }
 
@@ -1375,32 +1377,32 @@ window.addEventListener("keydown", (event) => {
     function ajustarPlataforma(subindo, alvo) {
       const initialY = plataforma.position.y;
         // Coleta da chave 1
-        if (!chave1Coletada && personagem && grupoChave1.position.y >= alturaFinal1) {
-            const distancia = personagem.position.distanceTo(
-                chave1.getWorldPosition(new THREE.Vector3())
-            );
-            if (distancia < 7) {
-                chave1.visible = false;
-                chave1Coletada = true;
-                chavesUI.adicionarChave1();
-                sons.keyPickup.play();
-                console.log("Chave 1 coletada!");
-            }
-        }
+        // if (!chave1Coletada && personagem && grupoChave1.position.y >= alturaFinal1) {
+        //     const distancia = personagem.position.distanceTo(
+        //         chave1.getWorldPosition(new THREE.Vector3())
+        //     );
+        //     if (distancia < 7) {
+        //         chave1.visible = false;
+        //         chave1Coletada = true;
+        //         chavesUI.adicionarChave1();
+        //         sons.keyPickup.play();
+        //         console.log("Chave 1 coletada!");
+        //     }
+        // }
 
-        // Coleta da chave 1
-        if (!chave2Coletada && personagem) {
-            const distancia = personagem.position.distanceTo(
-                chave2.getWorldPosition(new THREE.Vector3())
-            );
-            if (distancia < 4.5) {
-                chave2.visible = false;
-                chave2Coletada = true;
-                chavesUI.adicionarChave2();
-                sons.keyPickup.play();
-                console.log("Chave 2 coletada!");
-            }
-        }
+        // // Coleta da chave 1
+        // if (!chave2Coletada && personagem) {
+        //     const distancia = personagem.position.distanceTo(
+        //         chave2.getWorldPosition(new THREE.Vector3())
+        //     );
+        //     if (distancia < 4.5) {
+        //         chave2.visible = false;
+        //         chave2Coletada = true;
+        //         chavesUI.adicionarChave2();
+        //         sons.keyPickup.play();
+        //         console.log("Chave 2 coletada!");
+        //     }
+        // }
 
       if (subindo) {
         plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma, alvo);
