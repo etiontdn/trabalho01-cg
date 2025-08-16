@@ -128,9 +128,9 @@ async function carregarTexturas() {
     },
 
     altar: {
-      map: await carregar("assets/rust-panel-albedo.png"),
-      normalMap: await carregar("assets/rust-panel-normal-unity.png"),
-      aoMap: await carregar("assets/rust-panel-ao.png"),
+      map: await carregar("assets/storage-container2-albedo.png"),
+      normalMap: await carregar("assets/storage-container2-normal-ogl.png"),
+      aoMap: await carregar("assets/storage-container2-ao.png"),
 
     },
 
@@ -273,6 +273,8 @@ async function carregarTexturas() {
         normalMap: await carregar("assets/worn-medieval-armor_normal-ogl.png"),
         displacementMap: await carregar("assets/worn-medieval-armor_height.png"),
       }
+
+      
     }
   };
 }
@@ -320,6 +322,7 @@ let area4Criada = false; // NOVO: para garantir que criamos só uma vez
 let paredesDescendo = false;
 let paredesBaixadas = false;
 let texturasArea4Guardadas = null; // NOVO: guardará as textura
+let altarArea4;
 
 export default async function(scene, audioListener) {
   const texturas = await carregarTexturas();
@@ -824,7 +827,7 @@ export default async function(scene, audioListener) {
     Object.values(texAltar).forEach(tex => {
       if (tex) { // Check if texture exists before setting properties
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(2, 2); // Adjust as needed for desired look
+        tex.repeat.set(1, 1); // Adjust as needed for desired look
       }
     });
 
@@ -837,14 +840,14 @@ export default async function(scene, audioListener) {
     });
 
     // Criar geometria do altar com uv2 para aoMap e displacementMap
-    const geoAltar = new THREE.BoxGeometry(2, 3.5, 2);
+    const geoAltar = new THREE.BoxGeometry(2, 2, 2);
     geoAltar.setAttribute('uv2', new THREE.BufferAttribute(geoAltar.attributes.uv.array, 2));
 
     altar = new THREE.Mesh(
       geoAltar,
       matAltar // Reutilizando o material
     );
-    altar.position.set(-2, 0, -98);
+    altar.position.set(-2, 1, -98);
     altar.castShadow = true;
     altar.receiveShadow = true;
     objetosColidiveis.push(altar);
@@ -1062,7 +1065,7 @@ criarParedesArea4();
 
       const altura = 30;
       const espessura =0 ;
-      const lado = (80 * 2) ; // raio=80, folga=10
+      const lado = (80 * 2) ; 
       const offset = lado / 2;
 
       const posY = altura / 2;
@@ -1088,6 +1091,37 @@ criarParedesArea4();
         area4Walls.push(mesh); // guarda referência
       }
     }
+
+     // Novo Altar para Área 4
+    const texAltarArea4 = texturas.altar; // Reutiliza as texturas do altar existente
+
+    // Ajusta repeat e wrap para todas as texturas do altar da Área 4
+    Object.values(texAltarArea4).forEach(tex => {
+      if (tex) {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 1);
+      }
+    });
+
+    const matAltarArea4 = new THREE.MeshStandardMaterial({
+      map: texAltarArea4.map,
+      normalMap: texAltarArea4.normalMap,
+      aoMap: texAltarArea4.aoMap,
+    });
+
+    const geoAltarArea4 = new THREE.BoxGeometry(2, 2, 2);
+    geoAltarArea4.setAttribute('uv2', new THREE.BufferAttribute(geoAltarArea4.attributes.uv.array, 2));
+
+    altarArea4 = new THREE.Mesh(
+      geoAltarArea4,
+      matAltarArea4
+    );
+
+    altarArea4.position.set(0, 1, 35); // Ajuste a posição Z conforme necessário
+    altarArea4.castShadow = true;
+    altarArea4.receiveShadow = true;
+    objetosColidiveis.push(altarArea4);
+    scene.add(altarArea4);
     
 
   }
@@ -1220,7 +1254,7 @@ window.addEventListener("keydown", (event) => {
       if (distanciaAltar < 10) {
         altar.add(chave1);
         chave1.visible = true;
-        chave1.position.set(0, 3, 0);
+        chave1.position.set(0, 2.5, 0);
         altar_ativo = true;
         if (!portaaberta) {
           portaaberta = true;
@@ -1233,7 +1267,7 @@ window.addEventListener("keydown", (event) => {
       porta.position.x = Math.max(porta.position.x - 0.4, -16);
     }
 
-    // ------------------- LÓGICA DA PLATAFORMA -------------------
+   // ------------------- LÓGICA DA PLATAFORMA -------------------
     const posPlataforma = plataforma.getWorldPosition(new THREE.Vector3());
     const PosicaoSubida = -0.01;
     const PosicaoDescida = -4;
@@ -1267,7 +1301,7 @@ window.addEventListener("keydown", (event) => {
                 console.log("Chave 1 coletada!");
             }
         }
-        
+
         // Coleta da chave 1
         if (!chave2Coletada && personagem) {
             const distancia = personagem.position.distanceTo(
@@ -1313,53 +1347,52 @@ window.addEventListener("keydown", (event) => {
       if (personagem.position.y === posicaoChao && !emCima) noChao = true;
       else if ((personagem.position.y === posicaoTopo) && !emCima) noChao = false;
 
-      if (noChao) {
-        // Descida quando no chão
-        if (!descida2 && !subida &&
-          ((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
-              distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma - 5) &&
-            distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
-            plataforma.position.y > PosicaoDescida && !emCima &&
-            personagem.position.y == posicaoChao)) {
-          descida2 = true;
-        }
-        if (descida2) {
-          descida2 = ajustarPlataforma(false, PosicaoDescida);
-        }
+      // Lógica para descer do topo
+      if (!descida && plataforma.position.y > PosicaoDescida && emCima && !noChao) {
+        descida = true;
+      }
 
-        // Subida com personagem em cima
-        if (!subida && plataforma.position.y < PosicaoSubida && emCima) {
-          subida = true;
+      if (descida) {
+        // Ajustar a posição Y do jogador apenas enquanto estiver na plataforma durante a descida
+        if (emCima && personagem.position.y > PosicaoDescida + plataforma.geometry.parameters.height / 2 + 0.1) {
+            personagem.position.y -= velocidade_plataforma;
         }
-        if (subida) {
-          subida = ajustarPlataforma(true, PosicaoSubida);
-        }
+        // Sempre continuar a descida da plataforma uma vez iniciada, independentemente da posição do jogador
+        descida = ajustarPlataforma(false, PosicaoDescida);
+      }
 
-      } else {
-        // Subida quando no ar
-        if (!subida2 && !descida &&
-          (distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
-            distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
-            plataforma.position.y < PosicaoSubida && !emCima &&
-            personagem.position.y == posicaoTopo)) {
-          subida2 = true;
-        }
-        if (subida2) {
-          subida2 = ajustarPlataforma(true, PosicaoSubida);
-        }
+      // Lógica para subir do fundo
+      if (!subida && plataforma.position.y < PosicaoSubida && emCima && noChao) {
+        subida = true;
+      }
 
-        // Descida com personagem em cima
-        if (!descida && plataforma.position.y > PosicaoDescida && emCima) {
-          personagem.position.y -= velocidade_plataforma + 0.01;
-          descida = true;
-        }
-        if (descida) {
-          // mantém ajuste de Y só enquanto está em cima
-          if (emCima) {
-            personagem.position.y -= velocidade_plataforma + 0.01;
-          }
-          descida = ajustarPlataforma(false, PosicaoDescida);
-        }
+      if (subida) {
+        subida = ajustarPlataforma(true, PosicaoSubida);
+      }
+
+      // Lógica para subida automática do fundo (se o jogador não estiver nela, mas por perto)
+      if (!subida2 && !descida &&
+        (distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
+          distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
+          plataforma.position.y < PosicaoSubida && !emCima &&
+          personagem.position.y == posicaoTopo)) { // Verifica se o jogador está no nível superior
+        subida2 = true;
+      }
+      if (subida2) {
+        subida2 = ajustarPlataforma(true, PosicaoSubida);
+      }
+
+      // Lógica para descida automática do topo (se o jogador não estiver nela, mas por perto)
+      if (!descida2 && !subida &&
+        ((distanciaPlataformaZ_Atual <= distanciaZ_da_Plataforma &&
+            distanciaPlataformaZ_Atual >= distanciaZ_da_Plataforma - 5) &&
+          distanciaPlataformaX_Atual <= distanciaX_da_Plataforma &&
+          plataforma.position.y > PosicaoDescida && !emCima &&
+          personagem.position.y == posicaoChao)) { // Verifica se o jogador está no nível do chão
+        descida2 = true;
+      }
+      if (descida2) {
+        descida2 = ajustarPlataforma(false, PosicaoDescida);
       }
     }
 

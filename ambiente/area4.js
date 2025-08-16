@@ -40,6 +40,7 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
     // BASE
     const cylinderGeo = new THREE.CylinderGeometry(r, r, altBase, radialSegments);
     const base = new THREE.Mesh(cylinderGeo, matBase);
+    base.castShadow = base.receiveShadow = true;
     base.position.set(0, altBase / 2, 0);
     base.geometry.setAttribute('uv2', new THREE.BufferAttribute(base.geometry.attributes.uv.array, 2));
 
@@ -174,14 +175,12 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
     const colunaGeo = new THREE.CylinderGeometry(1.5, 1.5, 15, 16);
     colunaGeo.setAttribute('uv2', new THREE.BufferAttribute(colunaGeo.attributes.uv.array, 2));
     
-    // --- MODIFICAÇÃO AQUI ---
     // Passe textures.pilares e os valores de repetição para createMaterial
-    const colunaMat = createMaterial(textures.pilares, 2, 2); // Exemplo: repetir a textura 5 vezes na vertical
-    // --- FIM DA MODIFICAÇÃO ---
+    const colunaMat = createMaterial(textures.pilares, 2, 2); 
 
     const colunas = new THREE.Object3D();
     const colunaPositions = [
-        [0, 7.5, 0],
+        
         [20, 7.5, 20], [-20, 7.5, 20], [20, 7.5, -20], [-20, 7.5, -20],
         [40, 7.5, 0], [-40, 7.5, 0], [0, 7.5, 40], [0, 7.5, -40],
         [30, 7.5, 30], [-30, 7.5, 30], [30, 7.5, -30], [-30, 7.5, -30],
@@ -190,7 +189,7 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
     ];
     colunaPositions.forEach(([x, y, z]) => {
         const c = new THREE.Mesh(colunaGeo, colunaMat);
-        c.position.set(x, y, z); // Esta será a altura máxima (ponto de partida da descida)
+        c.position.set(x, y, z); 
         c.castShadow = c.receiveShadow = true;
         colunas.add(c);
         objetosColidiveis.push(c);
@@ -198,10 +197,10 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
         // Adiciona a coluna para animação
         animatedColumns.push({
             mesh: c,
-            initialY: y, // Esta será a altura máxima (ponto de partida da descida)
-            lowestY: y - (8 + Math.random() * 8), // Define o ponto mais baixo para onde vai descer (5 a 10 unidades abaixo)
+            initialY: y, 
+            lowestY: y - (8 + Math.random() * 8), 
             speed: 0.1 + Math.random() * 0.1,
-            direction: -1 // Começa descendo
+            direction: -1 
         });
     });
     area4.add(colunas);
@@ -216,35 +215,29 @@ function createArea4(scene, objetosColidiveis, rampas, textures) {
         roughnessMap: textures.barricadas.roughnessMap
     });
     const barricadas = new THREE.Object3D();
+    
+    // Reduced and redistributed barricade positions
     const barricadePositions = [
-        // Mantendo boa distância das colunas e entre si
-        [10, 1.5, 15], [-15, 1.5, 10], [15, 1.5, -10], // Posições originais ajustadas se necessário
+        // Main pathways, avoiding center and columns
+        [r * 0.4, 1.5, 0], [-r * 0.4, 1.5, 0],
+        [0, 1.5, r * 0.4], [0, 1.5, -r * 0.4],
 
-        // Mais para o centro, espaçadas
-        [5, 1.5, 5], [-5, 1.5, 5], [5, 1.5, -5], [-5, 1.5, -5],
-        [12, 1.5, 0], [-12, 1.5, 0], [0, 1.5, 12], [0, 1.5, -12],
+        // Diagonal placements, further from columns
+        [r * 0.3, 1.5, r * 0.3], [-r * 0.3, 1.5, r * 0.3],
+        [r * 0.3, 1.5, -r * 0.3], [-r * 0.3, 1.5, -r * 0.3],
 
-        // Meio do raio, cuidadosamente posicionadas
-        [r * 0.35, 1.5, r * 0.1], [-r * 0.35, 1.5, r * 0.1], [r * 0.1, 1.5, r * 0.35], [r * 0.1, 1.5, -r * 0.35],
-        [r * 0.35, 1.5, -r * 0.1], [-r * 0.35, 1.5, -r * 0.1], [-r * 0.1, 1.5, r * 0.35], [-r * 0.1, 1.5, -r * 0.35],
+        // Nearer to the edges, ensuring good spacing
+        [r * 0.7, 1.5, 0], [-r * 0.7, 1.5, 0],
+        [0, 1.5, r * 0.7], [0, 1.5, -r * 0.7],
 
-        [r * 0.2, 1.5, r * 0.5], [-r * 0.2, 1.5, r * 0.5], [r * 0.2, 1.5, -r * 0.5], [-r * 0.2, 1.5, -r * 0.5],
-        [r * 0.5, 1.5, r * 0.2], [-r * 0.5, 1.5, r * 0.2], [r * 0.5, 1.5, -r * 0.2], [-r * 0.5, 1.5, -r * 0.2],
+        [r * 0.5, 1.5, r * 0.5], [-r * 0.5, 1.5, r * 0.5],
+        [r * 0.5, 1.5, -r * 0.5], [-r * 0.5, 1.5, -r * 0.5],
 
-        // Mais para as bordas do raio, com espaçamento
-        [r * 0.65, 1.5, r * 0.05], [-r * 0.65, 1.5, r * 0.05], [r * 0.05, 1.5, r * 0.65], [r * 0.05, 1.5, -r * 0.65],
-        [r * 0.65, 1.5, -r * 0.05], [-r * 0.65, 1.5, -r * 0.05], [-r * 0.05, 1.5, r * 0.65], [-r * 0.05, 1.5, -r * 0.65],
-
-        [r * 0.55, 1.5, r * 0.45], [-r * 0.55, 1.5, r * 0.45], [r * 0.55, 1.5, -r * 0.45], [-r * 0.55, 1.5, -r * 0.45],
-        [r * 0.45, 1.5, r * 0.55], [-r * 0.45, 1.5, r * 0.55], [r * 0.45, 1.5, -r * 0.55], [-r * 0.45, 1.5, -r * 0.55],
-
-        [r * 0.75, 1.5, r * 0.3], [-r * 0.75, 1.5, r * 0.3], [r * 0.75, 1.5, -r * 0.3], [-r * 0.75, 1.5, -r * 0.3],
-        [r * 0.3, 1.5, r * 0.75], [-r * 0.3, 1.5, r * 0.75], [r * 0.3, 1.5, -r * 0.75], [-r * 0.3, 1.5, -r * 0.75],
-
-        // Quase na borda
-        [r * 0.85, 1.5, 0], [-r * 0.85, 1.5, 0], [0, 1.5, r * 0.85], [0, 1.5, -r * 0.85],
-        [r * 0.8, 1.5, r * 0.15], [-r * 0.8, 1.5, r * 0.15], [r * 0.8, 1.5, -r * 0.15], [-r * 0.8, 1.5, -r * 0.15],
-        [r * 0.15, 1.5, r * 0.8], [-r * 0.15, 1.5, r * 0.8], [r * 0.15, 1.5, -r * 0.8], [-r * 0.15, 1.5, -r * 0.8]
+        // More sparse placements
+        [r * 0.6, 1.5, r * 0.2], [-r * 0.6, 1.5, r * 0.2],
+        [r * 0.6, 1.5, -r * 0.2], [-r * 0.6, 1.5, -r * 0.2],
+        [r * 0.2, 1.5, r * 0.6], [-r * 0.2, 1.5, r * 0.6],
+        [r * 0.2, 1.5, -r * 0.6], [-r * 0.2, 1.5, -r * 0.6]
     ];
 
     barricadePositions.forEach(([x, y, z]) => {

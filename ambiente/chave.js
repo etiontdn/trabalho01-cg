@@ -1,10 +1,19 @@
+// chave.js
 import * as THREE from "three";
 import { CSG } from '../../libs/other/CSGMesh.js'  
 
 export function criarChave(corHex = 0xffff00, escala = 1.0) {
     // Cubo base
     const cubeGeo = new THREE.BoxGeometry(3, 3, 3);
-    const cubeMat = new THREE.MeshPhongMaterial({ color: corHex });
+    
+    // --- MODIFICAÇÃO AQUI: Ajustar propriedades do MeshPhongMaterial ---
+    const cubeMat = new THREE.MeshPhongMaterial({ 
+        color: corHex,
+        specular: 0xcccccc, // Cor do brilho especular (geralmente branco ou cinza claro)
+        shininess: 100     // Intensidade do brilho (valores comuns: 30 a 200)
+    });
+    // --- FIM DA MODIFICAÇÃO ---
+
     const cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);
 
     // Cilindros para subtrair
@@ -18,7 +27,13 @@ export function criarChave(corHex = 0xffff00, escala = 1.0) {
     const cylZGeo = cylinderGeo.clone();
     cylZGeo.rotateX(Math.PI / 2);
 
-    const cylinderMat = new THREE.MeshPhongMaterial({ color: corHex });
+    // --- MODIFICAÇÃO AQUI: Ajustar propriedades do MeshPhongMaterial para os cilindros também ---
+    const cylinderMat = new THREE.MeshPhongMaterial({ 
+        color: corHex,
+        specular: 0xcccccc, // Usar a mesma cor de brilho
+        shininess: 100      // Usar a mesma intensidade de brilho
+    });
+    // --- FIM DA MODIFICAÇÃO ---
 
     // Criar meshes com geometria rotacionada
     const cylX = new THREE.Mesh(cylXGeo, cylinderMat);
@@ -37,7 +52,7 @@ export function criarChave(corHex = 0xffff00, escala = 1.0) {
     chaveCSG = chaveCSG.subtract(cylZCSG);
 
     // Converter de volta para mesh
-    const chaveMesh = CSG.toMesh(chaveCSG, cubeMesh.matrix, cubeMat);
+    const chaveMesh = CSG.toMesh(chaveCSG, cubeMesh.matrix, cubeMat); // Note que chaveMesh reusa cubeMat
 
     // Ajustes finais
     chaveMesh.castShadow = true;
