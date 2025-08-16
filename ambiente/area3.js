@@ -549,7 +549,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
 
             const delta = clock.getDelta();
             const speed = velocidade * delta;
-            console.log(soldados_mortos);
+            // console.log(soldados_mortos);
             if(!chaveAnimating && !chave3Coletada && soldados_mortos && !chave3Alreadyanimate && chave2Coletada) {
                 chaveAnimating = true;
                 progresso = 0;
