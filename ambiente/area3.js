@@ -547,16 +547,10 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         const tmpWorldPos = new THREE.Vector3();
         function updateArea3(chave2Coletada, chave3Coletada, soldados_mortos) {
 
-            if(!chave2Coletada)
-                return;
-
-            if(chave3Alreadyanimate)
-                return;
-
             const delta = clock.getDelta();
             const speed = velocidade * delta;
-
-            if(!chaveAnimating && !chave3Coletada && soldados_mortos && !chave3Alreadyanimate) {
+            console.log(soldados_mortos);
+            if(!chaveAnimating && !chave3Coletada && soldados_mortos && !chave3Alreadyanimate && chave2Coletada) {
                 chaveAnimating = true;
                 progresso = 0;
             }
@@ -576,7 +570,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
             if(portaoAlreadyAnimate)
                 return;
 
-            if (!portaoAlreadyAnimate && !portaoAnimating) {
+            if (!portaoAlreadyAnimate && !portaoAnimating && chave2Coletada) {
                 areaAtivacao.getWorldPosition(tmpWorldPos);
                 const d = scene.personagem.position.distanceTo(tmpWorldPos);
                 chave2.visible = false;

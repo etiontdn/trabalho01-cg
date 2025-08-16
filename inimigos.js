@@ -18,7 +18,7 @@ export class LostSoul extends Entidade {
         this.scale = new THREE.Vector3(5, 4, 0.5);
         this.damage = 15;
         this.speed = 10;
-        this.altMinima = 1.5;
+        this.altMinima = 2;
         this.distRecuo = 0;
         this.minDistRecuar = 8;
         this.tamanho = new THREE.Vector3(1.5, 1.5, 1.5);

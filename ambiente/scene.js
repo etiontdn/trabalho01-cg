@@ -1211,7 +1211,6 @@ criarParedesArea4();
     if (event.key.toLowerCase() === "k") {
       subirGrupoChave1 = true;
       subirGrupoChave2 = true;
-      subirGrupoChave3 = true;
     }
   });
 
@@ -1269,7 +1268,7 @@ let contSoldMortos;
     if(!chave3Coletada && Soldados.length > 0){
       contSoldMortos = 0;
       Soldados.forEach(soldado => {
-        if(soldado.estadoAtual !== 'morre')
+        if(soldado.estadoAtual == 'morre')
           contSoldMortos++;
         if(contSoldMortos == Soldados.length)
           subirGrupoChave3 = true;
