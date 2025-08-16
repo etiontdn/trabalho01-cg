@@ -18,6 +18,7 @@ class Iluminacao {
             corAmbiente,
             intensidadeLuzAmbiente
         );
+        this.luzAmbiente = luzAmbiente;
         this.scene.add(luzAmbiente);
         return luzAmbiente;
     }
@@ -47,9 +48,34 @@ class Iluminacao {
         return luzDirecional;
     }
 
-    adicionarSpotlight(posicao, intensidade, lookAt, abertura, cor) {
-        // TODO: Implementar só se necessário, não sei se vai ser?
-        return;
+    adicionarSpotlight(posicao, intensidade, lookAt, abertura, cor = "rgb(255,255,255)") {
+        const pos = new THREE.Vector3(posicao.x, posicao.y, posicao.z)
+
+        const alvo = new THREE.Vector3(lookAt.x, lookAt.y, lookAt.z)
+
+        const luz = new THREE.DirectionalLight(cor, intensidade);
+        luz.position.copy(pos);
+        luz.castShadow = true;
+
+        luz.shadow.camera.left = -40
+        luz.shadow.camera.right = 40
+        luz.shadow.camera.top = 40
+        luz.shadow.camera.bottom = -40
+
+        // configurações de sombra (ajuste se precisar)
+        luz.shadow.mapSize.width = 40;
+        luz.shadow.mapSize.height = 40;
+        luz.shadow.camera.near = 0.1;
+        luz.shadow.camera.far = 40;
+        luz.shadow.bias = -0.0001;
+        luz.shadow.normalBias = -0.0001;
+
+        // target
+        luz.target.position.copy(alvo);
+        this.scene.add(luz.target);
+        this.scene.add(luz);
+
+        return luz;
     }
 
     adicionarLuzPontual(posicao, intensidade, cor) {

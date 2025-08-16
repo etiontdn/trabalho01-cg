@@ -1291,13 +1291,12 @@ export function createEnemies(scene, objetosColidiveis, rampas, personagem) {
     new Cacodemon(scene, new THREE.Vector3(30, 30, -180));
     new Cacodemon(scene, new THREE.Vector3(-30, 45, -180));
 
-    // new Soldado(scene, new THREE.Vector3(0, 2, -20));
     // TODO: implementar função de retornar a posição inicial do soldado
-    new Soldado(scene, new THREE.Vector3(120, 2, -100));
+    new Soldado(scene, new THREE.Vector3(120, 2, -110));
     new Soldado(scene, new THREE.Vector3(120, 2, -125));
     new Soldado(scene, new THREE.Vector3(120, 2, -150));
     new Soldado(scene, new THREE.Vector3(120, 2, -175));
-    new Soldado(scene, new THREE.Vector3(180, 2, -100));
+    new Soldado(scene, new THREE.Vector3(180, 2, -110));
     new Soldado(scene, new THREE.Vector3(180, 2, -125));
     new Soldado(scene, new THREE.Vector3(180, 2, -150));
     new Soldado(scene, new THREE.Vector3(180, 2, -175));

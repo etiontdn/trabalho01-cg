@@ -93,6 +93,9 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
             displacementScale: 0.001,
         });
 
+        //----------------- MATERIAL PARA MESHS INVISIVEIS ----------------//
+        const objMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+
     //------------------------ CSG PARA O TETO -----------------------//
 
         //---------- TETO POR FORA  ----------//
@@ -201,121 +204,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         base.position.set(0, 0.05, 0);
         area3.add(base);
 
-        //-----------------AREAS ALTAS DE DENTRO ----------------//
-            //---------- ESCADAS ---------//
-            // const degrauWidth  = 10;
-            // const baseHeight   = 0.4;
-            // const stepDepth    = 1.5;
-            // const degrauMat    = AAmat; 
-
-            // function createEscada(posInicial, numDegraus = 17, groundY = 0) {
-            //     const escada = new THREE.Object3D();
-
-            //     for (let i = 0; i < numDegraus; i++) {
-            //         const altura = baseHeight * (i + 1);
-
-            //         const geo = new THREE.BoxGeometry(degrauWidth, altura, stepDepth);
-            //         const degrau = new THREE.Mesh(geo, degrauMat);
-            //         const y = groundY + altura / 2;
-            //         const z = posInicial.z - (i * stepDepth);
-            //         degrau.position.set(posInicial.x, y, z);
-            //         degrau.castShadow = castShadow;
-            //         degrau.receiveShadow = receiveShadow;
-            //         escada.add(degrau);
-            //         objetosColidiveis.push(degrau);
-            //     }
-            //     rampas.push(escada);
-            //     return escada;
-            // }
-
-            // const posEscada1 = new THREE.Vector3(profArea3/2*1.05, 0, profArea3/2*0.6);
-            // const posEscada2 = new THREE.Vector3(-profArea3/2*1.05, 0, profArea3/2*0.6);
-            // const escadaDir = createEscada(posEscada1);
-            // const escadaEsq = createEscada(posEscada2);
-            // area3.add(escadaDir);
-            // area3.add(escadaEsq);
-            
-            //---------- AREAS LATERAIS ALTAS ---------//
-            // const areaInnerEndZ = paredeNorte.position.z/2 + 0.01;
-
-            // function criaAreaAltaAposEscada(escada, posEscada) {
-            //     const numDegraus = escada.children.length;
-            //     if (numDegraus === 0) return null;
-
-            //     const lastIndex = numDegraus - 1;
-            //     const lastCenterZ = posEscada.z - (lastIndex * stepDepth);
-
-            //     const lastBackFaceZ = lastCenterZ - (stepDepth / 2);
-
-            //     if (lastBackFaceZ <= areaInnerEndZ) {
-            //     return null;
-            //     }
-
-            //     const profundidade = lastBackFaceZ - areaInnerEndZ;
-            //     const centroZ = areaInnerEndZ + profundidade / 2;
-
-            //     const ultimoDegrau = escada.children[lastIndex];
-            //     const alturaUltimo = ultimoDegrau.geometry.parameters.height;
-
-            //     const largura = degrauWidth;
-
-            //     const geo = new THREE.BoxGeometry(largura, alturaUltimo, profundidade);
-            //     const mesh = new THREE.Mesh(geo, AAmat);
-
-            //     mesh.position.set(posEscada.x, alturaUltimo / 2, centroZ);
-
-            //     area3.add(mesh);
-            //     objetosColidiveis.push(mesh);
-
-            //     return mesh;
-            // }
-            // const areaAlta1 = criaAreaAltaAposEscada(escadaDir, posEscada1);
-            // const areaAlta2 = criaAreaAltaAposEscada(escadaEsq, posEscada2);
-
-            //---------- AREA ALTA FUNDO ---------//
-            // const thickness = 20;
-
-            // const altura1 = (typeof areaAlta1 !== 'undefined' && areaAlta1) ? areaAlta1.geometry.parameters.height : 0;
-            // const altura2 = (typeof areaAlta2 !== 'undefined' && areaAlta2) ? areaAlta2.geometry.parameters.height : 0;
-
-            // const alturaFundo = Math.max(altura1, altura2);
-            // const centerX = (posEscada1.x + posEscada2.x) / 2;
-
-            // const larguraFundo = Math.abs(posEscada1.x - posEscada2.x) + degrauWidth;
-
-            // const centerZ = areaInnerEndZ - (thickness / 2);
-
-            // const centerY = alturaFundo / 2;
-
-            // const fundoGeo = new THREE.BoxGeometry(larguraFundo, alturaFundo, thickness);
-            // const fundoMesh = new THREE.Mesh(fundoGeo, AAmat);
-
-            // fundoMesh.position.set(centerX, centerY, centerZ);
-
-            // area3.add(fundoMesh);
-            // objetosColidiveis.push(fundoMesh);
-
-            // MATERIAL
-            const objMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-
-            //---------- CORRIMAO LATERAIS ---------//
-            // const corrimaoHeight = 2;
-            // const corrimaoDepth = 0.2;
-            // const corrimaoGeo = new THREE.BoxGeometry(corrimaoDepth, corrimaoHeight, areaAlta1.geometry.parameters.depth + 2);
-            // const corrimao1 = new THREE.Mesh(corrimaoGeo, corrimao1Mat);
-            // const corrimao2 = new THREE.Mesh(corrimaoGeo, corrimao1Mat);
-            // corrimao1.position.set(areaAlta1.position.x - areaAlta1.geometry.parameters.width*0.45, areaAlta1.position.y + areaAlta1.geometry.parameters.height / 2 + corrimao1.geometry.parameters.height / 2, -2 + areaAlta1.position.z - areaAlta1.geometry.parameters.depth / 2 + corrimao1.geometry.parameters.depth / 2);
-            // corrimao2.position.set(areaAlta2.position.x + areaAlta2.geometry.parameters.width*0.45, areaAlta2.position.y + areaAlta2.geometry.parameters.height / 2 + corrimao2.geometry.parameters.height / 2, -2 + areaAlta2.position.z - areaAlta2.geometry.parameters.depth / 2 + corrimao2.geometry.parameters.depth / 2);
-
-            // area3.add(corrimao1);
-            // area3.add(corrimao2);
-            
-            //---------- CORRIMAO FUNDO ---------//
-            // const distance = Math.abs(areaAlta1.position.x - areaAlta2.position.x) - 8.75;
-            // const corrimaoFundoGeo = new THREE.BoxGeometry(distance, corrimaoHeight, corrimaoDepth);
-            // const corrimaoFundo = new THREE.Mesh(corrimaoFundoGeo, corrimao2Mat);
-            // corrimaoFundo.position.set(0, areaAlta1.position.y + areaAlta1.geometry.parameters.height / 2 + corrimaoFundo.geometry.parameters.height / 2, -2 + areaInnerEndZ - corrimaoFundo.geometry.parameters.depth / 2);
-            // area3.add(corrimaoFundo);
+        
             
         //----------------- CAIXAS ESPALHADAS ----------------//
         const cxGtam = 3.5;
@@ -325,21 +214,27 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         const caixaMediaGeo = new THREE.BoxGeometry(cxMtam, cxMtam, cxMtam);
         const caixaPequenaGeo = new THREE.BoxGeometry(cxPtam, cxPtam, cxPtam);
 
-        function criaPilha(opc, x, y, z){
+        function criaPilha(opc, x, y, z, angle = 0){
                 const pilha = new THREE.Object3D();
                 function criaCaixaG(x, y, z){
                     const caixa = new THREE.Mesh(caixaGrandeGeo, cxMat);
                     caixa.position.set(x, y, z);
+                    caixa.castShadow = castShadow;
+                    caixa.receiveShadow = receiveShadow;
                     pilha.add(caixa);
                 }
                 function criaCaixaM(x, y, z){
                     const caixa = new THREE.Mesh(caixaMediaGeo, cxMat);
                     caixa.position.set(x, y, z);
+                    caixa.castShadow = castShadow;
+                    caixa.receiveShadow = receiveShadow;
                     pilha.add(caixa);
                 }
                 function criaCaixaP(x, y, z){
                     const caixa = new THREE.Mesh(caixaPequenaGeo, cxMat);
                     caixa.position.set(x, y, z);
+                    caixa.castShadow = castShadow;
+                    caixa.receiveShadow = receiveShadow;
                     pilha.add(caixa);
                 }
                 if(opc == 2){
@@ -365,6 +260,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
                     criaCaixaG(0, cxGtam / 2, 0);
                     criaCaixaG(-cxGtam, cxGtam / 2, 0);
                     criaCaixaG(0, cxGtam / 2, cxGtam);
+                    criaCaixaG(0, cxGtam / 2, -cxGtam);
                     criaCaixaG(cxGtam, cxGtam / 2, 0);
                     criaCaixaG(0, cxGtam*1.5, 0);
                 }
@@ -378,40 +274,38 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
                 }
                 //------ SHADOW CAIXAS -----//
                 pilha.children.forEach(child => {
-                    child.castShadow = castShadow;
-                    child.receiveShadow = receiveShadow;
                     objetosColidiveis.push(child);
                 });
 
                 pilha.position.set(x, y, z);
+                pilha.rotateY(angle);
                 area3.add(pilha);
             }
 
-            //---------- CAIXAS DA PARTE ALTA ---------//
-            // criaPilha(4, fundoMesh.position.x - (fundoMesh.geometry.parameters.width - cxGtam - 2) / 2,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(2, fundoMesh.position.x - (fundoMesh.geometry.parameters.width - cxGtam - 2) / 2 + cxGtam * 4,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(2, fundoMesh.position.x + (fundoMesh.geometry.parameters.width - cxGtam - 2) / 2,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(5, fundoMesh.position.x,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(6, fundoMesh.position.x + (fundoMesh.geometry.parameters.width - cxGtam - 2) / 4,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(4, fundoMesh.position.x + (fundoMesh.geometry.parameters.width - cxGtam - 2) / 4,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2 + cxGtam);
-            // criaPilha(4,fundoMesh.position.x + (fundoMesh.geometry.parameters.width - cxGtam - 2) / 4 + cxGtam*2,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
-            // criaPilha(4,fundoMesh.position.x + (fundoMesh.geometry.parameters.width - cxGtam - 2) / 4 + cxGtam*2,
-            //             fundoMesh.position.y + (fundoMesh.geometry.parameters.height) / 2 + cxGtam,
-            //             fundoMesh.position.z - (fundoMesh.geometry.parameters.depth - cxGtam) / 2);
+            //---------- CAIXAS ---------//
+            const minX = paredeOeste.position.x - paredeOeste.geometry.parameters.width / 2 - cxGtam / 2 - cxGtam * 2;
+            const maxX = paredeLeste.position.x + paredeLeste.geometry.parameters.width / 2 + cxGtam / 2 + cxGtam * 2;
+            const minZ = paredeNorte.position.z + paredeNorte.geometry.parameters.depth / 2 + cxGtam / 2 + cxGtam * 2;
+            const maxZ = paredesSul1.position.z - paredesSul1.geometry.parameters.depth / 2 - cxGtam / 2 - cxGtam * 2;
+            const tipos = [2, 3, 5];
+            const pilhas = [
+                { x: minX + 0.950714*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.170524*(maxZ - minZ) },{ x: minX + 0.731994*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.065052*(maxZ - minZ) },
+                { x: minX + 0.601115*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.684233*(maxZ - minZ) },{ x: minX + 0.708073*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.440152*(maxZ - minZ) },{ x: minX + 0.020584*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.122038*(maxZ - minZ) },{ x: minX + 0.96991*(maxX - minX),  y: base.geometry.parameters.height / 2, z: minZ + 0.495177*(maxZ - minZ) },{ x: minX + 0.832443*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.034389*(maxZ - minZ) },
+                { x: minX + 0.212339*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.90932*(maxZ - minZ) },
+                { x: minX + 0.181825*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.25878*(maxZ - minZ) },{ x: minX + 0.183405*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.662522*(maxZ - minZ) },
+                { x: minX + 0.291229*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.184854*(maxZ - minZ) },{ x: minX + 0.611853*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.969585*(maxZ - minZ) },
+                { x: minX + 0.366362*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.894827*(maxZ - minZ) },
+                { x: minX + 0.785176*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.921874*(maxZ - minZ) },{ x: minX + 0.199674*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.088493*(maxZ - minZ) },{ x: minX + 0.514234*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.195983*(maxZ - minZ) },{ x: minX + 0.592415*(maxX - minX), y: base.geometry.parameters.height / 2, z: minZ + 0.045227*(maxZ - minZ) },{ x: minX + 0.04645*(maxX - minX),  y: base.geometry.parameters.height / 2, z: minZ + 0.32533*(maxZ - minZ) }];
+            for(let k = 0; k < pilhas.length; k++){
+                const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+
+                criaPilha(tipo, pilhas[k].x, pilhas[k].y, pilhas[k].z);
+            }
+            criaPilha(4, maxX, base.geometry.parameters.height / 2, minZ - 2 * cxGtam);
+            criaPilha(4, maxX + cxGtam * 4, base.geometry.parameters.height / 2, minZ - 2 * cxGtam);
+            criaPilha(4, maxX + cxGtam * 8, base.geometry.parameters.height / 2, minZ - 2 * cxGtam);
+
+            criaPilha(6, paredeNorte.position.x + paredeNorte.geometry.parameters.width / 3, base.geometry.parameters.height, paredeNorte.position.z + paredeNorte.geometry.parameters.depth / 2 + cxGtam / 2);
 
         //---------- AVIAO ---------//
         function loadOBJFile(modelPath, modelName, desiredScale, angle, visibility)
@@ -543,13 +437,33 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
         let progresso;
         let chaveAnimating = false;
 
+        //--------------- ILUMINAÇÃO AREA 3 --------------//
+        let posIlum = area3.getWorldPosition(new THREE.Vector3())
+        const altIlum = 25;
+        posIlum.y += altIlum;
+        scene.iluminacao.adicionarSpotlight(posIlum, .1, area3.position);
+        scene.updateMatrixWorld()
+        const ilumMinX = paredeLeste.getWorldPosition(new THREE.Vector3()).x;
+        const ilumMaxX = paredeOeste.getWorldPosition(new THREE.Vector3()).x;
+        const ilumMinZ = paredeNorte.getWorldPosition(new THREE.Vector3()).z;
+        const ilumMaxZ = paredesSul1.getWorldPosition(new THREE.Vector3()).z;
+
         //--------------- UPDATE AREA 3 --------------//
         const tmpWorldPos = new THREE.Vector3();
         function updateArea3(chave2Coletada, chave3Coletada, soldados_mortos) {
 
+            //--------------- MUDANÇA ILUMINAÇÃO --------------//
+            if(scene.personagem.position.x >= ilumMinX && scene.personagem.position.x <= ilumMaxX &&
+               scene.personagem.position.z >= ilumMinZ && scene.personagem.position.z <= ilumMaxZ) {
+                scene.iluminacao.luzAmbiente.intensity = .1;
+            } else {
+                scene.iluminacao.luzAmbiente.intensity = .5;
+            }
+
             const delta = clock.getDelta();
             const speed = velocidade * delta;
-            // console.log(soldados_mortos);
+
+            //--------------- CHAVE 3 --------------//
             if(!chaveAnimating && !chave3Coletada && soldados_mortos && !chave3Alreadyanimate && chave2Coletada) {
                 chaveAnimating = true;
                 progresso = 0;
@@ -567,6 +481,7 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
                 }
             }
 
+            //--------------- PORTA AREA 3 --------------//
             if(portaoAlreadyAnimate)
                 return;
 
@@ -618,3 +533,116 @@ function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas)
 }
 
 export default createArea3;
+
+//-----------------AREAS ALTAS DE DENTRO ----------------//
+            //---------- ESCADAS ---------//
+            // const degrauWidth  = 10;
+            // const baseHeight   = 0.4;
+            // const stepDepth    = 1.5;
+            // const degrauMat    = AAmat; 
+
+            // function createEscada(posInicial, numDegraus = 17, groundY = 0) {
+            //     const escada = new THREE.Object3D();
+
+            //     for (let i = 0; i < numDegraus; i++) {
+            //         const altura = baseHeight * (i + 1);
+
+            //         const geo = new THREE.BoxGeometry(degrauWidth, altura, stepDepth);
+            //         const degrau = new THREE.Mesh(geo, degrauMat);
+            //         const y = groundY + altura / 2;
+            //         const z = posInicial.z - (i * stepDepth);
+            //         degrau.position.set(posInicial.x, y, z);
+            //         degrau.castShadow = castShadow;
+            //         degrau.receiveShadow = receiveShadow;
+            //         escada.add(degrau);
+            //         objetosColidiveis.push(degrau);
+            //     }
+            //     rampas.push(escada);
+            //     return escada;
+            // }
+
+            // const posEscada1 = new THREE.Vector3(profArea3/2*1.05, 0, profArea3/2*0.6);
+            // const posEscada2 = new THREE.Vector3(-profArea3/2*1.05, 0, profArea3/2*0.6);
+            // const escadaDir = createEscada(posEscada1);
+            // const escadaEsq = createEscada(posEscada2);
+            // area3.add(escadaDir);
+            // area3.add(escadaEsq);
+            
+            //---------- AREAS LATERAIS ALTAS ---------//
+            // const areaInnerEndZ = paredeNorte.position.z/2 + 0.01;
+
+            // function criaAreaAltaAposEscada(escada, posEscada) {
+            //     const numDegraus = escada.children.length;
+            //     if (numDegraus === 0) return null;
+
+            //     const lastIndex = numDegraus - 1;
+            //     const lastCenterZ = posEscada.z - (lastIndex * stepDepth);
+
+            //     const lastBackFaceZ = lastCenterZ - (stepDepth / 2);
+
+            //     if (lastBackFaceZ <= areaInnerEndZ) {
+            //     return null;
+            //     }
+
+            //     const profundidade = lastBackFaceZ - areaInnerEndZ;
+            //     const centroZ = areaInnerEndZ + profundidade / 2;
+
+            //     const ultimoDegrau = escada.children[lastIndex];
+            //     const alturaUltimo = ultimoDegrau.geometry.parameters.height;
+
+            //     const largura = degrauWidth;
+
+            //     const geo = new THREE.BoxGeometry(largura, alturaUltimo, profundidade);
+            //     const mesh = new THREE.Mesh(geo, AAmat);
+
+            //     mesh.position.set(posEscada.x, alturaUltimo / 2, centroZ);
+
+            //     area3.add(mesh);
+            //     objetosColidiveis.push(mesh);
+
+            //     return mesh;
+            // }
+            // const areaAlta1 = criaAreaAltaAposEscada(escadaDir, posEscada1);
+            // const areaAlta2 = criaAreaAltaAposEscada(escadaEsq, posEscada2);
+
+            //---------- AREA ALTA FUNDO ---------//
+            // const thickness = 20;
+
+            // const altura1 = (typeof areaAlta1 !== 'undefined' && areaAlta1) ? areaAlta1.geometry.parameters.height : 0;
+            // const altura2 = (typeof areaAlta2 !== 'undefined' && areaAlta2) ? areaAlta2.geometry.parameters.height : 0;
+
+            // const alturaFundo = Math.max(altura1, altura2);
+            // const centerX = (posEscada1.x + posEscada2.x) / 2;
+
+            // const larguraFundo = Math.abs(posEscada1.x - posEscada2.x) + degrauWidth;
+
+            // const centerZ = areaInnerEndZ - (thickness / 2);
+
+            // const centerY = alturaFundo / 2;
+
+            // const fundoGeo = new THREE.BoxGeometry(larguraFundo, alturaFundo, thickness);
+            // const fundoMesh = new THREE.Mesh(fundoGeo, AAmat);
+
+            // fundoMesh.position.set(centerX, centerY, centerZ);
+
+            // area3.add(fundoMesh);
+            // objetosColidiveis.push(fundoMesh);
+
+            //---------- CORRIMAO LATERAIS ---------//
+            // const corrimaoHeight = 2;
+            // const corrimaoDepth = 0.2;
+            // const corrimaoGeo = new THREE.BoxGeometry(corrimaoDepth, corrimaoHeight, areaAlta1.geometry.parameters.depth + 2);
+            // const corrimao1 = new THREE.Mesh(corrimaoGeo, corrimao1Mat);
+            // const corrimao2 = new THREE.Mesh(corrimaoGeo, corrimao1Mat);
+            // corrimao1.position.set(areaAlta1.position.x - areaAlta1.geometry.parameters.width*0.45, areaAlta1.position.y + areaAlta1.geometry.parameters.height / 2 + corrimao1.geometry.parameters.height / 2, -2 + areaAlta1.position.z - areaAlta1.geometry.parameters.depth / 2 + corrimao1.geometry.parameters.depth / 2);
+            // corrimao2.position.set(areaAlta2.position.x + areaAlta2.geometry.parameters.width*0.45, areaAlta2.position.y + areaAlta2.geometry.parameters.height / 2 + corrimao2.geometry.parameters.height / 2, -2 + areaAlta2.position.z - areaAlta2.geometry.parameters.depth / 2 + corrimao2.geometry.parameters.depth / 2);
+
+            // area3.add(corrimao1);
+            // area3.add(corrimao2);
+            
+            //---------- CORRIMAO FUNDO ---------//
+            // const distance = Math.abs(areaAlta1.position.x - areaAlta2.position.x) - 8.75;
+            // const corrimaoFundoGeo = new THREE.BoxGeometry(distance, corrimaoHeight, corrimaoDepth);
+            // const corrimaoFundo = new THREE.Mesh(corrimaoFundoGeo, corrimao2Mat);
+            // corrimaoFundo.position.set(0, areaAlta1.position.y + areaAlta1.geometry.parameters.height / 2 + corrimaoFundo.geometry.parameters.height / 2, -2 + areaInnerEndZ - corrimaoFundo.geometry.parameters.depth / 2);
+            // area3.add(corrimaoFundo);

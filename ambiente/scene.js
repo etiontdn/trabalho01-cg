@@ -347,7 +347,8 @@ export default async function(scene, audioListener) {
   const iluminacao = new Iluminacao(scene);
   iluminacao.adicionarIluminacaoAmbiente();
   iluminacao.adicionarIluminacaoDirecional();
-
+  scene.iluminacao = iluminacao;
+  
   // Chão
   const materialComTextura = new THREE.MeshLambertMaterial({
     map: texturas.chao
@@ -1375,33 +1376,6 @@ let contSoldMortos;
 
     function ajustarPlataforma(subindo, alvo) {
       const initialY = plataforma.position.y;
-        // Coleta da chave 1
-        // if (!chave1Coletada && personagem && grupoChave1.position.y >= alturaFinal1) {
-        //     const distancia = personagem.position.distanceTo(
-        //         chave1.getWorldPosition(new THREE.Vector3())
-        //     );
-        //     if (distancia < 7) {
-        //         chave1.visible = false;
-        //         chave1Coletada = true;
-        //         chavesUI.adicionarChave1();
-        //         sons.keyPickup.play();
-        //         console.log("Chave 1 coletada!");
-        //     }
-        // }
-
-        // // Coleta da chave 1
-        // if (!chave2Coletada && personagem) {
-        //     const distancia = personagem.position.distanceTo(
-        //         chave2.getWorldPosition(new THREE.Vector3())
-        //     );
-        //     if (distancia < 4.5) {
-        //         chave2.visible = false;
-        //         chave2Coletada = true;
-        //         chavesUI.adicionarChave2();
-        //         sons.keyPickup.play();
-        //         console.log("Chave 2 coletada!");
-        //     }
-        // }
 
       if (subindo) {
         plataforma.position.y = Math.min(plataforma.position.y + velocidade_plataforma, alvo);
@@ -1486,6 +1460,8 @@ let contSoldMortos;
 
     // ---------------------   AREA 3   --------------------- //
     updateArea3(chave2Coletada, chave3Coletada, subirGrupoChave3);
+
+    // ------------------------------------------------------ //
 
     const x = personagem.position.x;
     const z = personagem.position.z;
