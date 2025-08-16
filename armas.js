@@ -159,6 +159,8 @@ export default function criarArmas(
             isAnimating: false,
         };
 
+        sprite.vel = 3;
+
         personagemControls.getObject().add(sprite);
         sprite.dano = dano;
         armas.push(sprite);
@@ -193,6 +195,7 @@ export default function criarArmas(
         personagemControls.getObject().add(arma);
         arma.cadencia = cadencia;
         arma.dano = dano;
+        arma.vel = 1;
         armas.push(arma);
 
         if (soundUrl) {
@@ -205,28 +208,47 @@ export default function criarArmas(
         }
     }
 
-    function criarDisparo(visivel = true) {
-        const disparoGeo = new THREE.SphereGeometry(0.2, 10, 10);
-        const disparoMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
-        const tiro = new THREE.Mesh(disparoGeo, disparoMat);
+function criarDisparo() {
+    if (armas[armaAtual].sound && !armas[armaAtual].sound.isPlaying) {
+        armas[armaAtual].sound.play();
+    }
+    crosshair.active = true;
 
-        crosshair.active = true;
-        tiro.visible = visivel;
+    const raycaster = new THREE.Raycaster();
+    const camera = personagemControls.getObject();
+    const rayOrigin = new THREE.Vector2(0, 0); 
+    raycaster.setFromCamera(rayOrigin, camera);
 
-        armas[armaAtual].getWorldPosition(tiro.position);
-        tiro.position.y += 0.2;
-        tiro.userData.dir = personagemControls
-            .getObject()
-            .getWorldDirection(new THREE.Vector3())
-            .clone();
+    const inimigosMesh = inimigos.map(inimigo => inimigo.enemyObj);
+    const alvos = [...inimigosMesh, ...objetosColidiveis, ...rampas];
 
-        scene.add(tiro);
-        disparos.push(tiro);
+    const intersects = raycaster.intersectObjects(alvos, true);
 
-        if (armas[armaAtual].sound && !armas[armaAtual].sound.isPlaying) {
-            armas[armaAtual].sound.play();
+    for (const hit of intersects) {
+        let inimigoEncontrado = null;
+        let objetoVerificado = hit.object;
+
+        while (objetoVerificado) {
+            const found = inimigos.find(inimigo => inimigo.enemyObj === objetoVerificado);
+            if (found) {
+                inimigoEncontrado = found;
+                break;
+            }
+            objetoVerificado = objetoVerificado.parent;
+        }
+
+        if (inimigoEncontrado) {
+            
+            if (inimigoEncontrado.estadoAtual === 'morre') {
+                continue; 
+            } else {
+                inimigoEncontrado.hp -= armas[armaAtual].dano;
+                inimigoEncontrado.alerta = true;
+                break; 
+            }
         }
     }
+}
 
     function criarDisparoCacodemon(inimigo) {
         const disparoGeo = new THREE.SphereGeometry(1, 10, 10);
@@ -331,67 +353,48 @@ export default function criarArmas(
 
         const speed = 200;
 
-        for (let i = 0; i < disparos.length; i++) {
-            const tiro = disparos[i];
-            const dir = tiro.userData.dir.clone().normalize();
-            if (tiro.eInimigo) {
-                tiro.position.addScaledVector(dir, (speed/3) * delta);
-            } else {
-                tiro.position.addScaledVector(dir, speed * delta);
-            }
+for (let i = 0; i < disparos.length; i++) {
+    const tiro = disparos[i]; // Este 'tiro' SEMPRE será de um inimigo
 
-            const tiroBB = new THREE.Box3().setFromObject(tiro);
-            let colidiu = false;
-            const alvos = objetosColidiveis.concat(rampas);
-            if (tiro.eInimigo) {
-                const personagemBB = new THREE.Box3().setFromObject(
-                    scene.personagem
-                );
-                if (tiroBB.intersectsBox(personagemBB)) {
-                    if (!tiro.colidiu) {
-                        takeDamage();
-                        tiro.colidiu = true;
-                        colidiu = true;
-                        scene.personagem.vida -= 8;
-                        scene.personagem.updateHealthBar();
-                    }
-                    break;
-                }
-            }
-            for (let alvo of alvos) {
-                const alvoBB = new THREE.Box3().setFromObject(alvo);
-                if (tiroBB.intersectsBox(alvoBB)) {
-                    colidiu = true;
-                    break;
-                }
-            }
-            const copiaInimigos = [...inimigos]
-            copiaInimigos.forEach((inimigo) => {
-                if (inimigo instanceof PainElemental) {
-                    for (let lostSoul of inimigo.lostSoulsInvocados) {
-                        if (!inimigos.includes(lostSoul)) {
-                            inimigos.push(lostSoul);
-                        }
-                    }
-                }
-            });
-            for (let inimigo of inimigos) {
-                if (!inimigo.bb || !inimigo.enemyObj) continue;
-                inimigo.bb.setFromObject(inimigo.enemyObj);
-                if (tiroBB.intersectsBox(inimigo.bb) && !tiro.eInimigo) {
-                    colidiu = true;
-                    inimigo.hp -= armas[armaAtual].dano;
-                    inimigo.alerta = true;
-                    break;
-                }
-            }
+    // 1. Atualizar a posição do projétil inimigo
+    const dir = tiro.userData.dir.clone().normalize();
+    tiro.position.addScaledVector(dir, (speed / 3) * delta);
 
-            if (colidiu) {
-                scene.remove(tiro);
-                disparos.splice(i, 1);
-                i--;
+    // 2. Verificar colisão do projétil inimigo
+    const tiroBB = new THREE.Box3().setFromObject(tiro);
+    let colidiu = false;
+
+    // Colisão com o personagem
+    const personagemBB = new THREE.Box3().setFromObject(scene.personagem);
+    if (tiroBB.intersectsBox(personagemBB)) {
+        if (!tiro.colidiu) {
+            takeDamage();
+            tiro.colidiu = true;
+            colidiu = true;
+            scene.personagem.vida -= 8;
+            scene.personagem.updateHealthBar();
+        }
+    }
+
+    // Colisão com o cenário
+    if (!colidiu) {
+        const alvosCenario = objetosColidiveis.concat(rampas);
+        for (let alvo of alvosCenario) {
+            const alvoBB = new THREE.Box3().setFromObject(alvo);
+            if (tiroBB.intersectsBox(alvoBB)) {
+                colidiu = true;
+                break;
             }
         }
+    }
+    
+    // 3. Remover o projétil se colidiu
+    if (colidiu) {
+        scene.remove(tiro);
+        disparos.splice(i, 1);
+        i--;
+    }
+    }
     }
 
     return updateDisparos;
