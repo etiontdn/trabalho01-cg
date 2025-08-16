@@ -62,14 +62,44 @@ export default function createPersonagem(
         }
         
         healthBarElement.style.width = `${vidaAtual}%`;
-        if(personagem.godMode)
-            healthBarElement.style.backgroundColor = '#1cd9c3ff';
-        else if (vidaAtual <= 25) {
-            healthBarElement.style.backgroundColor = '#dc3545';
+
+        if(personagem.godMode){
+            healthBarElement.style.background = `
+            repeating-linear-gradient(
+                135deg,
+                #2a2a2a,
+                #2a2a2a 6px,
+                #3d3d3d 6px,
+                #3d3d3d 12px,
+                #4a4a4a 12px,
+                #4a4a4a 18px
+            )`;
+            healthBarElement.style.backgroundBlendMode = "overlay";
+            healthBarElement.style.backgroundColor = "#2f2f2f";
+            healthBarElement.style.backgroundImage += `,
+                linear-gradient(
+                    120deg,
+                    rgba(255,255,255,0.15) 0%,
+                    rgba(255,255,255,0.05) 30%,
+                    rgba(255,255,255,0) 60%
+                )`;
+            healthBarElement.style.backgroundSize = "200% 200%";
+            healthBarElement.style.boxShadow = `
+                0 0 15px #2e5a5cff, 
+                inset 0 0 8px #47888cff,
+                inset 0 0 15px rgba(255,255,255,0.2)
+            `;
+            healthBarElement.style.border = "1px solid #888";
+            healthBarElement.style.borderRadius = "6px";
+        } else if (vidaAtual <= 25) {
+            healthBarElement.style.background = "#dc3545";
+            healthBarElement.style.boxShadow = "";
         } else if (vidaAtual <= 60) {
-            healthBarElement.style.backgroundColor = '#ffc107';
+            healthBarElement.style.background = "#ffc107";
+            healthBarElement.style.boxShadow = "";
         } else {
-            healthBarElement.style.backgroundColor = '#28a745';
+            healthBarElement.style.background = "#28a745";
+            healthBarElement.style.boxShadow = "";
         }
         if (vidaAtual <= 0) {
             telaFimUI.init();
@@ -142,6 +172,7 @@ export default function createPersonagem(
                 break;
             case "KeyG":
                 personagem.godMode = !personagem.godMode;
+                personagem.vida = personagem.vidaMax;
                 personagem.updateHealthBar();
                 break;
         }
