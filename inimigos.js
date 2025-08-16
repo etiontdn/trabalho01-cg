@@ -460,7 +460,7 @@ export class PainElemental extends Entidade {
         }
         const dummy = new THREE.Object3D();
         dummy.position.copy(this.entidade.position);
-        dummy.lookAt(vetorPos);
+        dummy.lookAt(this.ultimaPosicaoInimigo);
 
         this.entidade.quaternion.slerp(dummy.quaternion, 0.04);
     }
@@ -468,7 +468,7 @@ export class PainElemental extends Entidade {
     patrulha(enemy, speed) {}
 
     atacar() {
-        const vetorPos = this.pathFinding.vetorPos;
+        const vetorPos = this.ultimaPosicaoInimigo;
         const dummy = new THREE.Object3D();
         dummy.position.copy(this.entidade.position);
         dummy.lookAt(vetorPos);
@@ -482,7 +482,7 @@ export class PainElemental extends Entidade {
 
         const direcaoPersonagem = new THREE.Vector3()
             .subVectors(
-                this.scene.personagem.position,
+                this.ultimaPosicaoInimigo,
                 lostSoul.entidade.position
             )
             .normalize();
@@ -494,7 +494,7 @@ export class PainElemental extends Entidade {
 
         if (
             lostSoul.entidade.position.distanceTo(
-                this.scene.personagem.position
+                this.ultimaPosicaoInimigo
             ) <= 1
         ) {
             lostSoul.reached = true;
@@ -1231,6 +1231,29 @@ export class Soldado extends Entidade {
             this.actions.ShootingDown.playOnce();
             // implementar o dano
             this.somAtaque.play();
+            // novo raycast com a ultima posição para dar chance de evadir:
+            const raycaster = new THREE.Raycaster();
+            const origemRay = this.entidade.position.clone();
+            const direcaoPersonagem = new THREE.Vector3()
+                .subVectors(this.ultimaPosicaoInimigo, origemRay)
+                .normalize();
+            raycaster.set(origemRay, direcaoPersonagem);
+
+            // Crie uma lista de objetos para o raycast, contendo apenas a colisão do personagem
+            const objetosParaChecar = [this.scene.personagem.colisao];
+
+            // Intersecta o raio com a colisão do personagem
+            const intersects = raycaster.intersectObjects(
+                objetosParaChecar,
+                true
+            );
+
+            // Se o raio atingir o personagem, o tiro é "válido"
+            if (intersects.length > 0) {
+                takeDamage();
+                this.scene.personagem.vida -= this.damage;
+                this.scene.personagem.updateHealthBar();
+            }
             takeDamage();
             this.scene.personagem.vida -= this.damage;
             this.scene.personagem.updateHealthBar();
