@@ -433,8 +433,9 @@ export class PainElemental extends Entidade {
 
                     if (this.fadeOut <= 0) {
                         this.scene.remove(this.entidade);
-                        const index = list_Cacodemons.indexOf(this);
-                        if (index !== -1) list_Cacodemons.splice(index, 1);
+                        console.log("Pain elemental morre")
+                        const index = list_PainElementals.indexOf(this);
+                        if (index !== -1) list_PainElementals.splice(index, 1);
                     }
                 }
                 break;

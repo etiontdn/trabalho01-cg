@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from "../build/jsm/controls/PointerLockControls.js";
+import telaFimUI from "./telaFimUI.js";
 
 export default function createPersonagem(
     camera,
@@ -71,8 +72,10 @@ export default function createPersonagem(
             healthBarElement.style.backgroundColor = '#28a745';
         }
         if (vidaAtual <= 0) {
-            initPersonagem();
-            personagem.updateHealthBar();
+            telaFimUI.init();
+            telaFimUI.aparece();
+            //personagem.updateHealthBar();
+            personagem.position.y = 10000;
         }
     };
 

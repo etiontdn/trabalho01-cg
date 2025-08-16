@@ -224,3 +224,48 @@
     font-size: 36px;
     color: white;
 }
+
+
+#tela-fim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 1) url("./assets/tela-carregamento/fundo.png");
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    pointer-events: none;
+
+    opacity: 0;
+
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+#texto-tela-fim {
+    font-family: Orbitron, monospace, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    
+    font-size: 64px;
+    color: rgb(222, 15, 15);
+    text-align: center;
+    background-color: rgba(0,0,0,0.6);
+    padding: 20px;
+    width: 100%;
+}
+
+#subtitulo-tela-fim {
+    font-family: Orbitron, monospace, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 32px;
+    color: white;
+
+    text-align: center;
+    background-color: rgba(0,0,0,0.6);
+    padding-bottom: 32px;
+    width: 100%;
+}
