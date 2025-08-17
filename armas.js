@@ -22,7 +22,7 @@ export default function criarArmas(
 
     // Metralhadora
     criarArmaSprite(
-        "../0_assetsT3/objects/chaingun.png",
+        "./0_assetsT3/objects/chaingun.png",
         0.1,
         0.1,
         3,
@@ -30,8 +30,8 @@ export default function criarArmas(
         1,
         1.7,
         1.2,
-        200,
-        "../0_assetsT3/sounds/chaingunFiring.wav",
+        2,
+        "./0_assetsT3/sounds/chaingunFiring.wav",
         listener,
         5
     );
@@ -47,7 +47,7 @@ export default function criarArmas(
         1,
         1.2,
         10,
-        "../0_assetsT3/sounds/rocketFiring.wav",
+        "./0_assetsT3/sounds/rocketFiring.wav",
         listener,
         3 // Exemplo: velocidade normal (1.0) para o lança-foguetes
     );
@@ -73,7 +73,7 @@ export default function criarArmas(
     arma2.cadencia = 0.75;
     arma2.dano = 7;
     // Exemplo: se quisesse som para a shotgun
-    // const shotgunSoundUrl = '../0_assetsT3/sounds/shotgun_shoot.wav';
+    // const shotgunSoundUrl = './0_assetsT3/sounds/shotgun_shoot.wav';
     // const shotgunPlaybackRate = 1.2; // Exemplo: um pouco mais rápido
     // if (shotgunSoundUrl) {
     //     arma2.sound = new THREE.Audio(listener);

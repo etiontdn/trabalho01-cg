@@ -307,10 +307,10 @@ async function carregarSons(audioListener) {
   }
 
   return {
-    keyPickup: await carregar("../0_assetsT3/sounds/chave.wav"),
-    platformMove: await carregar("../0_assetsT3/sounds/plataformaMovendo.wav"),
-    doorOpen: await carregar("../0_assetsT3/sounds/doorOpening.wav"),
-    ambientSound: await carregar("../0_assetsT3/sounds/doom.mp3"),
+    keyPickup: await carregar("./0_assetsT3/sounds/chave.wav"),
+    platformMove: await carregar("./0_assetsT3/sounds/plataformaMovendo.wav"),
+    doorOpen: await carregar("./0_assetsT3/sounds/doorOpening.wav"),
+    ambientSound: await carregar("./0_assetsT3/sounds/doom.mp3"),
   };
 }
 

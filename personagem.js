@@ -30,7 +30,7 @@ export default function createPersonagem(
     let currentHealth = 0; // To track health changes
 
     // -- MODIFICAÇÃO AQUI: ATUALIZA O CAMINHO DO ÁUDIO --
-    audioLoader.load('../0_assetsT3/sounds/playerInjured.wav', function(buffer) { // Assuming your sound file is named hit_sound.mp3
+    audioLoader.load('./0_assetsT3/sounds/playerInjured.wav', function(buffer) { // Assuming your sound file is named hit_sound.mp3
         sound.setBuffer(buffer);
         sound.setLoop(false);
         sound.setVolume(0.5); // Adjust volume as needed

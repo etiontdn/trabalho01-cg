@@ -30,7 +30,7 @@ export class LostSoul extends Entidade {
         this.ultimoDano = 0;
         this.fadeOut = 1.0; // opacidade usada na transição
 
-        this.url = "../0_assetsT3/objects/skull/skull.mtl";
+        this.url = "./0_assetsT3/objects/skull/skull.mtl";
         this.createEnemy();
         this.bb.setFromObject(this.entidade);
         list_LostSouls.push(this);
@@ -43,7 +43,7 @@ export class LostSoul extends Entidade {
 
         this.somAtaque = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/lostSoul/lost_soul_attack.wav",
+            "./0_assetsT3/sounds/lostSoul/lost_soul_attack.wav",
             (buffer) => {
                 this.somAtaque.setBuffer(buffer);
                 this.somAtaque.setVolume(0.5);
@@ -53,7 +53,7 @@ export class LostSoul extends Entidade {
 
         this.somInjured = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/lostSoul/injured.wav",
+            "./0_assetsT3/sounds/lostSoul/injured.wav",
             (buffer) => {
                 this.somInjured.setBuffer(buffer);
                 this.somInjured.setVolume(0.5);
@@ -68,7 +68,7 @@ export class LostSoul extends Entidade {
             materials.preload();
             const objLoader = new OBJLoader();
             objLoader.setMaterials(materials);
-            objLoader.load("../0_assetsT3/objects/skull.obj", (enemyMesh) => {
+            objLoader.load("./0_assetsT3/objects/skull.obj", (enemyMesh) => {
                 // agora o enemyMesh já vem com texturas aplicadas
                 this.entidade.add(enemyMesh);
                 this.enemyObj = this.entidade;
@@ -341,7 +341,7 @@ export class PainElemental extends Entidade {
         const audioLoader = new THREE.AudioLoader();
         this.somAtaque = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/painElemental/painAttack.wav",
+            "./0_assetsT3/sounds/painElemental/painAttack.wav",
             (buffer) => {
                 this.somAtaque.setBuffer(buffer);
                 this.somAtaque.setVolume(0.5);
@@ -351,7 +351,7 @@ export class PainElemental extends Entidade {
 
         this.somInjured = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/painElemental/injured.wav",
+            "./0_assetsT3/sounds/painElemental/injured.wav",
             (buffer) => {
                 this.somInjured.setBuffer(buffer);
                 this.somInjured.setVolume(0.5);
@@ -361,7 +361,7 @@ export class PainElemental extends Entidade {
 
         this.somAlerta = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/painElemental/painSight.wav",
+            "./0_assetsT3/sounds/painElemental/painSight.wav",
             (buffer) => {
                 this.somAlerta.setBuffer(buffer);
                 this.somAlerta.setVolume(0.5);
@@ -592,7 +592,7 @@ export class Cacodemon extends Entidade {
         this.minDistRecuar = 10;
         this.altMinima = 4;
         this.fadeOut = 1.0; // opacidade usada na transição
-        this.url = "../0_assetsT3/objects/cacodemon.glb";
+        this.url = "./0_assetsT3/objects/cacodemon.glb";
         this.createEnemy();
 
         this.duracaoEstados.espera = 20;
@@ -606,7 +606,7 @@ export class Cacodemon extends Entidade {
         const audioLoader = new THREE.AudioLoader();
         this.somAtaque = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/cacoDemon/cacodemonAttack.wav",
+            "./0_assetsT3/sounds/cacoDemon/cacodemonAttack.wav",
             (buffer) => {
                 this.somAtaque.setBuffer(buffer);
                 this.somAtaque.setVolume(0.5);
@@ -616,7 +616,7 @@ export class Cacodemon extends Entidade {
 
         this.somInjured = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/cacoDemon/cacodemonInjured.wav",
+            "./0_assetsT3/sounds/cacoDemon/cacodemonInjured.wav",
             (buffer) => {
                 this.somInjured.setBuffer(buffer);
                 this.somInjured.setVolume(0.5);
@@ -626,7 +626,7 @@ export class Cacodemon extends Entidade {
 
         this.somMorte = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/cacoDemon/cacodemonDeath.wav",
+            "./0_assetsT3/sounds/cacoDemon/cacodemonDeath.wav",
             (buffer) => {
                 this.somMorte.setBuffer(buffer);
                 this.somMorte.setVolume(0.5);
@@ -636,7 +636,7 @@ export class Cacodemon extends Entidade {
 
         this.somPerto = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/cacoDemon/cacoDemonNearby.wav",
+            "./0_assetsT3/sounds/cacoDemon/cacoDemonNearby.wav",
             (buffer) => {
                 this.somPerto.setBuffer(buffer);
                 this.somPerto.setVolume(0.5);
@@ -646,7 +646,7 @@ export class Cacodemon extends Entidade {
 
         this.somAlerta = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/cacoDemon/cacoDemonSight.wav",
+            "./0_assetsT3/sounds/cacoDemon/cacoDemonSight.wav",
             (buffer) => {
                 this.somAlerta.setBuffer(buffer);
                 this.somAlerta.setVolume(0.5);
@@ -822,7 +822,7 @@ export class Soldado extends Entidade {
 
         this.somAtaque = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/soldier/soldierAttack.wav",
+            "./0_assetsT3/sounds/soldier/soldierAttack.wav",
             (buffer) => {
                 this.somAtaque.setBuffer(buffer);
                 this.somAtaque.setVolume(0.5);
@@ -832,7 +832,7 @@ export class Soldado extends Entidade {
 
         this.somInjured = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/soldier/injured.wav",
+            "./0_assetsT3/sounds/soldier/injured.wav",
             (buffer) => {
                 this.somInjured.setBuffer(buffer);
                 this.somInjured.setVolume(0.5);
@@ -842,7 +842,7 @@ export class Soldado extends Entidade {
 
         this.somSight = new THREE.Audio(audioListener);
         audioLoader.load(
-            "../0_assetsT3/sounds/soldier/soldierSight.wav",
+            "./0_assetsT3/sounds/soldier/soldierSight.wav",
             (buffer) => {
                 this.somSight.setBuffer(buffer);
                 this.somSight.setVolume(0.5);
