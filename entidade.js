@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import encontrarCaminho from "./pathfinding.js";
-import { Vector3 } from "../build/three.module.js";
-import { CSS2DObject } from '../build/jsm/renderers/CSS2DRenderer.js';
-import { Box3 } from "../build/three.module.js";
+import { Vector3 } from "./build/three.module.js";
+import { CSS2DObject } from './build/jsm/renderers/CSS2DRenderer.js';
+import { Box3 } from "./build/three.module.js";
 
 
 const estados = [

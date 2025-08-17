@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { OBJLoader } from '../../build/jsm/loaders/OBJLoader.js';
-import {MTLLoader} from '../../build/jsm/loaders/MTLLoader.js';
-import { CSG } from '../../libs/other/CSGMesh.js';
-import { getMaxSize } from "../../libs/util/util.js";
+import { OBJLoader } from '../build/jsm/loaders/OBJLoader.js';
+import {MTLLoader} from '../build/jsm/loaders/MTLLoader.js';
+import { CSG } from '../libs/other/CSGMesh.js';
+import { getMaxSize } from "../libs/util/util.js";
 
 function createArea3(scene, chave2, chave3, objetosColidiveis, rampas, texturas, sons, audioListener)  {
     const radialSegments = 128;

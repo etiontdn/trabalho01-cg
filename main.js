@@ -1,14 +1,14 @@
 // main.js
 import createScene from "./ambiente/scene.js";
 import * as THREE from "three";
-import { onWindowResize } from "../libs/util/util.js";
+import { onWindowResize } from "./libs/util/util.js";
 import iniciarRenderer from "./renderer.js";
 import createCamera from "./camera.js";
 import createPersonagem from "./personagem.js";
 import crosshair from "./crosshair.js";
 import createArmas from "./armas.js";
 import { createEnemies } from "./inimigos.js";
-import { CSS2DRenderer } from "../build/jsm/renderers/CSS2DRenderer.js";
+import { CSS2DRenderer } from "./build/jsm/renderers/CSS2DRenderer.js";
 
 const renderer = iniciarRenderer();
 
