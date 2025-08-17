@@ -480,7 +480,8 @@ export default async function(scene, audioListener) {
 
       const mesh = new THREE.Mesh(geometry, materialParede); // Reutilizando o material
       mesh.position.set(...pos);
-      mesh.name = `parede ${nome}`;
+      mesh.name = 'paredeFim';
+      mesh.paredeFim = true;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
@@ -1562,11 +1563,13 @@ let contSoldMortos;
             parede.visible = false; // Garante que permaneçam invisíveis
         }
         
-        console.log("Paredes do cenário abaixadas e instantaneamente retornadas à posição original (invisíveis).");
+        scene.fimDeJogo = true;
+        console.log(scene.fimDeJogo);
       }
     }
   }
 
+  scene.fimDeJogo = false;
   // Execução das funções de setup
   criarParedes();
   criarAreas();

@@ -62,7 +62,7 @@ async function iniciarCena() {
         personagemControls,
         updateControl,
         ativar
-    } = createPersonagem(camera, renderer, objetosColidiveis, rampas);
+    } = createPersonagem(camera, scene, objetosColidiveis, rampas);
 
     scene.add(personagem);
     scene.personagem = personagem;

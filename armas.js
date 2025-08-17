@@ -30,10 +30,10 @@ export default function criarArmas(
         1,
         1.7,
         1.2,
-        2,
+        200,
         "../0_assetsT3/sounds/chaingunFiring.wav",
         listener,
-        5 // Exemplo: velocidade normal (1.0) para a metralhadora
+        5
     );
 
     // Rocket Launcher

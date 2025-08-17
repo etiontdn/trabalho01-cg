@@ -4,7 +4,7 @@ import telaFimUI from "./telaFimUI.js";
 
 export default function createPersonagem(
     camera,
-    renderer,
+    scene,
     objetosColidiveis,
     rampas
 ) {
@@ -284,9 +284,10 @@ export default function createPersonagem(
             if (Math.abs(bb.max.y - bottomY) <= 0.5) return false;
             return true;
         });
-        const obstacleBoxes = lateralObjs.map((obj) =>
-            new THREE.Box3().setFromObject(obj)
-        );
+        const obstacles = lateralObjs.map(obj => ({
+            obj,
+            box: new THREE.Box3().setFromObject(obj)
+        }));
 
         if (moveDir.x || moveDir.z) {
             moveDir.normalize();
@@ -294,17 +295,31 @@ export default function createPersonagem(
                 .clone()
                 .applyEuler(personagem.rotation)
                 .multiplyScalar(speed);
-
+            obstacles.forEach(o => o.box.setFromObject(o.obj));
             posX.copy(personagem.position).add(new THREE.Vector3(dirWorld.x, 0.5, 0));
             personagemBox.setFromCenterAndSize(posX, boxSize);
-            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
+            const hitX = obstacles.find(o => personagemBox.intersectsBox(o.box));
+            if (!hitX) {
                 personagem.position.x = posX.x;
+            } else {
+                const paredeFim1 = hitX.obj?.paredeFim ?? false;
+                if(scene.fimDeJogo && paredeFim1){
+                    scene.fimDeJogo = false;
+                    window.location.reload();
+                }
             }
-
+                
             posZ.copy(personagem.position).add(new THREE.Vector3(0, 0.5, dirWorld.z));
             personagemBox.setFromCenterAndSize(posZ, boxSize);
-            if (!obstacleBoxes.some((b) => personagemBox.intersectsBox(b))) {
+            const hitZ = obstacles.find(o => personagemBox.intersectsBox(o.box));
+            if (!hitZ) {
                 personagem.position.z = posZ.z;
+            } else {
+                const paredeFim2 = hitZ.obj?.paredeFim ?? false;
+                if(scene.fimDeJogo && paredeFim2){
+                    scene.fimDeJogo = false;
+                    window.location.reload();
+                }
             }
         }
     }
